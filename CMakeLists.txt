@@ -116,6 +116,7 @@ endif ( VERDICT_BUILD_DOC )
 #
 # Installation stuff
 #
+if(0)
 install(FILES 
   README
   Verdict.htm
@@ -138,11 +139,12 @@ if ( VERDICT_MANGLE )
     COMPONENT Development
   )
 endif ( VERDICT_MANGLE )
+endif()
 
 install(TARGETS ${verdict_LIBRARY}
       RUNTIME DESTINATION ${verdict_INSTALL_BIN_DIR} COMPONENT RuntimeLibraries # .exe, .dll
       LIBRARY DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT RuntimeLibraries # .so, mod.dll
-      ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Development      # .a, .lib
+      #ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Development      # .a, .lib
 )
 
 #
