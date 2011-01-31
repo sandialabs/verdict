@@ -142,7 +142,7 @@ endif ( VERDICT_MANGLE )
 endif()
 
 if(BUILD_SHARED_LIBS)
-install(TARGETS ${verdict_LIBRARY}
+install(TARGETS ${verdict_LIBRARY} ${VERDICT_EXPORT_GROUP}
       RUNTIME DESTINATION ${verdict_INSTALL_BIN_DIR} COMPONENT Runtime # .exe, .dll
       LIBRARY DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Runtime # .so, mod.dll
       #ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Development      # .a, .lib
