@@ -263,7 +263,14 @@ struct QuadMetricVals
   */
 struct PyramidMetricVals
 {
+  /** \sa v_pyramid_volume */
   double volume ; 
+  /** \sa v_pyramid_jacobian */
+  double jacobian ;
+  /** \sa v_pyramid_scaled_jacobian */
+  double scaled_jacobian ;
+  /** \sa v_pyramid_shape */
+  double shape ;
 };
    
 /**\brief A <em>struct</em> to hold values computed by \ref v_wedge_quality.
@@ -541,6 +548,9 @@ struct TriMetricVals
 //@{
 /*!\hideinitializer \brief */
 #define V_PYRAMID_VOLUME             1
+#define V_PYRAMID_SCALED_JACOBIAN    2
+#define V_PYRAMID_JACOBIAN           4
+#define V_PYRAMID_SHAPE              8
 /*!\hideinitializer \brief */
 #define V_PYRAMID_ALL \
   V_PYRAMID_VOLUME
@@ -1107,6 +1117,18 @@ struct TriMetricVals
 
     //! Calculates pyramid volume.
     C_FUNC_DEF double v_pyramid_volume( int num_nodes, double coordinates[][3] ); 
+    //! Caluculates pyramid jacaboian based on bisecting into two tets
+    C_FUNC_DEF double v_pyramid_jacobian( int num_nodes, double coordinates[][3] );
+
+    //! Calculates pyramid scaled jacaboian based on bisecting into two tets
+    C_FUNC_DEF double v_pyramid_scaled_jacobian( int num_nodes, double coordinates[][3] );
+
+    //! Calculates the pyramid shape metric.
+    /** 4 divided by the minimum mean ratio of the Jacobian matrix at each
+        element corner.
+        Reference -- Adaptation of Hex shape metric. */
+    C_FUNC_DEF double v_pyramid_shape( int num_nodes, double coordinates[][3] );
+
 
 
 /* individual quality functions for wedge elements */
