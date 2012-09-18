@@ -159,7 +159,7 @@ C_FUNC_DEF double v_pyramid_scaled_jacobian( int num_nodes, double coordinates[]
   if (*iter <= 0.0)
     return 0.0;
 
-  double min_jac = (*iter)*2/sqrt(2);
+  double min_jac = (*iter)*2.0/sqrt(2.0);
   return min_jac < 1.0 ? min_jac : 1.0 - (min_jac - 1.0);
 }
 
