@@ -25,7 +25,9 @@
 #include "verdict.h"
 #include "VerdictVector.hpp"
 #include "verdict_defines.hpp"
-#include <memory.h> 
+#include <memory.h>
+#include <vector>
+#include <algorithm>
 
 // local methods
 void v_make_pyramid_tets(double coordinates[][3], double tet1_coords[][3], double tet2_coords[][3],
@@ -40,7 +42,7 @@ double v_largest_pyramid_edge( double coordinates[][3] );
 
        5
        ^
-       |\ 
+       |\
       /| \\_
      |  \   \
      |  | \_ \_
@@ -55,7 +57,7 @@ double v_largest_pyramid_edge( double coordinates[][3] );
           2
 
     a quadrilateral base and a pointy peak like a pyramid
-          
+
 */
 
 
@@ -68,10 +70,10 @@ double v_largest_pyramid_edge( double coordinates[][3] );
 
 C_FUNC_DEF double v_pyramid_volume( int num_nodes, double coordinates[][3] )
 {
-    
+
   double volume = 0;
   VerdictVector side1, side2, side3;
-  
+
   if (num_nodes == 5)
   {
     // divide the pyramid into 2 tets and calculate each
@@ -79,42 +81,42 @@ C_FUNC_DEF double v_pyramid_volume( int num_nodes, double coordinates[][3] )
     side1.set( coordinates[1][0] - coordinates[0][0],
         coordinates[1][1] - coordinates[0][1],
         coordinates[1][2] - coordinates[0][2] );
-    
+
     side2.set( coordinates[3][0] - coordinates[0][0],
         coordinates[3][1] - coordinates[0][1],
         coordinates[3][2] - coordinates[0][2] );
-    
+
     side3.set( coordinates[4][0] - coordinates[0][0],
-        coordinates[4][1] - coordinates[0][1], 
+        coordinates[4][1] - coordinates[0][1],
         coordinates[4][2] - coordinates[0][2] );
-    
+
     // volume of the first tet
     volume = (side3 % (side1 * side2 ))/6.0;
-    
-    
+
+
     side1.set( coordinates[3][0] - coordinates[2][0],
         coordinates[3][1] - coordinates[2][1],
         coordinates[3][2] - coordinates[2][2] );
-    
+
     side2.set( coordinates[1][0] - coordinates[2][0],
         coordinates[1][1] - coordinates[2][1],
         coordinates[1][2] - coordinates[2][2] );
-    
+
     side3.set( coordinates[4][0] - coordinates[2][0],
         coordinates[4][1] - coordinates[2][1],
         coordinates[4][2] - coordinates[2][2] );
-    
+
     // volume of the second tet
     volume += (side3 % (side1 * side2 ))/6.0;
- 
-  }   
+
+  }
   return (double)volume;
-    
+
 }
 
 C_FUNC_DEF double v_pyramid_jacobian( int num_nodes, double coordinates[][3] )
 {
-  // break the pyramid into four tets return the minimum scaled jacobian of the two tets
+  // break the pyramid into four tets return the minimum jacobian of the two tets
   double tet1_coords[4][3];
   double tet2_coords[4][3];
   double tet3_coords[4][3];
@@ -135,7 +137,7 @@ C_FUNC_DEF double v_pyramid_jacobian( int num_nodes, double coordinates[][3] )
 
 C_FUNC_DEF double v_pyramid_scaled_jacobian( int num_nodes, double coordinates[][3] )
 {
-  // break the pyramid into four tets return the minimum scaled jacobian of the two tets
+  // break the pyramid into four tets return the minimum scaled jacobian of the tets
   double tet1_coords[4][3];
   double tet2_coords[4][3];
   double tet3_coords[4][3];
@@ -144,68 +146,18 @@ C_FUNC_DEF double v_pyramid_scaled_jacobian( int num_nodes, double coordinates[]
 
   v_make_pyramid_tets(coordinates, tet1_coords, tet2_coords, tet3_coords, tet4_coords);
 
-  double j1 = v_tet_jacobian(4, tet1_coords);
-  double j2 = v_tet_jacobian(4, tet2_coords);
-  double j3 = v_tet_jacobian(4, tet3_coords);
-  double j4 = v_tet_jacobian(4, tet4_coords);
+  std::vector<double> scaled_jacob(4);
+  scaled_jacob[0] = v_tet_scaled_jacobian(4, tet1_coords);
+  scaled_jacob[1] = v_tet_scaled_jacobian(4, tet2_coords);
+  scaled_jacob[2] = v_tet_scaled_jacobian(4, tet3_coords);
+  scaled_jacob[3] = v_tet_scaled_jacobian(4, tet4_coords);
 
-  VerdictVector edges[8];
-  v_make_pyramid_edges(edges, coordinates);
+  std::vector<double>::iterator iter = std::min_element(scaled_jacob.begin(), scaled_jacob.end());
 
-  double length[8];
-  length[0] = edges[0].length();
-  length[1] = edges[1].length();
-  length[2] = edges[2].length();
-  length[3] = edges[3].length();
-  length[4] = edges[4].length();
-  length[5] = edges[5].length();
-  length[6] = edges[6].length();
-  length[7] = edges[7].length();
-
-  if (length[0] < VERDICT_DBL_MIN ||
-      length[1] < VERDICT_DBL_MIN ||
-      length[2] < VERDICT_DBL_MIN ||
-      length[3] < VERDICT_DBL_MIN ||
-      length[4] < VERDICT_DBL_MIN ||
-      length[5] < VERDICT_DBL_MIN ||
-      length[6] < VERDICT_DBL_MIN ||
-      length[7] < VERDICT_DBL_MIN )
-    return 0;
-
-  double factor = sqrt(2.0)/2;
-  double scaled_jac = j1/(length[0] * length[1] * length[5] * factor);
-  min_scaled_jac = VERDICT_MIN( scaled_jac, min_scaled_jac);
-
-  scaled_jac = j2/(length[2] * length[3] * length[7] * factor);
-  min_scaled_jac = VERDICT_MIN( scaled_jac, min_scaled_jac);
-
-  scaled_jac = j3/(length[0] * length[3] * length[4] * factor);
-  min_scaled_jac = VERDICT_MIN( scaled_jac, min_scaled_jac);
-
-  scaled_jac = j4/(length[1] * length[2] * length[6] * factor);
-  min_scaled_jac = VERDICT_MIN( scaled_jac, min_scaled_jac);
-
-  return min_scaled_jac;
-
-#if 0
-  // ideally there will be four equilateral triangles and one square.  
-  // Test each face
-  double base[4][3];
-  double tri1[3][3];
-  double tri2[3][3];
-  double tri3[3][3];
-  double tri4[3][3];
-
-  v_make_pyramid_faces(coordinates, base, tri1, tri2, tri3, tri4);
-
-  double s1 = v_quad_scaled_jacobian(4, base);
-  double s2 = v_tri_scaled_jacobian(3, tri1);
-  double s3 = v_tri_scaled_jacobian(3, tri2);
-  double s4 = v_tri_scaled_jacobian(3, tri3);
-  double s5 = v_tri_scaled_jacobian(3, tri4);
-
-  return .2*(s1 + s2 + s3 + s4 + s5);
-#endif
+  // scale the minimum scaled jacobian so that a perfect pyramid has
+  // a value of 1 and cap it to make sure it never exeeds 1.0
+  double min_jac = (*iter)*2/sqrt(2);
+  return min_jac < 1.0 ? min_jac : 1.0 - (min_jac - 1.0);
 }
 
 
@@ -213,7 +165,7 @@ C_FUNC_DEF double v_pyramid_shape( int num_nodes, double coordinates[][3] )
 {
   static double SQRT2_HALVES = sqrt(2.0)/2.0;
 
-  // ideally there will be four equilateral triangles and one square.  
+  // ideally there will be four equilateral triangles and one square.
   // Test each face
   double base[4][3];
   double tri1[3][3];
@@ -447,7 +399,7 @@ double v_largest_pyramid_edge( double coordinates[][3] )
   double l5 = edges[5].length_squared();
   double l6 = edges[6].length_squared();
   double l7 = edges[7].length_squared();
-  
+
   double max = VERDICT_MIN(l0, l1);
   max = VERDICT_MAX(max, l2);
   max = VERDICT_MAX(max, l3);
@@ -473,7 +425,7 @@ double v_distance_point_to_pyramid_base( int num_nodes, double coordinates[][3],
 
   VerdictVector normal = t1 * t2;
   double normal_length = normal.length();
-  
+
   VerdictVector pq = peak - centroid;
 
   double distance =  (pq % normal)/normal_length;
@@ -483,7 +435,8 @@ double v_distance_point_to_pyramid_base( int num_nodes, double coordinates[][3],
 }
 
 
-C_FUNC_DEF void v_pyramid_quality( int num_nodes, double coordinates[][3], 
+
+C_FUNC_DEF void v_pyramid_quality( int num_nodes, double coordinates[][3],
     unsigned int metrics_request_flag, PyramidMetricVals *metric_vals )
 {
   memset( metric_vals, 0, sizeof( PyramidMetricVals ) );
