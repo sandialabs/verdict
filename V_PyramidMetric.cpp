@@ -155,11 +155,13 @@ C_FUNC_DEF double v_pyramid_scaled_jacobian( int num_nodes, double coordinates[]
   std::vector<double>::iterator iter = std::min_element(scaled_jacob.begin(), scaled_jacob.end());
 
   // scale the minimum scaled jacobian so that a perfect pyramid has
-  // a value of 1 and cap it to make sure it never exeeds 1.0
+  // a value of 1 and cap it to make sure it is not > 1.0 or < 0.0
+  if (*iter <= 0.0)
+    return 0.0;
+
   double min_jac = (*iter)*2/sqrt(2);
   return min_jac < 1.0 ? min_jac : 1.0 - (min_jac - 1.0);
 }
-
 
 C_FUNC_DEF double v_pyramid_shape( int num_nodes, double coordinates[][3] )
 {
