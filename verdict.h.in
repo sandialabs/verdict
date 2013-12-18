@@ -1332,6 +1332,9 @@ struct TriMetricVals
        Reference --- SDRC/IDEAS Simulation: Finite Element Modeling--User's Guide */
     C_FUNC_DEF double v_quad_distortion( int num_nodes, double coordinates[][3] ); 
 
+	//! Sets function pointer to calculate quad normal wrt surface 
+    C_FUNC_DEF void v_set_quad_normal_func( ComputeNormal func );
+
 
 /* individual quality functions for triangle elements */
 

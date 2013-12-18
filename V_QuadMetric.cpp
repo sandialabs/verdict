@@ -27,10 +27,13 @@
 #include "verdict_defines.hpp"
 #include "V_GaussIntegration.hpp"
 #include <memory.h>
+#include <stddef.h>
 
 
 //! the average area of a quad
 static double v_quad_size = 0;
+
+static ComputeNormal compute_normal = NULL;
 
 /*!
   weights based on the average size of a quad
@@ -59,6 +62,11 @@ static int v_quad_get_weight (
 C_FUNC_DEF void v_set_quad_size( double size )
 {
   v_quad_size = size;
+}
+
+C_FUNC_DEF void v_set_quad_normal_func( ComputeNormal func )
+{
+  compute_normal = func;
 }
 
 //! returns whether the quad is collapsed or not
@@ -228,13 +236,12 @@ static VerdictVector v_quad_normal( double coordinates[][3] )
   VerdictVector edge0, edge1;
   
   edge0.set( coordinates[1][0] - coordinates[0][0], 
-      coordinates[1][1] - coordinates[0][1],
-      coordinates[1][2] - coordinates[0][2] );
-  
+             coordinates[1][1] - coordinates[0][1],
+             coordinates[1][2] - coordinates[0][2] );  
   
   edge1.set( coordinates[3][0] - coordinates[0][0], 
-      coordinates[3][1] - coordinates[0][1],
-      coordinates[3][2] - coordinates[0][2] );
+             coordinates[3][1] - coordinates[0][1], 
+             coordinates[3][2] - coordinates[0][2] );
   
   VerdictVector norm0 = edge0 * edge1 ;
   norm0.normalize();
@@ -243,14 +250,13 @@ static VerdictVector v_quad_normal( double coordinates[][3] )
   // node 2 for consistent sense
 
 
-  edge0.set ( coordinates[2][0] - coordinates[3][0], 
-      coordinates[2][1] - coordinates[3][1],
-      coordinates[2][2] - coordinates[3][2] );
+  edge0.set ( coordinates[3][0] - coordinates[2][0], 
+              coordinates[3][1] - coordinates[2][1],
+              coordinates[3][2] - coordinates[2][2] );  
   
-  
-  edge1.set ( coordinates[2][0] - coordinates[1][0], 
-      coordinates[2][1] - coordinates[1][1],
-      coordinates[2][2] - coordinates[1][2] );
+  edge1.set ( coordinates[1][0] - coordinates[2][0], 
+              coordinates[1][1] - coordinates[2][1],
+              coordinates[1][2] - coordinates[2][2] );
   
   VerdictVector norm2 = edge0 * edge1 ;
   norm2.normalize();
@@ -267,14 +273,13 @@ static VerdictVector v_quad_normal( double coordinates[][3] )
   // test normal at node1
 
 
-  edge0.set ( coordinates[1][0] - coordinates[2][0], 
-      coordinates[1][1] - coordinates[2][1],
-      coordinates[1][2] - coordinates[2][2] );
+  edge0.set ( coordinates[2][0] - coordinates[1][0], 
+              coordinates[2][1] - coordinates[1][1],
+              coordinates[2][2] - coordinates[1][2] );  
   
-  
-  edge1.set ( coordinates[1][0] - coordinates[0][0], 
-      coordinates[1][1] - coordinates[0][1],
-      coordinates[1][2] - coordinates[0][2] );
+  edge1.set ( coordinates[0][0] - coordinates[1][0], 
+              coordinates[0][1] - coordinates[1][1],
+              coordinates[0][2] - coordinates[1][2] );
   
   VerdictVector norm1 = edge0 * edge1 ;
   norm1.normalize();
@@ -927,7 +932,6 @@ C_FUNC_DEF double v_quad_oddy( int /*num_nodes*/, double coordinates[][3] )
 */
 C_FUNC_DEF double v_quad_condition( int /*num_nodes*/, double coordinates[][3] )
 {
-
   if ( v_is_collapsed_quad( coordinates ) == VERDICT_TRUE ) 
     return v_tri_condition(3,coordinates);
  
@@ -941,8 +945,7 @@ C_FUNC_DEF double v_quad_condition( int /*num_nodes*/, double coordinates[][3] )
   double condition;
   
   for ( int i=0; i<4; i++ ) 
-  {
-    
+  {    
     xxi.set( coordinates[i][0] - coordinates[(i+1)%4][0],
         coordinates[i][1] - coordinates[(i+1)%4][1],
         coordinates[i][2] - coordinates[(i+1)%4][2] );
@@ -960,6 +963,27 @@ C_FUNC_DEF double v_quad_condition( int /*num_nodes*/, double coordinates[][3] )
   }
   
   max_condition /= 2;
+  
+  if( compute_normal )
+  {
+    VerdictVector face_normal = v_quad_normal( coordinates );
+
+    //center of quad
+    double point[3], surf_normal[3];
+    point[0] =  (coordinates[0][0] + coordinates[1][0] + 
+                 coordinates[2][0] + coordinates[3][0]) / 4;
+    point[1] =  (coordinates[0][1] + coordinates[1][1] + 
+                 coordinates[2][1] + coordinates[3][1] ) / 4;
+    point[2] =  (coordinates[0][2] + coordinates[1][2] + 
+                 coordinates[2][2] + coordinates[3][2] ) / 4;
+
+    //dot product
+    compute_normal( point, surf_normal ); 
+    if( (face_normal.x()*surf_normal[0] + 
+         face_normal.y()*surf_normal[1] +
+         face_normal.z()*surf_normal[2] ) < 0 )
+      return (double)VERDICT_DBL_MAX;
+  }
 
   if( max_condition > 0 )
     return (double) VERDICT_MIN( max_condition, VERDICT_DBL_MAX );
@@ -1029,6 +1053,24 @@ C_FUNC_DEF double v_quad_scaled_jacobian( int /*num_nodes*/, double coordinates[
 
   scaled_jac = corner_areas[3] / (length[3] * length[2]);
   min_scaled_jac = VERDICT_MIN( scaled_jac, min_scaled_jac );
+  
+  if( compute_normal )
+  {
+     VerdictVector face_normal = v_quad_normal( coordinates );
+
+    //center of tri
+    double point[3], surf_normal[3];
+    point[0] =  (coordinates[0][0] + coordinates[1][0] + coordinates[2][0]) / 3;
+    point[1] =  (coordinates[0][1] + coordinates[1][1] + coordinates[2][1]) / 3;
+    point[2] =  (coordinates[0][2] + coordinates[1][2] + coordinates[2][2]) / 3;
+
+    //dot product
+    compute_normal( point, surf_normal ); 
+    if( (face_normal.x()*surf_normal[0] + 
+         face_normal.y()*surf_normal[1] +
+         face_normal.z()*surf_normal[2] ) < 0 )
+      min_scaled_jac *= -1; 
+  }
 
   if( min_scaled_jac > 0 )
     return (double) VERDICT_MIN( min_scaled_jac, VERDICT_DBL_MAX );
@@ -1588,6 +1630,24 @@ C_FUNC_DEF void v_quad_quality( int num_nodes, double coordinates[][3],
       scaled_jac = areas[3] / (lengths[3] * lengths[2]);
       min_scaled_jac = VERDICT_MIN( scaled_jac, min_scaled_jac );
 
+      if( compute_normal )
+      {
+        VerdictVector face_normal = v_quad_normal( coordinates );
+
+        //center of tri
+        double point[3], surf_normal[3];
+        point[0] =  (coordinates[0][0] + coordinates[1][0] + coordinates[2][0]) / 3;
+        point[1] =  (coordinates[0][1] + coordinates[1][1] + coordinates[2][1]) / 3;
+        point[2] =  (coordinates[0][2] + coordinates[1][2] + coordinates[2][2]) / 3;
+
+        //dot product
+        compute_normal( point, surf_normal ); 
+        if( (face_normal.x()*surf_normal[0] + 
+          face_normal.y()*surf_normal[1] +
+          face_normal.z()*surf_normal[2] ) < 0 )
+          min_scaled_jac *= -1; 
+      }
+
       metric_vals->scaled_jacobian = min_scaled_jac;
      
       //what the heck...set shear as well 
@@ -1728,6 +1788,27 @@ C_FUNC_DEF void v_quad_quality( int num_nodes, double coordinates[][3],
 
       metric_vals->condition = 0.5*max_condition;
       metric_vals->shape =  2/max_condition;
+
+      if( compute_normal )
+      {
+        VerdictVector face_normal = v_quad_normal( coordinates );
+
+        //center of quad
+        double point[3], surf_normal[3];
+        point[0] =  (coordinates[0][0] + coordinates[1][0] + 
+          coordinates[2][0] + coordinates[3][0]) / 4;
+        point[1] =  (coordinates[0][1] + coordinates[1][1] + 
+          coordinates[2][1] + coordinates[3][1] ) / 4;
+        point[2] =  (coordinates[0][2] + coordinates[1][2] + 
+          coordinates[2][2] + coordinates[3][2] ) / 4;
+
+        //dot product
+        compute_normal( point, surf_normal ); 
+        if( (face_normal.x()*surf_normal[0] + 
+          face_normal.y()*surf_normal[1] +
+          face_normal.z()*surf_normal[2] ) < 0 )
+          metric_vals->condition = (double)VERDICT_DBL_MAX;
+      }
     }
   } 
 
