@@ -34,7 +34,7 @@ void v_make_pyramid_tets(double coordinates[][3], double tet1_coords[][3], doubl
                                                   double tet3_coords[][3], double tet4_coords[][3]);
 void v_make_pyramid_faces(double coordinates[][3], double base[][3], double tri1[][3],
                           double tri2[][3], double tri3[][3], double tri4[][3]);
-void v_make_pyramid_edges( VerdictVector edges[7], double coordinates[][3] );
+void v_make_pyramid_edges( VerdictVector edges[8], double coordinates[][3] );
 double v_distance_point_to_pyramid_base( int num_nodes, double coordinates[][3], double &cos_angle);
 double v_largest_pyramid_edge( double coordinates[][3] );
 /*
@@ -344,7 +344,7 @@ void v_make_pyramid_faces(double coordinates[][3], double base[][3], double tri1
   tri4[2][2] = coordinates[4][2];
 }
 
-void v_make_pyramid_edges( VerdictVector edges[7], double coordinates[][3] )
+void v_make_pyramid_edges( VerdictVector edges[8], double coordinates[][3] )
 {
 
   edges[0].set(
