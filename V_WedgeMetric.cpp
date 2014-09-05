@@ -793,9 +793,16 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
       coordinates[2][2] - coordinates[0][2] );
 
   current_jacobian = vec2 % (vec1 * vec3);
-  norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-  current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-  min_shape = VERDICT_MIN(current_shape,min_shape);
+  if(current_jacobian > VERDICT_DBL_MIN)
+  {
+    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
+    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = VERDICT_MIN(current_shape,min_shape);
+  }
+  else
+  {
+    return 0;
+  }
 
   //node 1
   vec1.set( coordinates[2][0] - coordinates[1][0],
@@ -811,9 +818,16 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
       coordinates[0][2] - coordinates[1][2] );
 
   current_jacobian = vec2 % (vec1 * vec3);
-  norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-  current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-  min_shape = VERDICT_MIN(current_shape,min_shape);
+  if(current_jacobian > VERDICT_DBL_MIN)
+  {
+    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
+    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = VERDICT_MIN(current_shape,min_shape);
+  }
+  else
+  {
+    return 0;
+  }
 
   //node 2
   vec1.set( coordinates[0][0] - coordinates[2][0],
@@ -829,9 +843,16 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
       coordinates[1][2] - coordinates[2][2] );
 
   current_jacobian = vec2 % (vec1 * vec3);
-  norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-  current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-  min_shape = VERDICT_MIN(current_shape,min_shape);
+  if(current_jacobian > VERDICT_DBL_MIN)
+  {
+    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
+    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = VERDICT_MIN(current_shape,min_shape);
+  }
+  else
+  {
+    return 0;
+  }
 
   //node 3
   vec1.set( coordinates[0][0] - coordinates[3][0],
@@ -847,9 +868,16 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
       coordinates[5][2] - coordinates[3][2] );
 
   current_jacobian = vec2 % (vec1 * vec3);
-  norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-  current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-  min_shape = VERDICT_MIN(current_shape,min_shape);
+  if(current_jacobian > VERDICT_DBL_MIN)
+  {
+    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
+    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = VERDICT_MIN(current_shape,min_shape);
+  }
+  else
+  {
+    return 0;
+  }
 
   //node 4
   vec1.set( coordinates[1][0] - coordinates[4][0],
@@ -865,9 +893,16 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
       coordinates[3][2] - coordinates[4][2] );
 
   current_jacobian = vec2 % (vec1 * vec3);
-  norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-  current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-  min_shape = VERDICT_MIN(current_shape,min_shape);
+  if(current_jacobian > VERDICT_DBL_MIN)
+  {
+    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
+    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = VERDICT_MIN(current_shape,min_shape);
+  }
+  else
+  {
+    return 0;
+  }
 
   //node 5
   vec1.set( coordinates[3][0] - coordinates[5][0],
@@ -883,9 +918,16 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
       coordinates[2][2] - coordinates[5][2] );
 
   current_jacobian = vec2 % (vec1 * vec3);
-  norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-  current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-  min_shape = VERDICT_MIN(current_shape,min_shape);
+  if(current_jacobian > VERDICT_DBL_MIN)
+  {
+    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
+    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = VERDICT_MIN(current_shape,min_shape);
+  }
+  else
+  {
+    return 0;
+  }
 
   if (min_shape < VERDICT_DBL_MIN)
     return 0;
