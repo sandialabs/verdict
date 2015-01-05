@@ -1,10 +1,7 @@
 # Copyright (c) 2003,2006 Sandia National Laboratories <cubit@sandia.gov>
 project(verdict)
 
-cmake_minimum_required( VERSION 2.4.5 )
-if ( COMMAND CMAKE_POLICY )
-  cmake_policy( SET CMP0003 NEW )
-endif( COMMAND CMAKE_POLICY )
+cmake_minimum_required( VERSION 2.8 )
 
 set( verdict_MAJOR_VERSION "1")
 set( verdict_MINOR_VERSION "2")
