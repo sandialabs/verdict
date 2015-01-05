@@ -68,6 +68,8 @@ endif ( NOT VERDICT_NO_LIBRARY_VERSION )
 
 add_library( ${verdict_LIBRARY} ${verdict_SRCS} )
 set_target_properties( ${verdict_LIBRARY} PROPERTIES DEFINE_SYMBOL verdict_EXPORTS)
+set_target_properties( ${verdict_LIBRARY} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}>")
 
 # Apply user-defined properties to the library targets.
 if ( VERDICT_LIBRARY_PROPERTIES )
