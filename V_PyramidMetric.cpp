@@ -45,7 +45,7 @@ double v_largest_pyramid_edge( double coordinates[][3] );
 
        5
        ^
-       |\
+       |\ 
       /| \\_
      |  \   \
      |  | \_ \_
@@ -60,7 +60,7 @@ double v_largest_pyramid_edge( double coordinates[][3] );
           2
 
     a quadrilateral base and a pointy peak like a pyramid
-
+          
 */
 
 C_FUNC_DEF double v_pyramid_equiangle_skew( int num_nodes, double coordinates[][3] )
@@ -97,10 +97,10 @@ C_FUNC_DEF double v_pyramid_equiangle_skew( int num_nodes, double coordinates[][
 
 C_FUNC_DEF double v_pyramid_volume( int num_nodes, double coordinates[][3] )
 {
-
+    
   double volume = 0;
   VerdictVector side1, side2, side3;
-
+  
   if (num_nodes == 5)
   {
     // divide the pyramid into 2 tets and calculate each
@@ -108,37 +108,37 @@ C_FUNC_DEF double v_pyramid_volume( int num_nodes, double coordinates[][3] )
     side1.set( coordinates[1][0] - coordinates[0][0],
         coordinates[1][1] - coordinates[0][1],
         coordinates[1][2] - coordinates[0][2] );
-
+    
     side2.set( coordinates[3][0] - coordinates[0][0],
         coordinates[3][1] - coordinates[0][1],
         coordinates[3][2] - coordinates[0][2] );
-
+    
     side3.set( coordinates[4][0] - coordinates[0][0],
-        coordinates[4][1] - coordinates[0][1],
+        coordinates[4][1] - coordinates[0][1], 
         coordinates[4][2] - coordinates[0][2] );
-
+    
     // volume of the first tet
     volume = (side3 % (side1 * side2 ))/6.0;
-
-
+    
+    
     side1.set( coordinates[3][0] - coordinates[2][0],
         coordinates[3][1] - coordinates[2][1],
         coordinates[3][2] - coordinates[2][2] );
-
+    
     side2.set( coordinates[1][0] - coordinates[2][0],
         coordinates[1][1] - coordinates[2][1],
         coordinates[1][2] - coordinates[2][2] );
-
+    
     side3.set( coordinates[4][0] - coordinates[2][0],
         coordinates[4][1] - coordinates[2][1],
         coordinates[4][2] - coordinates[2][2] );
-
+    
     // volume of the second tet
     volume += (side3 % (side1 * side2 ))/6.0;
-
-  }
+ 
+  }   
   return (double)volume;
-
+    
 }
 
 C_FUNC_DEF double v_pyramid_jacobian( int num_nodes, double coordinates[][3] )

@@ -236,12 +236,12 @@ static VerdictVector v_quad_normal( double coordinates[][3] )
   VerdictVector edge0, edge1;
   
   edge0.set( coordinates[1][0] - coordinates[0][0], 
-             coordinates[1][1] - coordinates[0][1],
-             coordinates[1][2] - coordinates[0][2] );  
+      coordinates[1][1] - coordinates[0][1],
+      coordinates[1][2] - coordinates[0][2] );
   
   edge1.set( coordinates[3][0] - coordinates[0][0], 
-             coordinates[3][1] - coordinates[0][1], 
-             coordinates[3][2] - coordinates[0][2] );
+      coordinates[3][1] - coordinates[0][1],
+      coordinates[3][2] - coordinates[0][2] );
   
   VerdictVector norm0 = edge0 * edge1 ;
   norm0.normalize();
@@ -250,13 +250,13 @@ static VerdictVector v_quad_normal( double coordinates[][3] )
   // node 2 for consistent sense
 
 
-  edge0.set ( coordinates[3][0] - coordinates[2][0], 
-              coordinates[3][1] - coordinates[2][1],
-              coordinates[3][2] - coordinates[2][2] );  
+  edge0.set ( coordinates[3][0] - coordinates[2][0],
+      coordinates[3][1] - coordinates[2][1],
+      coordinates[3][2] - coordinates[2][2] );
   
-  edge1.set ( coordinates[1][0] - coordinates[2][0], 
-              coordinates[1][1] - coordinates[2][1],
-              coordinates[1][2] - coordinates[2][2] );
+  edge1.set ( coordinates[1][0] - coordinates[2][0],
+      coordinates[1][1] - coordinates[2][1],
+      coordinates[1][2] - coordinates[2][2] );
   
   VerdictVector norm2 = edge0 * edge1 ;
   norm2.normalize();
@@ -273,13 +273,13 @@ static VerdictVector v_quad_normal( double coordinates[][3] )
   // test normal at node1
 
 
-  edge0.set ( coordinates[2][0] - coordinates[1][0], 
-              coordinates[2][1] - coordinates[1][1],
-              coordinates[2][2] - coordinates[1][2] );  
+  edge0.set ( coordinates[2][0] - coordinates[1][0],
+      coordinates[2][1] - coordinates[1][1],
+      coordinates[2][2] - coordinates[1][2] );
   
-  edge1.set ( coordinates[0][0] - coordinates[1][0], 
-              coordinates[0][1] - coordinates[1][1],
-              coordinates[0][2] - coordinates[1][2] );
+  edge1.set ( coordinates[0][0] - coordinates[1][0],
+      coordinates[0][1] - coordinates[1][1],
+      coordinates[0][2] - coordinates[1][2] );
   
   VerdictVector norm1 = edge0 * edge1 ;
   norm1.normalize();
@@ -1052,7 +1052,7 @@ C_FUNC_DEF double v_quad_condition( int /*num_nodes*/, double coordinates[][3] )
 {
   if ( v_is_collapsed_quad( coordinates ) == VERDICT_TRUE ) 
     return v_tri_condition(3,coordinates);
- 
+
   double areas[4]; 
   v_signed_corner_areas( areas, coordinates );
 
@@ -1063,7 +1063,7 @@ C_FUNC_DEF double v_quad_condition( int /*num_nodes*/, double coordinates[][3] )
   double condition;
   
   for ( int i=0; i<4; i++ ) 
-  {    
+  {
     xxi.set( coordinates[i][0] - coordinates[(i+1)%4][0],
         coordinates[i][1] - coordinates[(i+1)%4][1],
         coordinates[i][2] - coordinates[(i+1)%4][2] );
