@@ -30,6 +30,8 @@
 #pragma warn -8004 /* "assigned a value that is never used" */
 #endif
 
+extern void v_quad_minimum_maximum_angle( double min_max_angles[2], double coordinates[][3] );
+
 //! the average volume of a hex
 static double v_hex_size = 0;
 
@@ -730,6 +732,144 @@ C_FUNC_DEF double v_hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][
     return (double) VERDICT_MIN( aspect, VERDICT_DBL_MAX );
   return (double) VERDICT_MAX( aspect, -VERDICT_DBL_MAX );
  
+}
+
+C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
+{
+  double quad[4][3];
+  double min_angle=360.0;
+  double max_angle=0.0;
+  double min_max_angle[2];
+
+  quad[0][0]=coordinates[0][0];
+  quad[0][1]=coordinates[0][1];
+  quad[0][2]=coordinates[0][2];
+  quad[1][0]=coordinates[1][0];
+  quad[1][1]=coordinates[1][1];
+  quad[1][2]=coordinates[1][2];
+  quad[2][0]=coordinates[5][0];
+  quad[2][1]=coordinates[5][1];
+  quad[2][2]=coordinates[5][2];
+  quad[3][0]=coordinates[4][0];
+  quad[3][1]=coordinates[4][1];
+  quad[3][2]=coordinates[4][2];
+
+  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  if(min_max_angle[0]<min_angle)
+    min_angle=min_max_angle[0];
+  if(min_max_angle[1]>max_angle)
+    max_angle=min_max_angle[1];
+
+
+  quad[0][0]=coordinates[1][0];
+  quad[0][1]=coordinates[1][1];
+  quad[0][2]=coordinates[1][2];
+  quad[1][0]=coordinates[2][0];
+  quad[1][1]=coordinates[2][1];
+  quad[1][2]=coordinates[2][2];
+  quad[2][0]=coordinates[6][0];
+  quad[2][1]=coordinates[6][1];
+  quad[2][2]=coordinates[6][2];
+  quad[3][0]=coordinates[5][0];
+  quad[3][1]=coordinates[5][1];
+  quad[3][2]=coordinates[5][2];
+
+  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  if(min_max_angle[0]<min_angle)
+    min_angle=min_max_angle[0];
+  if(min_max_angle[1]>max_angle)
+    max_angle=min_max_angle[1];
+
+
+  quad[0][0]=coordinates[2][0];
+  quad[0][1]=coordinates[2][1];
+  quad[0][2]=coordinates[2][2];
+  quad[1][0]=coordinates[3][0];
+  quad[1][1]=coordinates[3][1];
+  quad[1][2]=coordinates[3][2];
+  quad[2][0]=coordinates[7][0];
+  quad[2][1]=coordinates[7][1];
+  quad[2][2]=coordinates[7][2];
+  quad[3][0]=coordinates[6][0];
+  quad[3][1]=coordinates[6][1];
+  quad[3][2]=coordinates[6][2];
+
+  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  if(min_max_angle[0]<min_angle)
+    min_angle=min_max_angle[0];
+  if(min_max_angle[1]>max_angle)
+    max_angle=min_max_angle[1];
+
+
+  quad[0][0]=coordinates[3][0];
+  quad[0][1]=coordinates[3][1];
+  quad[0][2]=coordinates[3][2];
+  quad[1][0]=coordinates[0][0];
+  quad[1][1]=coordinates[0][1];
+  quad[1][2]=coordinates[0][2];
+  quad[2][0]=coordinates[4][0];
+  quad[2][1]=coordinates[4][1];
+  quad[2][2]=coordinates[4][2];
+  quad[3][0]=coordinates[7][0];
+  quad[3][1]=coordinates[7][1];
+  quad[3][2]=coordinates[7][2];
+
+  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  if(min_max_angle[0]<min_angle)
+    min_angle=min_max_angle[0];
+  if(min_max_angle[1]>max_angle)
+    max_angle=min_max_angle[1];
+
+
+  quad[0][0]=coordinates[4][0];
+  quad[0][1]=coordinates[4][1];
+  quad[0][2]=coordinates[4][2];
+  quad[1][0]=coordinates[5][0];
+  quad[1][1]=coordinates[5][1];
+  quad[1][2]=coordinates[5][2];
+  quad[2][0]=coordinates[6][0];
+  quad[2][1]=coordinates[6][1];
+  quad[2][2]=coordinates[6][2];
+  quad[3][0]=coordinates[7][0];
+  quad[3][1]=coordinates[7][1];
+  quad[3][2]=coordinates[7][2];
+
+  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  if(min_max_angle[0]<min_angle)
+    min_angle=min_max_angle[0];
+  if(min_max_angle[1]>max_angle)
+    max_angle=min_max_angle[1];
+
+
+  quad[0][0]=coordinates[3][0];
+  quad[0][1]=coordinates[3][1];
+  quad[0][2]=coordinates[3][2];
+  quad[1][0]=coordinates[2][0];
+  quad[1][1]=coordinates[2][1];
+  quad[1][2]=coordinates[2][2];
+  quad[2][0]=coordinates[1][0];
+  quad[2][1]=coordinates[1][1];
+  quad[2][2]=coordinates[1][2];
+  quad[3][0]=coordinates[0][0];
+  quad[3][1]=coordinates[0][1];
+  quad[3][2]=coordinates[0][2];
+
+  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  if(min_max_angle[0]<min_angle)
+    min_angle=min_max_angle[0];
+  if(min_max_angle[1]>max_angle)
+    max_angle=min_max_angle[1];
+
+
+
+  double skew_max= (max_angle-90.0)/90.0;
+  double skew_min= (90.0-min_angle)/90.0;
+
+  if(skew_max>skew_min)
+    return skew_max;
+  return skew_min;
+
+
 }
 
 /*!
@@ -3299,7 +3439,11 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
       metric_vals->stretch = (double)(HEX_STRETCH_SCALE_FACTOR * ( v_safe_ratio( sqrt(min_edge), max_diag) ));
     }
   }
-
+  // calculate the Equiangle Skew
+  if(metrics_request_flag & V_HEX_EQUIANGLE_SKEW)
+  {
+    metric_vals->equiangle_skew = v_hex_equiangle_skew(num_nodes, coordinates);
+  }
 
   if (metrics_request_flag & V_HEX_DIAGONAL)
     metric_vals->diagonal = v_hex_diagonal(num_nodes, coordinates);
@@ -3410,6 +3554,13 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
     metric_vals->distortion = (double) VERDICT_MIN( metric_vals->distortion, VERDICT_DBL_MAX );
   else
     metric_vals->distortion = (double) VERDICT_MAX( metric_vals->distortion, -VERDICT_DBL_MAX );
+
+  if(metrics_request_flag & V_HEX_EQUIANGLE_SKEW)
+  {
+    if( metric_vals->equiangle_skew > 0 )
+      metric_vals->equiangle_skew = (double) VERDICT_MIN( metric_vals->equiangle_skew, VERDICT_DBL_MAX );
+    metric_vals->equiangle_skew = (double) VERDICT_MAX( metric_vals->equiangle_skew, -VERDICT_DBL_MAX );
+  }
 
 }
 

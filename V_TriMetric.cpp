@@ -473,7 +473,24 @@ C_FUNC_DEF double v_tri_maximum_angle( int /*num_nodes*/, double coordinates[][3
   
 }
 
+double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] )
+{
+  double min_angle=360.0;
+  double max_angle=0.0;
 
+  min_angle=v_tri_minimum_angle(num_nodes,coordinates);
+  max_angle=v_tri_maximum_angle(num_nodes,coordinates);
+
+
+  double skew_max= (max_angle-60.0)/120.0;
+  double skew_min= (60.0-min_angle)/60.0;
+
+  if(skew_max>skew_min)
+    return skew_max;
+  return skew_min;
+
+
+}
 
 /*!
   The condition of a tri
@@ -934,7 +951,7 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
  
 
   // if we are doing angle calcuations
-  if( metrics_request_flag & (V_TRI_MINIMUM_ANGLE | V_TRI_MAXIMUM_ANGLE) )
+  if( metrics_request_flag & (V_TRI_MINIMUM_ANGLE | V_TRI_MAXIMUM_ANGLE | V_TRI_EQUIANGLE_SKEW) )
   {
     // which is short and long side
     int short_side=0, long_side=0;
@@ -951,7 +968,7 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
 
 
     // calculate the minimum angle of the tri
-    if( metrics_request_flag & V_TRI_MINIMUM_ANGLE )
+    if( metrics_request_flag & (V_TRI_MINIMUM_ANGLE | V_TRI_EQUIANGLE_SKEW)  )
     {
       if(sides_lengths_squared[0] == 0.0 || 
         sides_lengths_squared[1] == 0.0 ||
@@ -968,7 +985,7 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
     }
     
     // calculate the maximum angle of the tri
-    if( metrics_request_flag & V_TRI_MAXIMUM_ANGLE )
+    if( metrics_request_flag & (V_TRI_MAXIMUM_ANGLE | V_TRI_EQUIANGLE_SKEW) )
     {
       if(sides_lengths_squared[0] == 0.0 || 
         sides_lengths_squared[1] == 0.0 ||
@@ -983,6 +1000,17 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
       else
         metric_vals->maximum_angle = (double)sides[0].interior_angle(-sides[1]);
     }
+
+    if(metrics_request_flag & V_TRI_EQUIANGLE_SKEW)
+    {
+      double skew_max= (metric_vals->maximum_angle-60.0)/120;
+      double skew_min= (60.0-metric_vals->minimum_angle)/60.0;
+
+      if(skew_max>skew_min)
+        metric_vals->equiangle_skew = skew_max;
+      metric_vals->equiangle_skew = skew_min;
+    }
+
   }
 
 
@@ -1163,6 +1191,12 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
     metric_vals->maximum_angle = (double) VERDICT_MIN( metric_vals->maximum_angle, VERDICT_DBL_MAX );
   else
     metric_vals->maximum_angle = (double) VERDICT_MAX( metric_vals->maximum_angle , -VERDICT_DBL_MAX );
+
+  if( metric_vals->equiangle_skew > 0 )
+    metric_vals->equiangle_skew = (double) VERDICT_MIN( metric_vals->equiangle_skew, VERDICT_DBL_MAX );
+  else
+    metric_vals->equiangle_skew = (double) VERDICT_MAX( metric_vals->equiangle_skew , -VERDICT_DBL_MAX );
+
 
   if( metric_vals->condition > 0 )
     metric_vals->condition = (double) VERDICT_MIN( metric_vals->condition, VERDICT_DBL_MAX );

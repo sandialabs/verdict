@@ -298,6 +298,109 @@ static VerdictVector v_quad_normal( double coordinates[][3] )
   }
 
 }
+void v_quad_minimum_maximum_angle( double min_max_angles[2], double coordinates[][3] )
+{
+
+  // if this is a collapsed quad, just pass it on to
+  // the tri_largest_angle routine
+  if( v_is_collapsed_quad(coordinates) == VERDICT_TRUE )
+  {
+    min_max_angles[0]= v_tri_minimum_angle(3, coordinates);
+    min_max_angles[1]= v_tri_maximum_angle(3, coordinates);
+    return;
+  }
+
+  double angle;
+  double max_angle = 0.0;
+  double min_angle = 360.0;
+
+
+  VerdictVector edges[4];
+  edges[0].set(
+      coordinates[1][0] - coordinates[0][0],
+      coordinates[1][1] - coordinates[0][1],
+      coordinates[1][2] - coordinates[0][2]
+      );
+  edges[1].set(
+      coordinates[2][0] - coordinates[1][0],
+      coordinates[2][1] - coordinates[1][1],
+      coordinates[2][2] - coordinates[1][2]
+      );
+  edges[2].set(
+      coordinates[3][0] - coordinates[2][0],
+      coordinates[3][1] - coordinates[2][1],
+      coordinates[3][2] - coordinates[2][2]
+      );
+  edges[3].set(
+      coordinates[0][0] - coordinates[3][0],
+      coordinates[0][1] - coordinates[3][1],
+      coordinates[0][2] - coordinates[3][2]
+      );
+
+  // go around each node and calculate the angle
+  // at each node
+  double length[4];
+  length[0] = edges[0].length();
+  length[1] = edges[1].length();
+  length[2] = edges[2].length();
+  length[3] = edges[3].length();
+
+
+  if( length[0] <= VERDICT_DBL_MIN ||
+      length[1] <= VERDICT_DBL_MIN ||
+      length[2] <= VERDICT_DBL_MIN ||
+      length[3] <= VERDICT_DBL_MIN )
+  {
+     min_max_angles[0]=360.0;
+     min_max_angles[1]=0.0;
+     return;
+  }
+
+
+
+  angle = acos( -(edges[0] % edges[1])/(length[0]*length[1]) );
+  min_angle = VERDICT_MIN(angle, min_angle);
+  max_angle = VERDICT_MAX(angle, max_angle);
+
+  angle = acos( -(edges[1] % edges[2])/(length[1]*length[2]) );
+  min_angle = VERDICT_MIN(angle, min_angle);
+  max_angle = VERDICT_MAX(angle, max_angle);
+
+  angle = acos( -(edges[2] % edges[3])/(length[2]*length[3]) );
+  min_angle = VERDICT_MIN(angle, min_angle);
+  max_angle = VERDICT_MAX(angle, max_angle);
+
+  angle = acos( -(edges[3] % edges[0])/(length[3]*length[0]) );
+  min_angle = VERDICT_MIN(angle, min_angle);
+  max_angle = VERDICT_MAX(angle, max_angle);
+
+  max_angle = max_angle *180.0/VERDICT_PI;
+  min_angle = min_angle *180.0/VERDICT_PI;
+
+  if( min_angle  > 0 )
+    min_max_angles[0]=(double) VERDICT_MIN( min_angle, VERDICT_DBL_MAX );
+  min_max_angles[0]=(double) VERDICT_MAX( min_angle, -VERDICT_DBL_MAX );
+
+
+
+  //if any signed areas are < 0, then you are getting the wrong angle
+  double areas[4];
+  v_signed_corner_areas( areas, coordinates );
+
+  if( areas[0] < 0 || areas[1] < 0 ||
+      areas[2] < 0 || areas[3] < 0 )
+  {
+    max_angle = 360 - max_angle;
+  }
+
+  if( max_angle  > 0 )
+    min_max_angles[1]=(double) VERDICT_MIN( max_angle, VERDICT_DBL_MAX );
+  min_max_angles[1]=(double) VERDICT_MAX( max_angle, -VERDICT_DBL_MAX );
+
+  return;
+}
+
+
 
 /*!
    the edge ratio of a quad
@@ -881,7 +984,22 @@ C_FUNC_DEF double v_quad_minimum_angle( int /*num_nodes*/, double coordinates[][
     return (double) VERDICT_MIN( min_angle, VERDICT_DBL_MAX );
   return (double) VERDICT_MAX( min_angle, -VERDICT_DBL_MAX );
 }
+double v_quad_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
+{
+  double min_max_angle[2];
 
+
+  v_quad_minimum_maximum_angle(min_max_angle, coordinates);
+
+  double skew_max= (min_max_angle[1]-90.0)/90.0;
+  double skew_min= (90.0-min_max_angle[0])/90.0;
+
+  if(skew_max>skew_min)
+    return skew_max;
+  return skew_min;
+
+
+}
 /*!
   the oddy of a quad
 
@@ -1841,6 +1959,14 @@ C_FUNC_DEF void v_quad_quality( int num_nodes, double coordinates[][3],
     if( metric_vals->distortion > 0 ) 
       metric_vals->distortion = (double) VERDICT_MIN( metric_vals->distortion, VERDICT_DBL_MAX );
     metric_vals->distortion = (double) VERDICT_MAX( metric_vals->distortion, -VERDICT_DBL_MAX );
+  }
+  if(metrics_request_flag & V_QUAD_EQUIANGLE_SKEW)
+  {
+    metric_vals->equiangle_skew = v_quad_equiangle_skew(num_nodes, coordinates);
+
+    if( metric_vals->equiangle_skew > 0 )
+      metric_vals->equiangle_skew = (double) VERDICT_MIN( metric_vals->equiangle_skew, VERDICT_DBL_MAX );
+    metric_vals->equiangle_skew = (double) VERDICT_MAX( metric_vals->equiangle_skew, -VERDICT_DBL_MAX );
   }
 
   if(metrics_request_flag & V_QUAD_JACOBIAN )

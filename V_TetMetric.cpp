@@ -28,9 +28,119 @@
 #include "V_GaussIntegration.hpp"
 #include <memory.h>
 
-//! the average volume of a tet
-static double v_tet_size = 0;
 
+static double v_tet_size = 0;
+C_FUNC_DEF double v_tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
+{
+  static const double normal_coeff = 180. * .3183098861837906715377675267450287;
+
+  VerdictVector ab,ac,bc,bd, ad, cd;
+
+  ab.set( coordinates[1][0] - coordinates[0][0],
+          coordinates[1][1] - coordinates[0][1],
+          coordinates[1][2] - coordinates[0][2] );
+  ab.normalize();
+
+  ac.set( coordinates[2][0] - coordinates[0][0],
+          coordinates[2][1] - coordinates[0][1],
+          coordinates[2][2] - coordinates[0][2] );
+  ac.normalize();
+
+  ad.set( coordinates[3][0] - coordinates[0][0],
+          coordinates[3][1] - coordinates[0][1],
+          coordinates[3][2] - coordinates[0][2] );
+  ad.normalize();
+
+  bc.set( coordinates[2][0] - coordinates[1][0],
+          coordinates[2][1] - coordinates[1][1],
+          coordinates[2][2] - coordinates[1][2] );
+  bc.normalize();
+
+  bd.set( coordinates[3][0] - coordinates[1][0],
+          coordinates[3][1] - coordinates[1][1],
+          coordinates[3][2] - coordinates[1][2] );
+  bd.normalize();
+
+  cd.set( coordinates[3][0] - coordinates[2][0],
+          coordinates[3][1] - coordinates[2][1],
+          coordinates[3][2] - coordinates[2][2] );
+  cd.normalize();
+
+  VerdictVector abc = bc*ab;
+  abc.normalize();
+  VerdictVector abd = ab*ad;
+  abd.normalize();
+  VerdictVector acd = cd*ad ;
+  acd.normalize();
+  VerdictVector bcd = bc*cd;
+  bcd.normalize();
+
+  double alpha   = acos( -( abc % abd ) );
+  double beta    = acos( -( abc % acd ) );
+  double gamma   = acos( -( abc % bcd ) );
+  double delta   = acos( -( abd % acd ) );
+  double epsilon = acos( -( abd % bcd ) );
+  double zeta    = acos( -( acd % bcd ) );
+
+  double min_angle=alpha;
+  min_angle = min_angle < beta    ? min_angle : beta;
+  min_angle = min_angle < gamma   ? min_angle : gamma;
+  min_angle = min_angle < delta   ? min_angle : delta;
+  min_angle = min_angle < epsilon ? min_angle : epsilon;
+  min_angle = min_angle < zeta    ? min_angle : zeta;
+  min_angle *= normal_coeff;
+
+  double max_angle=alpha;
+  max_angle = max_angle > beta    ? max_angle : beta;
+  max_angle = max_angle > gamma   ? max_angle : gamma;
+  max_angle = max_angle > delta   ? max_angle : delta;
+  max_angle = max_angle > epsilon ? max_angle : epsilon;
+  max_angle = max_angle > zeta    ? max_angle : zeta;
+  max_angle *= normal_coeff;
+
+
+  double theta=acos(1/3.0)*normal_coeff;//70.528779365509308630754000660038;
+
+  double dihedral_skew_max= (max_angle-theta)/(180-theta);
+  double dihedral_skew_min= (theta-min_angle)/theta;
+
+  min_angle=360.0;
+  max_angle=0.0;
+
+  double angles[12];
+  angles[0]=acos( -( ab % bc ) );
+  angles[1]=acos( ( bc % ac ) );
+  angles[2]=acos( ( ac % ab ) );
+  angles[3]=acos( -( ab % bd ) );
+  angles[4]=acos( ( bd % ad ) );
+  angles[5]=acos( ( ad % ab ) );
+  angles[6]=acos( -( bc % cd ) );
+  angles[7]=acos( ( cd % bd ) );
+  angles[8]=acos( ( bd % bc ) );
+  angles[9]=acos( ( ad % cd ) );
+  angles[10]=acos( -( cd % ac ) );
+  angles[11]=acos( ( ac % ad ) );
+
+  for(int a=0;a<12;a++)
+  {
+    if(angles[a]<min_angle)
+      min_angle=angles[a];
+    if(angles[a]>max_angle)
+      max_angle=angles[a];
+  }
+  max_angle *= normal_coeff;
+  min_angle *= normal_coeff;
+  double skew_max= (max_angle-60.0)/120.0;
+  double skew_min= (60.0-min_angle)/60.0;
+
+  double max_skew=dihedral_skew_min;
+  max_skew = max_skew > dihedral_skew_max      ? max_skew : dihedral_skew_max;
+  max_skew = max_skew > skew_min               ? max_skew : skew_min;
+  max_skew = max_skew > skew_max               ? max_skew : skew_max;
+
+  return max_skew;
+}
+//! the average volume of a tet
 /*! 
   set the average volume of a tet
 */
@@ -667,6 +777,127 @@ C_FUNC_DEF double v_tet_collapse_ratio( int /*num_nodes*/, double coordinates[][
   return (double) VERDICT_MAX( crMin, -VERDICT_DBL_MAX );
 }
 
+C_FUNC_DEF double v_tet_equivolume_skew( int num_nodes, double coordinates[][3] )
+{
+
+    //- Find the vectors from the origin to each of the nodes on the tet.
+  VerdictVector vectA(coordinates[0][0],coordinates[0][1],coordinates[0][2]);
+  VerdictVector vectB(coordinates[1][0],coordinates[1][1],coordinates[1][2]);
+  VerdictVector vectC(coordinates[2][0],coordinates[2][1],coordinates[2][2]);
+  VerdictVector vectD(coordinates[3][0],coordinates[3][1],coordinates[3][2]);
+
+  VerdictVector vectAB = vectB - vectA;
+  VerdictVector vectAC = vectC - vectA;
+  VerdictVector vectAD = vectD - vectA;
+
+
+  double sq_lengthAB = vectAB.length_squared();
+  double sq_lengthAC = vectAC.length_squared();
+  double sq_lengthAD = vectAD.length_squared();
+
+  VerdictVector cpBC=vectAB * vectAC;
+  VerdictVector cpDB=vectAD * vectAB ;
+  VerdictVector cpCD=vectAC * vectAD;
+
+
+
+  VerdictVector num=sq_lengthAD*cpBC+sq_lengthAC*cpDB+sq_lengthAB*cpCD;
+  double den=2*vectAB%cpCD;
+
+  double circumradius=num.length()/den;
+
+
+  double volume=v_tet_volume(num_nodes,coordinates);
+  double optimal_length=circumradius/sqrt(double(3.0)/8.0);
+  double optimal_volume=(1.0/12.0)*sqrt(double(2.0))*pow(optimal_length,3);
+
+  return (optimal_volume-volume)/optimal_volume;
+}
+
+C_FUNC_DEF double v_tet_squish_index( int /*num_nodes*/, double coordinates[][3] )
+{
+  VerdictVector vectA(coordinates[0][0],coordinates[0][1],coordinates[0][2]);
+ VerdictVector vectB(coordinates[1][0],coordinates[1][1],coordinates[1][2]);
+  VerdictVector vectC(coordinates[2][0],coordinates[2][1],coordinates[2][2]);
+  VerdictVector vectD(coordinates[3][0],coordinates[3][1],coordinates[3][2]);
+
+
+  VerdictVector tetCenter=vectA+vectB+vectC+vectD;
+  tetCenter/=4.0;
+
+    /*                  top view
+    
+                            C
+                           /|\
+                          / 5 \
+                       2 /  D  \ 1
+                        / 3/ \4 \
+                       /_/     \_\
+                      A-----------B
+                            0
+    */
+
+
+
+  VerdictVector side[6];
+
+  side[0].set( vectA,vectB);
+  side[1].set( vectB,vectC);
+  side[2].set( vectC,vectA);
+  side[3].set( vectA,vectD);
+  side[4].set( vectB,vectD);
+  side[5].set( vectC,vectD);
+
+
+  double maxSquishIndex=0;
+  double squishIndex=0;
+  VerdictVector faceCenter;
+  VerdictVector centerCenterVector;
+  VerdictVector faceAreaVector;
+
+//face 1
+  faceCenter=(vectA+vectB+vectD)/3.0;
+  centerCenterVector=faceCenter-tetCenter;
+  faceAreaVector=0.5*(side[0]*side[4]);
+
+  squishIndex=1-(faceAreaVector%centerCenterVector)/(faceAreaVector.length()*centerCenterVector.length());
+  if(squishIndex>maxSquishIndex)
+    maxSquishIndex=squishIndex;
+
+//face 2
+  faceCenter=(vectB+vectC+vectD)/3.0;
+  centerCenterVector=faceCenter-tetCenter;
+  faceAreaVector=0.5*(side[1]*side[5]);
+
+  squishIndex=1-(faceAreaVector%centerCenterVector)/(faceAreaVector.length()*centerCenterVector.length());
+  if(squishIndex>maxSquishIndex)
+    maxSquishIndex=squishIndex;
+
+  //face 3
+  faceCenter=(vectA+vectC+vectD)/3.0;
+  centerCenterVector=faceCenter-tetCenter;
+  faceAreaVector=0.5*(side[2]*side[3]);
+
+  squishIndex=1-(faceAreaVector%centerCenterVector)/(faceAreaVector.length()*centerCenterVector.length());
+ if(squishIndex>maxSquishIndex)
+    maxSquishIndex=squishIndex;
+
+  //face 4
+  faceCenter=(vectA+vectB+vectC)/3.0;
+  centerCenterVector=faceCenter-tetCenter;
+  faceAreaVector=0.5*(side[1]*side[0]);
+
+  squishIndex=1-(faceAreaVector%centerCenterVector)/(faceAreaVector.length()*centerCenterVector.length());
+  if(squishIndex>maxSquishIndex)
+    maxSquishIndex=squishIndex;
+
+
+
+  return maxSquishIndex;
+}
+
+
+
 /*!
   the volume of a tet
 
@@ -1186,6 +1417,25 @@ C_FUNC_DEF void v_tet_quality( int num_nodes, double coordinates[][3],
     metric_vals->distortion = v_tet_distortion(num_nodes, coordinates);
   }
 
+
+  // calculate the equivolume skew
+  if(metrics_request_flag & V_TET_EQUIVOLUME_SKEW)
+  {
+    metric_vals->equivolume_skew = v_tet_equivolume_skew(num_nodes, coordinates);
+  }
+
+
+  // calculate the squish index
+  if(metrics_request_flag & V_TET_SQUISH_INDEX)
+  {
+    metric_vals->squish_index = v_tet_squish_index(num_nodes, coordinates);
+  }
+  // calculate the Equiangle Skew
+  if(metrics_request_flag & V_TET_EQUIANGLE_SKEW)
+  {
+    metric_vals->equiangle_skew = v_tet_equiangle_skew(num_nodes, coordinates);
+  }
+
   //check for overflow
   if(metrics_request_flag & V_TET_ASPECT_BETA )
   {
@@ -1255,6 +1505,26 @@ C_FUNC_DEF void v_tet_quality( int num_nodes, double coordinates[][3],
     if( metric_vals->distortion > 0 ) 
       metric_vals->distortion = (double) VERDICT_MIN( metric_vals->distortion, VERDICT_DBL_MAX );
     metric_vals->distortion = (double) VERDICT_MAX( metric_vals->distortion, -VERDICT_DBL_MAX );
+  }
+
+  if(metrics_request_flag & V_TET_EQUIVOLUME_SKEW)
+  {
+    if( metric_vals->equivolume_skew > 0 ) 
+      metric_vals->equivolume_skew = (double) VERDICT_MIN( metric_vals->equivolume_skew, VERDICT_DBL_MAX );
+    metric_vals->equivolume_skew = (double) VERDICT_MAX( metric_vals->equivolume_skew, -VERDICT_DBL_MAX );
+  } 
+  
+  if(metrics_request_flag & V_TET_SQUISH_INDEX)
+  {
+    if( metric_vals->squish_index > 0 ) 
+      metric_vals->squish_index = (double) VERDICT_MIN( metric_vals->squish_index, VERDICT_DBL_MAX );
+    metric_vals->squish_index = (double) VERDICT_MAX( metric_vals->squish_index, -VERDICT_DBL_MAX );
+  }
+  if(metrics_request_flag & V_TET_EQUIANGLE_SKEW)
+  {
+    if( metric_vals->equiangle_skew > 0 )
+      metric_vals->equiangle_skew = (double) VERDICT_MIN( metric_vals->equiangle_skew, VERDICT_DBL_MAX );
+    metric_vals->equiangle_skew = (double) VERDICT_MAX( metric_vals->equiangle_skew, -VERDICT_DBL_MAX );
   }
 
 

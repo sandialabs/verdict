@@ -27,6 +27,14 @@ PURPOSE.  See the above copyright notice for more information.
 #include <memory.h> 
 #include "verdict_defines.hpp"
 #include "V_GaussIntegration.hpp"
+
+extern double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] );
+extern double v_quad_equiangle_skew( int num_nodes, double coordinates[][3] );
+// local methods
+void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
+                          double quad1[][3], double quad2[][3], double quad3[][3]);
+
+
 /*
    the wedge element
 
@@ -43,6 +51,31 @@ PURPOSE.  See the above copyright notice for more information.
 
  */
 
+C_FUNC_DEF double v_wedge_equiangle_skew( int num_nodes, double coordinates[][3] )
+{
+  double tri1[3][3];
+  double tri2[3][3];
+  double quad1[4][3];
+  double quad2[4][3];
+  double quad3[4][3];
+
+  v_make_wedge_faces(coordinates, tri1,tri2,quad1,quad2,quad3);
+
+
+  double tri1_skew=v_tri_equiangle_skew(3,tri1);
+  double tri2_skew=v_tri_equiangle_skew(3,tri2);
+  double quad1_skew=v_quad_equiangle_skew( 4, quad1 );
+  double quad2_skew=v_quad_equiangle_skew( 4, quad2 );
+  double quad3_skew=v_quad_equiangle_skew( 4, quad3 );
+
+  double max_skew=tri1_skew;
+  max_skew = max_skew > tri2_skew      ? max_skew : tri2_skew;
+  max_skew = max_skew > quad1_skew      ? max_skew : quad1_skew;
+  max_skew = max_skew > quad2_skew      ? max_skew : quad2_skew;
+  max_skew = max_skew > quad3_skew      ? max_skew : quad3_skew;
+
+  return max_skew;
+}
 
 
 /*!
@@ -143,6 +176,9 @@ C_FUNC_DEF void v_wedge_quality( int num_nodes, double coordinates[][3],
     metric_vals->shape = v_wedge_shape(num_nodes, coordinates);
   if(metrics_request_flag & V_WEDGE_CONDITION)
     metric_vals->condition = v_wedge_condition(num_nodes, coordinates);
+  if(metrics_request_flag & V_WEDGE_EQUIANGLE_SKEW)
+    metric_vals->equiangle_skew = v_wedge_equiangle_skew(num_nodes, coordinates);
+
 }
 
 
@@ -958,3 +994,84 @@ C_FUNC_DEF double v_wedge_condition( int /*num_nodes*/, double coordinates[][3] 
   return v_wedge_max_aspect_frobenius(6,coordinates);
 }
 
+void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
+                          double quad1[][3], double quad2[][3], double quad3[][3])
+{
+
+  // tri1
+  tri1[0][0] = coordinates[0][0];
+  tri1[0][1] = coordinates[0][1];
+  tri1[0][2] = coordinates[0][2];
+
+  tri1[1][0] = coordinates[1][0];
+  tri1[1][1] = coordinates[1][1];
+  tri1[1][2] = coordinates[1][2];
+
+  tri1[2][0] = coordinates[2][0];
+  tri1[2][1] = coordinates[2][1];
+  tri1[2][2] = coordinates[2][2];
+
+  // tri2
+  tri2[0][0] = coordinates[3][0];
+  tri2[0][1] = coordinates[3][1];
+  tri2[0][2] = coordinates[3][2];
+
+  tri2[1][0] = coordinates[4][0];
+  tri2[1][1] = coordinates[4][1];
+  tri2[1][2] = coordinates[4][2];
+
+  tri2[2][0] = coordinates[5][0];
+  tri2[2][1] = coordinates[5][1];
+  tri2[2][2] = coordinates[5][2];
+
+  //quad1
+  quad1[0][0] = coordinates[0][0];
+  quad1[0][1] = coordinates[0][1];
+  quad1[0][2] = coordinates[0][2];
+
+  quad1[1][0] = coordinates[1][0];
+  quad1[1][1] = coordinates[1][1];
+  quad1[1][2] = coordinates[1][2];
+
+  quad1[2][0] = coordinates[4][0];
+  quad1[2][1] = coordinates[4][1];
+  quad1[2][2] = coordinates[4][2];
+
+  quad1[3][0] = coordinates[3][0];
+  quad1[3][1] = coordinates[3][1];
+  quad1[3][2] = coordinates[3][2];
+
+  //quad2
+  quad2[0][0] = coordinates[1][0];
+  quad2[0][1] = coordinates[1][1];
+  quad2[0][2] = coordinates[1][2];
+
+  quad2[1][0] = coordinates[2][0];
+  quad2[1][1] = coordinates[2][1];
+  quad2[1][2] = coordinates[2][2];
+
+  quad2[2][0] = coordinates[5][0];
+  quad2[2][1] = coordinates[5][1];
+  quad2[2][2] = coordinates[5][2];
+
+  quad2[3][0] = coordinates[4][0];
+  quad2[3][1] = coordinates[4][1];
+  quad2[3][2] = coordinates[4][2];
+
+  //quad3
+  quad3[0][0] = coordinates[2][0];
+  quad3[0][1] = coordinates[2][1];
+  quad3[0][2] = coordinates[2][2];
+
+  quad3[1][0] = coordinates[0][0];
+  quad3[1][1] = coordinates[0][1];
+  quad3[1][2] = coordinates[0][2];
+
+  quad3[2][0] = coordinates[3][0];
+  quad3[2][1] = coordinates[3][1];
+  quad3[2][2] = coordinates[3][2];
+
+  quad3[3][0] = coordinates[5][0];
+  quad3[3][1] = coordinates[5][1];
+  quad3[3][2] = coordinates[5][2];
+}

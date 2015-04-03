@@ -162,6 +162,8 @@ struct HexMetricVals
   double shear_and_size ; 
   /** \sa v_hex_distortion */
   double distortion; 
+  /** \sa v_hex_equiangle_skew */
+  double equiangle_skew;
 };
 
 /**\brief A <em>struct</em> to hold values computed by \ref v_edge_quality.
@@ -254,6 +256,9 @@ struct QuadMetricVals
   double shear_and_size ;
   /** \sa v_quad_distortion function */
   double distortion; 
+  /** \sa v_quad_equiangle_skew */
+  double equiangle_skew;
+
 };
 
 /**\brief A <em>struct</em> to hold values computed by \ref v_pyramid_quality.
@@ -271,6 +276,9 @@ struct PyramidMetricVals
   double scaled_jacobian ;
   /** \sa v_pyramid_shape */
   double shape ;
+  /** \sa v_pyramid_equiangle_skew */
+  double equiangle_skew;
+
 };
    
 /**\brief A <em>struct</em> to hold values computed by \ref v_wedge_quality.
@@ -300,6 +308,10 @@ struct WedgeMetricVals
   double shape;
   /** \sa v_wedge_condition */
   double condition;
+  /** \sa v_wedge_equiangle_skew */
+  double equiangle_skew;
+
+
 };
      
 /**\brief A <em>struct</em> to hold values computed by \ref v_tet_quality.
@@ -341,6 +353,14 @@ struct TetMetricVals
   double shape_and_size ; 
   /** \sa v_tet_distortion */
   double distortion; 
+  /** \sa v_tet_equivolume_skew */
+  double equivolume_skew; 
+  /** \sa v_tet_squish_index */
+  double squish_index; 
+  /** \sa v_tet_equiangle_skew */
+  double equiangle_skew;
+
+ 
 };
 
 /**\brief A <em>struct</em> to hold values computed by \ref v_tri_quality.
@@ -376,6 +396,9 @@ struct TriMetricVals
   double shape_and_size ; 
   /** \sa v_tri_distortion */
   double distortion; 
+  /** \sa v_tri_equiangle_skew */
+  double equiangle_skew;
+
 };
 
 
@@ -426,11 +449,16 @@ struct TriMetricVals
 #define V_HEX_EDGE_RATIO             131072
 /*!\hideinitializer \brief Request that average Frobenius aspect be computed. \sa v_hex_med_aspect_frobenius */
 #define V_HEX_MED_ASPECT_FROBENIUS   262144
+/*!\hideinitializer \brief Request that Equiangle Skew be computed. \sa v_hex_equiangle_skew */
+#define V_HEX_EQUIANGLE_SKEW      524288
+
+
+
 //!\name Composite hex quality flags
 //! These flags are bitwise combinations of the atomic flags above.
 //@{
 /*!\hideinitializer \brief Request that all hex metrics be computed. */
-#define V_HEX_ALL                    524287
+#define V_HEX_ALL                    1048575
 /*!\hideinitializer \brief Request the traditional hex qualities be computed.
  *                  
  * This includes
@@ -510,11 +538,18 @@ struct TriMetricVals
 #define V_TET_MINIMUM_ANGLE          16384
 /*!\hideinitializer \brief Request that the collapse ratio be computed. \sa v_tet_collapse_ratio */
 #define V_TET_COLLAPSE_RATIO         32768
+/*!\hideinitializer \brief Request that the equivolume skew as defined by Fluent be computed. \sa v_tet_equivolume_skew */
+#define V_TET_EQUIVOLUME_SKEW        65536
+/*!\hideinitializer \brief Request that the squish index as defined by Fluent be computed. \sa v_tet_squish_index */
+#define V_TET_SQUISH_INDEX           131072
+/*!\hideinitializer \brief Request that Equiangle Skew be computed. \sa v_tet_equiangle_skew */
+#define V_TET_EQUIANGLE_SKEW       262144
+
 //! Composite tetrahedral quality flags
 //! These flags are bitwise combinations of the atomic flags above.
 //@{
 /*!\hideinitializer \brief Request that the all tetrahedral qualities be computed. */
-#define V_TET_ALL                    65535
+#define V_TET_ALL                    524287
 /*!\hideinitializer \brief Request that the tradtional tetrahedral qualities be computed.
  *
  * This includes
@@ -551,9 +586,9 @@ struct TriMetricVals
 #define V_PYRAMID_SCALED_JACOBIAN    2
 #define V_PYRAMID_JACOBIAN           4
 #define V_PYRAMID_SHAPE              8
+#define V_PYRAMID_EQUIANGLE_SKEW     16
 /*!\hideinitializer \brief */
-#define V_PYRAMID_ALL \
-  V_PYRAMID_VOLUME
+#define V_PYRAMID_ALL                31
 //@}
 
 //! \name Wedge bit fields
@@ -570,9 +605,9 @@ struct TriMetricVals
 #define V_WEDGE_MAX_STRETCH            128
 #define V_WEDGE_SHAPE                  256
 #define V_WEDGE_CONDITION              512
+#define V_WEDGE_EQUIANGLE_SKEW         1024
 /*!\hideinitializer \brief */
-#define V_WEDGE_ALL \
-  V_WEDGE_VOLUME
+#define V_WEDGE_ALL                    2047
 //@}
  
 //! \name Knife bit fields
@@ -635,7 +670,10 @@ struct TriMetricVals
 /*!\hideinitializer \brief */
 #define V_QUAD_MAX_ASPECT_FROBENIUS  4194304
 /*!\hideinitializer \brief */
-#define V_QUAD_ALL                   8388607
+#define V_QUAD_EQUIANGLE_SKEW      8388608
+
+/*!\hideinitializer \brief */
+#define V_QUAD_ALL                   16777215
 /*!\hideinitializer \brief */
 #define V_QUAD_TRADITIONAL \
   V_QUAD_MAX_EDGE_RATIO + \
@@ -694,7 +732,10 @@ struct TriMetricVals
 /*!\hideinitializer \brief */
 #define V_TRI_EDGE_RATIO             2048
 /*!\hideinitializer \brief */
-#define V_TRI_ALL                    4095
+#define V_TRI_EQUIANGLE_SKEW       4096
+
+/*!\hideinitializer \brief */
+#define V_TRI_ALL                    8191
 /*!\hideinitializer \brief */
 #define V_TRI_TRADITIONAL \
   V_TRI_ASPECT_FROBENIUS + \

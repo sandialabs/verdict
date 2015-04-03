@@ -29,6 +29,9 @@
 #include <vector>
 #include <algorithm>
 
+extern double v_quad_equiangle_skew( int num_nodes, double coordinates[][3] );
+extern double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] );
+
 // local methods
 void v_make_pyramid_tets(double coordinates[][3], double tet1_coords[][3], double tet2_coords[][3],
                                                   double tet3_coords[][3], double tet4_coords[][3]);
@@ -60,6 +63,30 @@ double v_largest_pyramid_edge( double coordinates[][3] );
 
 */
 
+C_FUNC_DEF double v_pyramid_equiangle_skew( int num_nodes, double coordinates[][3] )
+{
+  double base[4][3];
+  double tri1[3][3];
+  double tri2[3][3];
+  double tri3[3][3];
+  double tri4[3][3];
+  v_make_pyramid_faces(coordinates, base,tri1,tri2,tri3,tri4);
+
+
+  double quad_skew=v_quad_equiangle_skew( 4, base );
+  double tri1_skew=v_tri_equiangle_skew(3,tri1);
+  double tri2_skew=v_tri_equiangle_skew(3,tri2);
+  double tri3_skew=v_tri_equiangle_skew(3,tri3);
+  double tri4_skew=v_tri_equiangle_skew(3,tri4);
+
+  double max_skew=quad_skew;
+  max_skew = max_skew > tri1_skew      ? max_skew : tri1_skew;
+  max_skew = max_skew > tri2_skew      ? max_skew : tri2_skew;
+  max_skew = max_skew > tri3_skew      ? max_skew : tri3_skew;
+  max_skew = max_skew > tri4_skew      ? max_skew : tri4_skew;
+
+  return max_skew;
+}
 
 /*!
   the volume of a pyramid
@@ -451,5 +478,7 @@ C_FUNC_DEF void v_pyramid_quality( int num_nodes, double coordinates[][3],
     metric_vals->scaled_jacobian = v_pyramid_scaled_jacobian(num_nodes, coordinates);
   else if(metrics_request_flag & V_PYRAMID_SHAPE)
     metric_vals->shape = v_pyramid_shape(num_nodes, coordinates);
+  else if(metrics_request_flag & V_PYRAMID_EQUIANGLE_SKEW)
+    metric_vals->equiangle_skew = v_pyramid_equiangle_skew(num_nodes, coordinates);
 }
 
