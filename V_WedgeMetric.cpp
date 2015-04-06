@@ -353,6 +353,7 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
   double max_aspect = VERDICT_MAX(aspect1,aspect2);
   max_aspect = VERDICT_MAX(max_aspect,aspect3);
   max_aspect = VERDICT_MAX(max_aspect,aspect4);
+  max_aspect = VERDICT_MAX(max_aspect,aspect5);
   max_aspect = VERDICT_MAX(max_aspect,aspect6);
   max_aspect = max_aspect/1.16477;
 

@@ -169,7 +169,6 @@ C_FUNC_DEF double v_pyramid_scaled_jacobian( int num_nodes, double coordinates[]
   double tet2_coords[4][3];
   double tet3_coords[4][3];
   double tet4_coords[4][3];
-  double min_scaled_jac = VERDICT_DBL_MAX;
 
   v_make_pyramid_tets(coordinates, tet1_coords, tet2_coords, tet3_coords, tet4_coords);
 
