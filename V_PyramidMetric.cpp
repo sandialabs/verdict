@@ -98,46 +98,79 @@ C_FUNC_DEF double v_pyramid_equiangle_skew( int num_nodes, double coordinates[][
 C_FUNC_DEF double v_pyramid_volume( int num_nodes, double coordinates[][3] )
 {
     
-  double volume = 0;
-  VerdictVector side1, side2, side3;
-  
-  if (num_nodes == 5)
-  {
-    // divide the pyramid into 2 tets and calculate each
+  double center_coords[3];
+  //calculate the center of the quads
+  center_coords[0] =  (coordinates[0][0] + coordinates[1][0] +
+      coordinates[2][0] + coordinates[3][0]) / 4;
+  center_coords[1] =  (coordinates[0][1] + coordinates[1][1] +
+      coordinates[2][1] + coordinates[3][1] ) / 4;
+  center_coords[2] =  (coordinates[0][2] + coordinates[1][2] +
+      coordinates[2][2] + coordinates[3][2] ) / 4;
 
-    side1.set( coordinates[1][0] - coordinates[0][0],
-        coordinates[1][1] - coordinates[0][1],
-        coordinates[1][2] - coordinates[0][2] );
-    
-    side2.set( coordinates[3][0] - coordinates[0][0],
-        coordinates[3][1] - coordinates[0][1],
-        coordinates[3][2] - coordinates[0][2] );
-    
-    side3.set( coordinates[4][0] - coordinates[0][0],
-        coordinates[4][1] - coordinates[0][1], 
-        coordinates[4][2] - coordinates[0][2] );
-    
-    // volume of the first tet
-    volume = (side3 % (side1 * side2 ))/6.0;
-    
-    
-    side1.set( coordinates[3][0] - coordinates[2][0],
-        coordinates[3][1] - coordinates[2][1],
-        coordinates[3][2] - coordinates[2][2] );
-    
-    side2.set( coordinates[1][0] - coordinates[2][0],
-        coordinates[1][1] - coordinates[2][1],
-        coordinates[1][2] - coordinates[2][2] );
-    
-    side3.set( coordinates[4][0] - coordinates[2][0],
-        coordinates[4][1] - coordinates[2][1],
-        coordinates[4][2] - coordinates[2][2] );
-    
-    // volume of the second tet
-    volume += (side3 % (side1 * side2 ))/6.0;
- 
-  }   
+  double tet_coords[4][4][3];
+  tet_coords[0][0][0] = coordinates[0][0];
+  tet_coords[0][0][1] = coordinates[0][1];
+  tet_coords[0][0][2] = coordinates[0][2];
+  tet_coords[0][1][0] = coordinates[1][0];
+  tet_coords[0][1][1] = coordinates[1][1];
+  tet_coords[0][1][2] = coordinates[1][2];
+  tet_coords[0][2][0] = center_coords[0];
+  tet_coords[0][2][1] = center_coords[1];
+  tet_coords[0][2][2] = center_coords[2];
+  tet_coords[0][3][0] = coordinates[4][0];
+  tet_coords[0][3][1] = coordinates[4][1];
+  tet_coords[0][3][2] = coordinates[4][2];
+
+  tet_coords[1][0][0] = coordinates[1][0];
+  tet_coords[1][0][1] = coordinates[1][1];
+  tet_coords[1][0][2] = coordinates[1][2];
+  tet_coords[1][1][0] = coordinates[2][0];
+  tet_coords[1][1][1] = coordinates[2][1];
+  tet_coords[1][1][2] = coordinates[2][2];
+  tet_coords[1][2][0] = center_coords[0];
+  tet_coords[1][2][1] = center_coords[1];
+  tet_coords[1][2][2] = center_coords[2];
+  tet_coords[1][3][0] = coordinates[4][0];
+  tet_coords[1][3][1] = coordinates[4][1];
+  tet_coords[1][3][2] = coordinates[4][2];
+
+  tet_coords[2][0][0] = coordinates[2][0];
+  tet_coords[2][0][1] = coordinates[2][1];
+  tet_coords[2][0][2] = coordinates[2][2];
+  tet_coords[2][1][0] = coordinates[3][0];
+  tet_coords[2][1][1] = coordinates[3][1];
+  tet_coords[2][1][2] = coordinates[3][2];
+  tet_coords[2][2][0] = center_coords[0];
+  tet_coords[2][2][1] = center_coords[1];
+  tet_coords[2][2][2] = center_coords[2];
+  tet_coords[2][3][0] = coordinates[4][0];
+  tet_coords[2][3][1] = coordinates[4][1];
+  tet_coords[2][3][2] = coordinates[4][2];
+
+  tet_coords[3][0][0] = coordinates[3][0];
+  tet_coords[3][0][1] = coordinates[3][1];
+  tet_coords[3][0][2] = coordinates[3][2];
+  tet_coords[3][1][0] = coordinates[0][0];
+  tet_coords[3][1][1] = coordinates[0][1];
+  tet_coords[3][1][2] = coordinates[0][2];
+  tet_coords[3][2][0] = center_coords[0];
+  tet_coords[3][2][1] = center_coords[1];
+  tet_coords[3][2][2] = center_coords[2];
+  tet_coords[3][3][0] = coordinates[4][0];
+  tet_coords[3][3][1] = coordinates[4][1];
+  tet_coords[3][3][2] = coordinates[4][2];
+
+
+
+
+  double volume=0.0;
+  for(int t=0;t<4;t++)
+  {
+    volume+=v_tet_volume(4,tet_coords[t]);
+  }
+
   return (double)volume;
+
     
 }
 
