@@ -82,71 +82,205 @@ C_FUNC_DEF double v_wedge_equiangle_skew( int num_nodes, double coordinates[][3]
 
   calculate the volume of a wedge
 
-  this is done by dividing the wedge into 3 tets
+  this is done by dividing the wedge into 11 tets
   and summing the volume of each tet
 
  */
 
-C_FUNC_DEF double v_wedge_volume( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double v_wedge_volume( int /*num_nodes*/, double coordinates[][3] )
 {
 
-  double volume = 0;
-  VerdictVector side1, side2, side3;
+  // We need to divide the wedge into 11 tets.
+  // This is a better solution than 3 tets or 3 hexes because
+  // if the wedge is twisted then the 3 quads will be twisted.
+  // This presents a problem when you have multiple wedges next to
+  // each other.  A hex or tet representation of a wedge may vary
+  // from one wedge to another.  This means that if wedge A splits
+  // a quad one way, wedge B may split the matching quad the other direction.
+  // this will produce an error in the total volume calculation across
+  // multiple wedges.  Placing a center point on each quad and dividing the
+  // wedge into 11 tets avoids this problem because each wedge will
+  // split the quads the same way.  This eliminates error in the total
+  // volume calculation across multiple wedges.
 
-  if ( num_nodes == 6 )
+  double center_coords[3][3];
+  //calculate the center of the quads
+  center_coords[0][0] =  (coordinates[0][0] + coordinates[1][0] +
+      coordinates[3][0] + coordinates[4][0]) / 4;
+  center_coords[0][1] =  (coordinates[0][1] + coordinates[1][1] +
+      coordinates[3][1] + coordinates[4][1] ) / 4;
+  center_coords[0][2] =  (coordinates[0][2] + coordinates[1][2] +
+      coordinates[3][2] + coordinates[4][2] ) / 4;
+
+
+  center_coords[1][0] =  (coordinates[1][0] + coordinates[2][0] +
+      coordinates[4][0] + coordinates[5][0]) / 4;
+  center_coords[1][1] =  (coordinates[1][1] + coordinates[2][1] +
+      coordinates[4][1] + coordinates[5][1] ) / 4;
+  center_coords[1][2] =  (coordinates[1][2] + coordinates[2][2] +
+      coordinates[4][2] + coordinates[5][2] ) / 4;
+
+
+  center_coords[2][0] =  (coordinates[2][0] + coordinates[0][0] +
+      coordinates[3][0] + coordinates[5][0]) / 4;
+  center_coords[2][1] =  (coordinates[2][1] + coordinates[0][1] +
+      coordinates[3][1] + coordinates[5][1] ) / 4;
+  center_coords[2][2] =  (coordinates[2][2] + coordinates[0][2] +
+      coordinates[3][2] + coordinates[5][2] ) / 4;
+
+
+  //create the tets.
+  double tet_coords[11][4][3];
+  tet_coords[0][0][0] = coordinates[0][0];
+  tet_coords[0][0][1] = coordinates[0][1];
+  tet_coords[0][0][2] = coordinates[0][2];
+  tet_coords[0][1][0] = coordinates[3][0];
+  tet_coords[0][1][1] = coordinates[3][1];
+  tet_coords[0][1][2] = coordinates[3][2];
+  tet_coords[0][2][0] = center_coords[0][0];
+  tet_coords[0][2][1] = center_coords[0][1];
+  tet_coords[0][2][2] = center_coords[0][2];
+  tet_coords[0][3][0] = center_coords[2][0];
+  tet_coords[0][3][1] = center_coords[2][1];
+  tet_coords[0][3][2] = center_coords[2][2];
+
+  tet_coords[1][0][0] = coordinates[1][0];
+  tet_coords[1][0][1] = coordinates[1][1];
+  tet_coords[1][0][2] = coordinates[1][2];
+  tet_coords[1][1][0] = coordinates[4][0];
+  tet_coords[1][1][1] = coordinates[4][1];
+  tet_coords[1][1][2] = coordinates[4][2];
+  tet_coords[1][2][0] = center_coords[1][0];
+  tet_coords[1][2][1] = center_coords[1][1];
+  tet_coords[1][2][2] = center_coords[1][2];
+  tet_coords[1][3][0] = center_coords[0][0];
+  tet_coords[1][3][1] = center_coords[0][1];
+  tet_coords[1][3][2] = center_coords[0][2];
+
+  tet_coords[2][0][0] = coordinates[2][0];
+  tet_coords[2][0][1] = coordinates[2][1];
+  tet_coords[2][0][2] = coordinates[2][2];
+  tet_coords[2][1][0] = coordinates[5][0];
+  tet_coords[2][1][1] = coordinates[5][1];
+  tet_coords[2][1][2] = coordinates[5][2];
+  tet_coords[2][2][0] = center_coords[2][0];
+  tet_coords[2][2][1] = center_coords[2][1];
+  tet_coords[2][2][2] = center_coords[2][2];
+  tet_coords[2][3][0] = center_coords[1][0];
+  tet_coords[2][3][1] = center_coords[1][1];
+  tet_coords[2][3][2] = center_coords[1][2];
+
+  tet_coords[3][0][0] = center_coords[0][0];
+  tet_coords[3][0][1] = center_coords[0][1];
+  tet_coords[3][0][2] = center_coords[0][2];
+  tet_coords[3][1][0] = center_coords[2][0];
+  tet_coords[3][1][1] = center_coords[2][1];
+  tet_coords[3][1][2] = center_coords[2][2];
+  tet_coords[3][2][0] = center_coords[1][0];
+  tet_coords[3][2][1] = center_coords[1][1];
+  tet_coords[3][2][2] = center_coords[1][2];
+  tet_coords[3][3][0] = coordinates[0][0];
+  tet_coords[3][3][1] = coordinates[0][1];
+  tet_coords[3][3][2] = coordinates[0][2];
+
+  tet_coords[4][0][0] = coordinates[1][0];
+  tet_coords[4][0][1] = coordinates[1][1];
+  tet_coords[4][0][2] = coordinates[1][2];
+  tet_coords[4][1][0] = center_coords[0][0];
+  tet_coords[4][1][1] = center_coords[0][1];
+  tet_coords[4][1][2] = center_coords[0][2];
+  tet_coords[4][2][0] = center_coords[1][0];
+  tet_coords[4][2][1] = center_coords[1][1];
+  tet_coords[4][2][2] = center_coords[1][2];
+  tet_coords[4][3][0] = coordinates[0][0];
+  tet_coords[4][3][1] = coordinates[0][1];
+  tet_coords[4][3][2] = coordinates[0][2];
+
+  tet_coords[5][0][0] = coordinates[2][0];
+  tet_coords[5][0][1] = coordinates[2][1];
+  tet_coords[5][0][2] = coordinates[2][2];
+  tet_coords[5][1][0] = coordinates[1][0];
+  tet_coords[5][1][1] = coordinates[1][1];
+  tet_coords[5][1][2] = coordinates[1][2];
+  tet_coords[5][2][0] = center_coords[1][0];
+  tet_coords[5][2][1] = center_coords[1][1];
+  tet_coords[5][2][2] = center_coords[1][2];
+  tet_coords[5][3][0] = coordinates[0][0];
+  tet_coords[5][3][1] = coordinates[0][1];
+  tet_coords[5][3][2] = coordinates[0][2];
+
+  tet_coords[6][0][0] = coordinates[2][0];
+  tet_coords[6][0][1] = coordinates[2][1];
+  tet_coords[6][0][2] = coordinates[2][2];
+  tet_coords[6][1][0] = center_coords[1][0];
+  tet_coords[6][1][1] = center_coords[1][1];
+  tet_coords[6][1][2] = center_coords[1][2];
+  tet_coords[6][2][0] = center_coords[2][0];
+  tet_coords[6][2][1] = center_coords[2][1];
+  tet_coords[6][2][2] = center_coords[2][2];
+  tet_coords[6][3][0] = coordinates[0][0];
+  tet_coords[6][3][1] = coordinates[0][1];
+  tet_coords[6][3][2] = coordinates[0][2];
+
+  tet_coords[7][0][0] = center_coords[0][0];
+  tet_coords[7][0][1] = center_coords[0][1];
+  tet_coords[7][0][2] = center_coords[0][2];
+  tet_coords[7][1][0] = center_coords[1][0];
+  tet_coords[7][1][1] = center_coords[1][1];
+  tet_coords[7][1][2] = center_coords[1][2];
+  tet_coords[7][2][0] = center_coords[2][0];
+  tet_coords[7][2][1] = center_coords[2][1];
+  tet_coords[7][2][2] = center_coords[2][2];
+  tet_coords[7][3][0] = coordinates[3][0];
+  tet_coords[7][3][1] = coordinates[3][1];
+  tet_coords[7][3][2] = coordinates[3][2];
+
+  tet_coords[8][0][0] = coordinates[5][0];
+  tet_coords[8][0][1] = coordinates[5][1];
+  tet_coords[8][0][2] = coordinates[5][2];
+  tet_coords[8][1][0] = center_coords[2][0];
+  tet_coords[8][1][1] = center_coords[2][1];
+  tet_coords[8][1][2] = center_coords[2][2];
+  tet_coords[8][2][0] = center_coords[1][0];
+  tet_coords[8][2][1] = center_coords[1][1];
+  tet_coords[8][2][2] = center_coords[1][2];
+  tet_coords[8][3][0] = coordinates[3][0];
+  tet_coords[8][3][1] = coordinates[3][1];
+  tet_coords[8][3][2] = coordinates[3][2];
+
+  tet_coords[9][0][0] = coordinates[4][0];
+  tet_coords[9][0][1] = coordinates[4][1];
+  tet_coords[9][0][2] = coordinates[4][2];
+  tet_coords[9][1][0] = coordinates[5][0];
+  tet_coords[9][1][1] = coordinates[5][1];
+  tet_coords[9][1][2] = coordinates[5][2];
+  tet_coords[9][2][0] = center_coords[1][0];
+  tet_coords[9][2][1] = center_coords[1][1];
+  tet_coords[9][2][2] = center_coords[1][2];
+  tet_coords[9][3][0] = coordinates[3][0];
+  tet_coords[9][3][1] = coordinates[3][1];
+  tet_coords[9][3][2] = coordinates[3][2];
+
+  tet_coords[10][0][0] = coordinates[4][0];
+  tet_coords[10][0][1] = coordinates[4][1];
+  tet_coords[10][0][2] = coordinates[4][2];
+  tet_coords[10][1][0] = center_coords[1][0];
+  tet_coords[10][1][1] = center_coords[1][1];
+  tet_coords[10][1][2] = center_coords[1][2];
+  tet_coords[10][2][0] = center_coords[0][0];
+  tet_coords[10][2][1] = center_coords[0][1];
+  tet_coords[10][2][2] = center_coords[0][2];
+  tet_coords[10][3][0] = coordinates[3][0];
+  tet_coords[10][3][1] = coordinates[3][1];
+  tet_coords[10][3][2] = coordinates[3][2];
+
+  double volume=0.0;
+  for(int t=0;t<11;t++)
   {
-
-    // divide the wedge into 3 tets and calculate each volume
-
-    side1.set( coordinates[1][0] - coordinates[0][0],
-        coordinates[1][1] - coordinates[0][1],
-        coordinates[1][2] - coordinates[0][2]);
-
-    side2.set( coordinates[2][0] - coordinates[0][0],
-        coordinates[2][1] - coordinates[0][1],
-        coordinates[2][2] - coordinates[0][2]);
-
-
-    side3.set( coordinates[3][0] - coordinates[0][0],
-        coordinates[3][1] - coordinates[0][1],
-        coordinates[3][2] - coordinates[0][2]);
-
-    volume = side3 % (side1 * side2)  / 6;
-
-    side1.set( coordinates[4][0] - coordinates[1][0],
-        coordinates[4][1] - coordinates[1][1],
-        coordinates[4][2] - coordinates[1][2]);
-
-    side2.set( coordinates[5][0] - coordinates[1][0],
-        coordinates[5][1] - coordinates[1][1],
-        coordinates[5][2] - coordinates[1][2]);
-
-
-    side3.set( coordinates[3][0] - coordinates[1][0],
-        coordinates[3][1] - coordinates[1][1],
-        coordinates[3][2] - coordinates[1][2]);
-
-    volume += side3 % (side1 * side2)  / 6;
-
-    side1.set( coordinates[5][0] - coordinates[1][0],
-        coordinates[5][1] - coordinates[1][1],
-        coordinates[5][2] - coordinates[1][2]);
-
-    side2.set( coordinates[2][0] - coordinates[1][0],
-        coordinates[2][1] - coordinates[1][1],
-        coordinates[2][2] - coordinates[1][2]);
-
-
-    side3.set( coordinates[3][0] - coordinates[1][0],
-        coordinates[3][1] - coordinates[1][1],
-        coordinates[3][2] - coordinates[1][2]);
-
-    volume += side3 % (side1 * side2)  / 6;
-
+    volume+=v_tet_volume(4,tet_coords[t]);
   }
 
   return (double)volume;
-
 }
 
 
