@@ -28,6 +28,10 @@
 #include "V_GaussIntegration.hpp"
 #include <memory.h>
 
+static const double one_third = 1.0/3.0;
+static const double one_fourth = 1.0/4.0;
+static const double fourninths= 4.0/9.0;
+
 //! the average volume of a tet
 static double v_tet_size = 0;
 C_FUNC_DEF double v_tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
@@ -910,6 +914,135 @@ C_FUNC_DEF double v_tet_squish_index( int /*num_nodes*/, double coordinates[][3]
 }
 
 
+static double TET15_node_local_coord[15][3] =
+{
+  {0,0,0},
+  {1.0,0,0},
+  {0,1.0,0},
+  {0,0,1.0},
+  {.5,0,0},
+  {.5,.5,0},
+  {0,.5,0},
+  {0,0,.5},
+  {.5,0,.5},
+  {0,.5,.5},
+  {one_third,one_third,0},
+  {one_third,0,one_third},
+  {one_third,one_third,one_third},
+  {0,one_third,one_third},
+  {one_fourth,one_fourth,one_fourth}
+};
+
+static void TET15_gradients_of_the_shape_functions_for_R_S_T(const double rst[3], double dhdr[15],double dhds[15],double dhdt[15])
+{
+  dhdr[0] = -1.0;
+  dhdr[1] = 1.0;
+  dhdr[2] = 0.0;
+  dhdr[3] = 0.0;
+  dhdr[4] = 4.0*(1.0-2.0*rst[0]-rst[1]-rst[2]);
+  dhdr[5] = 4.0*rst[1];
+  dhdr[6] = -4.0*rst[1];
+  dhdr[7] = -4.0*rst[2];
+  dhdr[8] = 4.0*rst[2];
+  dhdr[9] = 0.0;
+  dhdr[11] = 27.0*(rst[1]-2.0*rst[0]*rst[1]-rst[1]*rst[1]-rst[1]*rst[2]);
+  dhdr[14] = 27.0*(rst[2]-2.0*rst[0]*rst[2]-rst[1]*rst[2]-rst[2]*rst[2]) ;
+  dhdr[12] = 27.0*rst[1]*rst[2];
+  dhdr[13] = -27.0*rst[1]*rst[2];
+  dhdr[10] = 256.0*(rst[1]*rst[2]-2.0*rst[0]*rst[1]*rst[2]-rst[1]*rst[1]*rst[2]-rst[1]*rst[2]*rst[2]);
+
+//                     dh/ds;
+
+  dhds[0] = -1.0;
+  dhds[1] = 0.0;
+  dhds[2] = 1.0;
+  dhds[3] = 0.0;
+  dhds[4] = -4.0*rst[0];
+  dhds[5] = 4.0*rst[0];
+  dhds[6] = 4.0*(1.0-rst[0]-2.0*rst[1]-rst[2]);
+  dhds[7] = -4.0*rst[2];
+  dhds[8] = 0.0;
+  dhds[9] = 4.0*rst[2];
+  dhds[11] = 27.0*(rst[0]-rst[0]*rst[0]-2.0*rst[0]*rst[1]-rst[0]*rst[2]);
+  dhds[14] = -27.0*rst[0]*rst[2];
+  dhds[12] = 27.0*rst[0]*rst[2];
+  dhds[13] = 27.0*(rst[2]-rst[0]*rst[2]-2.0*rst[1]*rst[2]-rst[2]*rst[2]);
+  dhds[10] = 256.0*(rst[0]*rst[2]-rst[0]*rst[0]*rst[2]-2.0*rst[0]*rst[1]*rst[2]-rst[0]*rst[2]*rst[2]);
+
+//                    dh/dt;
+
+  dhdt[0] = -1.0;
+  dhdt[1] = 0.0;
+  dhdt[2] = 0.0;
+  dhdt[3] = 1.0;
+  dhdt[4] = -4.0*rst[0];
+  dhdt[5] = 0.0;
+  dhdt[6] = -4.0*rst[1];
+  dhdt[7] = 4.0*(1.0-rst[0]-rst[1]-2.0*rst[2]);
+  dhdt[8] = 4.0*rst[0];
+  dhdt[9] = 4.0*rst[1];
+  dhdt[11] = -27.0*rst[0]*rst[1];
+  dhdt[14] = 27.0*(rst[0]-rst[0]*rst[0]-rst[0]*rst[1]-2.0*rst[0]*rst[2]);
+  dhdt[12] = 27.0*rst[0]*rst[1];
+  dhdt[13] = 27.0*(rst[1]-rst[0]*rst[1]-rst[1]*rst[1]-2.0*rst[1]*rst[2]);
+  dhdt[10] = 256.0*(rst[0]*rst[1]-rst[0]*rst[0]*rst[1]-rst[0]*rst[1]*rst[1]-2.0*rst[0]*rst[1]*rst[2]);
+
+// ----------------------------------------------;
+ // ADD CONTRIBUTIONS OF NODES 5-15 TO NODES 1-14;
+// ----------------------------------------------;
+
+ //                      dh/dr;
+
+  dhdr[11] =  dhdr[11] - 108.0*dhdr[10]/256.0;
+  dhdr[14] =  dhdr[14] - 108.0*dhdr[10]/256.0;
+  dhdr[12] =  dhdr[12] - 108.0*dhdr[10]/256.0;
+  dhdr[13] =  dhdr[13] - 108.0*dhdr[10]/256.0 ;
+  dhdr[4]   =  dhdr[4]  - fourninths*(dhdr[11]+dhdr[14]) - .25*dhdr[10];
+  dhdr[5]   =  dhdr[5]  - fourninths*(dhdr[11]+dhdr[12]) - .25*dhdr[10];
+  dhdr[6]   =  dhdr[6]  - fourninths*(dhdr[11]+dhdr[13]) - .25*dhdr[10];
+  dhdr[7]   =  dhdr[7]  - fourninths*(dhdr[14]+dhdr[13]) - .25*dhdr[10];
+  dhdr[8]   =  dhdr[8]  - fourninths*(dhdr[14]+dhdr[12]) - .25*dhdr[10];
+  dhdr[9]   =  dhdr[9]  - fourninths*(dhdr[12]+dhdr[13]) - .25*dhdr[10];
+  dhdr[0] =  dhdr[0] - .5*(dhdr[4]+dhdr[6]+dhdr[7])- one_third*(dhdr[11]+dhdr[14]+dhdr[13]) - .25*dhdr[10];
+  dhdr[1] =  dhdr[1] - .5*(dhdr[4]+dhdr[5]+dhdr[8])- one_third*(dhdr[11]+dhdr[14]+dhdr[12]) - .25*dhdr[10];
+  dhdr[2] =  dhdr[2] - .5*(dhdr[5]+dhdr[6]+dhdr[9])- one_third*(dhdr[11]+dhdr[12]+dhdr[13]) - .25*dhdr[10];
+  dhdr[3] =  dhdr[3] - .5*(dhdr[7]+dhdr[8]+dhdr[9])- one_third*(dhdr[14]+dhdr[12]+dhdr[13]) - .25*dhdr[10];
+
+//                      dh/ds;
+
+  dhds[11] =  dhds[11] - 108.0*dhds[10]/256.0;
+  dhds[14] =  dhds[14] - 108.0*dhds[10]/256.0;
+  dhds[12] =  dhds[12] - 108.0*dhds[10]/256.0;
+  dhds[13] =  dhds[13] - 108.0*dhds[10]/256.0;
+  dhds[4]   =  dhds[4] - fourninths*(dhds[11]+dhds[14]) - .25*dhds[10];
+  dhds[5]   =  dhds[5] - fourninths*(dhds[11]+dhds[12]) - .25*dhds[10];
+  dhds[6]   =  dhds[6] - fourninths*(dhds[11]+dhds[13]) - .25*dhds[10];
+  dhds[7]   =  dhds[7] - fourninths*(dhds[14]+dhds[13]) - .25*dhds[10];
+  dhds[8]   =  dhds[8] - fourninths*(dhds[14]+dhds[12]) - .25*dhds[10];
+  dhds[9]   =  dhds[9] - fourninths*(dhds[12]+dhds[13]) - .25*dhds[10];
+  dhds[0] =  dhds[0] - .5*(dhds[4]+dhds[6]+dhds[7])- one_third*(dhds[11]+dhds[14]+dhds[13]) - .25*dhds[10];
+  dhds[1] =  dhds[1] - .5*(dhds[4]+dhds[5]+dhds[8])- one_third*(dhds[11]+dhds[14]+dhds[12]) - .25*dhds[10];
+  dhds[2] =  dhds[2] - .5*(dhds[5]+dhds[6]+dhds[9])- one_third*(dhds[11]+dhds[12]+dhds[13]) - .25*dhds[10];
+  dhds[3] =  dhds[3] - .5*(dhds[7]+dhds[8]+dhds[9])- one_third*(dhds[14]+dhds[12]+dhds[13]) - .25*dhds[10];
+
+ //                      dh/dt;
+
+  dhdt[11] =  dhdt[11] - 108.0*dhdt[10]/256.0;
+  dhdt[14] =  dhdt[14] - 108.0*dhdt[10]/256.0;
+  dhdt[12] =  dhdt[12] - 108.0*dhdt[10]/256.0;
+  dhdt[13] =  dhdt[13] - 108.0*dhdt[10]/256.0 ;
+  dhdt[4]   =  dhdt[4] - fourninths*(dhdt[11]+dhdt[14]) - .25*dhdt[10];
+  dhdt[5]   =  dhdt[5] - fourninths*(dhdt[11]+dhdt[12]) - .25*dhdt[10];
+  dhdt[6]   =  dhdt[6] - fourninths*(dhdt[11]+dhdt[13]) - .25*dhdt[10];
+  dhdt[7]   =  dhdt[7] - fourninths*(dhdt[14]+dhdt[13]) - .25*dhdt[10];
+  dhdt[8]   =  dhdt[8] - fourninths*(dhdt[14]+dhdt[12]) - .25*dhdt[10];
+  dhdt[9]   =  dhdt[9] - fourninths*(dhdt[12]+dhdt[13]) - .25*dhdt[10];
+  dhdt[0] =  dhdt[0] - .5*(dhdt[4]+dhdt[6]+dhdt[7])- one_third*(dhdt[11]+dhdt[14]+dhdt[13]) - .25*dhdt[10];
+  dhdt[1] =  dhdt[1] - .5*(dhdt[4]+dhdt[5]+dhdt[8])- one_third*(dhdt[11]+dhdt[14]+dhdt[12]) - .25*dhdt[10];
+  dhdt[2] =  dhdt[2] - .5*(dhdt[5]+dhdt[6]+dhdt[9])- one_third*(dhdt[11]+dhdt[12]+dhdt[13]) - .25*dhdt[10];
+  dhdt[3] =  dhdt[3] - .5*(dhdt[7]+dhdt[8]+dhdt[9])- one_third*(dhdt[14]+dhdt[12]+dhdt[13]) - .25*dhdt[10];
+}
+
 
 /*!
   the volume of a tet
@@ -995,25 +1128,55 @@ C_FUNC_DEF double v_tet_condition( int /*num_nodes*/, double coordinates[][3] )
 
   TODO
 */
-C_FUNC_DEF double v_tet_jacobian( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_tet_jacobian( int num_nodes, double coordinates[][3] )
 {
-  VerdictVector side0, side2, side3;
+  if(num_nodes == 15)
+  {
+    double dhdr[15];
+    double dhds[15];
+    double dhdt[15];
+    double min_determinant = VERDICT_DBL_MAX;
 
-  side0.set( coordinates[1][0] - coordinates[0][0],
-             coordinates[1][1] - coordinates[0][1],
-             coordinates[1][2] - coordinates[0][2] );
+    for(int i=0; i<15; i++)
+    {
+      TET15_gradients_of_the_shape_functions_for_R_S_T(TET15_node_local_coord[i], dhdr, dhds, dhdt);
+      double jacobian[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
 
-  side2.set( coordinates[0][0] - coordinates[2][0],
-             coordinates[0][1] - coordinates[2][1],
-             coordinates[0][2] - coordinates[2][2] );
+      for(int j=0; j<15; j++)
+      {
+        jacobian[0][0]+=coordinates[j][0]*dhdr[j];
+        jacobian[0][1]+=coordinates[j][0]*dhds[j];
+        jacobian[0][2]+=coordinates[j][0]*dhdt[j];
+        jacobian[1][0]+=coordinates[j][1]*dhdr[j];
+        jacobian[1][1]+=coordinates[j][1]*dhds[j];
+        jacobian[1][2]+=coordinates[j][1]*dhdt[j];
+        jacobian[2][0]+=coordinates[j][2]*dhdr[j];
+        jacobian[2][1]+=coordinates[j][2]*dhds[j];
+        jacobian[2][2]+=coordinates[j][2]*dhdt[j];
+      }
+      double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
+      min_determinant = VERDICT_MIN(det, min_determinant);
+    }
+  }
+  else
+  {
+    VerdictVector side0, side2, side3;
 
-  side3.set( coordinates[3][0] - coordinates[0][0],
-             coordinates[3][1] - coordinates[0][1],
-             coordinates[3][2] - coordinates[0][2] );
+    side0.set( coordinates[1][0] - coordinates[0][0],
+               coordinates[1][1] - coordinates[0][1],
+               coordinates[1][2] - coordinates[0][2] );
+
+    side2.set( coordinates[0][0] - coordinates[2][0],
+               coordinates[0][1] - coordinates[2][1],
+               coordinates[0][2] - coordinates[2][2] );
+
+    side3.set( coordinates[3][0] - coordinates[0][0],
+               coordinates[3][1] - coordinates[0][1],
+               coordinates[3][2] - coordinates[0][2] );
 
 
-  return (double)(side3 % (side2 * side0));
-
+    return (double)(side3 % (side2 * side0));
+  }
 }
 
 
@@ -1117,9 +1280,11 @@ C_FUNC_DEF double v_tet_distortion( int num_nodes, double coordinates[][3] )
       // straight edge tets are the target shape for tet
       return 1.0;
 
-   else if (num_nodes ==10)
+   else if (num_nodes >=10)
       //use four integration points for quadratic tet
       number_of_gauss_points = 4;
+
+   num_nodes = 10;
 
    int number_dims = 3;
    int total_number_of_gauss_points = number_of_gauss_points;
@@ -1545,5 +1710,9 @@ C_FUNC_DEF void v_tet_quality( int num_nodes, double coordinates[][3],
     metric_vals->equiangle_skew = (double) VERDICT_MAX( metric_vals->equiangle_skew, -VERDICT_DBL_MAX );
   }
 
+  if(metrics_request_flag & V_TET_JACOBIAN && num_nodes == 15)
+  {
+    metric_vals->jacobian = v_tet_jacobian(num_nodes, coordinates);
+  }
 
 }
