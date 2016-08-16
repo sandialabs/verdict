@@ -35,6 +35,8 @@ void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[]
                           double quad1[][3], double quad2[][3], double quad3[][3]);
 
 
+static const double one_third = 1.0/3.0;
+
 /*
    the wedge element
 
@@ -50,6 +52,117 @@ void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[]
    3         1
 
  */
+
+
+
+
+
+static double WEDGE21_node_local_coord[21][3] =
+{
+  {0,0,-1}, {1.0,0,-1}, {0,1.0,-1}, {0,0,1.0}, {1.0,0,1.0}, {0,1.0,1.0},
+  {0.5,0,-1}, {0.5,0.5,-1}, {0,0.5,-1},
+  {0.0,0.0,0}, {1.0,0,0}, {0,1.0,0},
+  {0.5,0,1.0}, {0.5,0.5,1.0}, {0,0.5,1.0},
+  {one_third,one_third,0}, {one_third,one_third,-1}, {one_third,one_third,1.0},
+  {0.5,0.5,0}, {0,0.5,0}, {0.5,0,0}
+};
+
+static void WEDGE21_gradients_of_the_shape_functions_for_RST(const double rst[3], double dhdr[21],double dhds[21],double dhdt[21])
+{
+  double RSM = 1.0 - rst[0] - rst[1];
+  double RR = rst[0]*rst[0];
+  double RS = rst[0]*rst[1];
+  double SS = rst[1]*rst[1];
+  double TP = 1.0 + rst[2];
+  double TM = 1.0 - rst[2];
+  double T2P = 1.0 + 2.0*rst[2];
+  double T2M = 1.0 - 2.0*rst[2];
+
+  dhdr[0]  = -0.5*rst[2]*TM*(4.0*rst[0] + 7.0*rst[1] - 3.0 - 6.0*RS - 3.0*SS);
+  dhds[0]  = -0.5*rst[2]*TM*(7.0*rst[0] + 4.0*rst[1] - 3.0 - 6.0*RS - 3.0*RR);
+  dhdt[0]  = -0.5*T2M*RSM*(1.0 - 2.0*(rst[0]+rst[1]) + 3.0*RS);
+
+  dhdr[1]  = -0.5*rst[2]*TM*(4.0*rst[0] - 1.0 + 3.0*rst[1] - 6.0*RS - 3.0*SS);
+  dhds[1]  = -0.5*rst[2]*TM*(3.0*rst[0] - 6.0*RS - 3.0*RR);
+  dhdt[1]  = -0.5*T2M*(rst[0] - 2.0*(RSM*rst[0] + RS) + 3.0*RSM*RS);
+
+  dhdr[2]  = -0.5*rst[2]*TM*(3.0*rst[1] - 6.0*RS - 3.0*SS);
+  dhds[2]  = -0.5*rst[2]*TM*(4.0*rst[1] - 1.0 + 3.0*rst[0] - 6.0*RS - 3.0*RR);
+  dhdt[2]  = -0.5*T2M*(rst[1] - 2.0*(RSM*rst[1] + RS) + 3.0*RSM*RS);
+
+  dhdr[3]  =  0.5*rst[2]*TP*(4.0*rst[0] + 7.0*rst[1] - 3.0 - 6.0*RS - 3.0*SS);
+  dhds[3]  =  0.5*rst[2]*TP*(7.0*rst[0] + 4.0*rst[1] - 3.0 - 6.0*RS - 3.0*RR);
+  dhdt[3]  =  0.5*T2P*RSM*(1.0 - 2.0*(rst[0]+rst[1]) + 3.0*RS);
+
+  dhdr[4]  =  0.5*rst[2]*TP*(4.0*rst[0] - 1.0 + 3.0*rst[1] - 6.0*RS - 3.0*SS);
+  dhds[4]  =  0.5*rst[2]*TP*(3.0*rst[0] - 6.0*RS - 3.0*RR);
+  dhdt[4]  =  0.5*T2P*(rst[0] - 2.0*(RSM*rst[0] + RS) + 3.0*RSM*RS);
+
+  dhdr[5]  =  0.5*rst[2]*TP*(3.0*rst[1] - 6.0*RS - 3.0*SS);
+  dhds[5]  =  0.5*rst[2]*TP*(4.0*rst[1] - 1.0 + 3.0*rst[0] - 6.0*RS - 3.0*RR);
+  dhdt[5]  =  0.5*T2P*(rst[1] - 2.0*(RSM*rst[1] + RS) + 3.0*RSM*RS);
+
+  dhdr[6]  = -0.5*rst[2]*TM*(4.0 - 8.0*rst[0] - 16.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[6]  = -0.5*rst[2]*TM*(-16.0*rst[0] + 12.0*RR + 24.0*RS);
+  dhdt[6]  = -0.5*T2M*RSM*(4.0*rst[0] - 12.0*RS);
+
+  dhdr[7]  = -0.5*rst[2]*TM*(-8.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[7]  = -0.5*rst[2]*TM*(-8.0*rst[0] + 12.0*RR + 24.0*RS);
+  dhdt[7]  = -0.5*T2M*(4.0*RS - 12.0*RSM*RS);
+
+  dhdr[8]  = -0.5*rst[2]*TM*(-16.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[8]  = -0.5*rst[2]*TM*(4.0 - 16.0*rst[0] - 8.0*rst[1] + 12.0*RR + 24.0*RS);
+  dhdt[8]  = -0.5*T2M*RSM*(4.0*rst[1] - 12.0*RS);
+
+  dhdr[12]  =  0.5*rst[2]*TP*(4.0 - 8.0*rst[0] - 16.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[12]  =  0.5*rst[2]*TP*(-16.0*rst[0] + 12.0*RR + 24.0*RS);
+  dhdt[12]  =  0.5*T2P*RSM*(4.0*rst[0] - 12.0*RS);
+
+  dhdr[13]  =  0.5*rst[2]*TP*(-8.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[13]  =  0.5*rst[2]*TP*(-8.0*rst[0] + 12.0*RR + 24.0*RS);
+  dhdt[13]  =  0.5*T2P*(4.0*RS - 12.0*RSM*RS);
+
+  dhdr[14]  =  0.5*rst[2]*TP*(-16.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[14]  =  0.5*rst[2]*TP*(4.0 - 16.0*rst[0] - 8.0*rst[1] + 12.0*RR + 24.0*RS);
+  dhdt[14]  =  0.5*T2P*RSM*(4.0*rst[1] - 12.0*RS);
+
+  dhdr[9]  =  TP*TM*(4.0*rst[0] + 7.0*rst[1] - 3.0 - 6.0*RS - 3.0*SS);
+  dhds[9]  =  TP*TM*(7.0*rst[0] + 4.0*rst[1] - 3.0 - 6.0*RS - 3.0*RR);
+  dhdt[9]  = -2.0*rst[2]*RSM*(1.0 - 2.0*(rst[0]+rst[1]) + 3.0*RS);
+
+  dhdr[10]  =  TP*TM*(4.0*rst[0] - 1.0 + 3.0*rst[1] - 6.0*RS - 3.0*SS);
+  dhds[10]  =  TP*TM*(3.0*rst[0] - 6.0*RS - 3.0*RR);
+  dhdt[10]  = -2.0*rst[2]*(rst[0] - 2.0*(RSM*rst[0] + RS) + 3.0*RSM*RS);
+
+  dhdr[11]  =  TP*TM*(3.0*rst[1] - 6.0*RS - 3.0*SS);
+  dhds[11]  =  TP*TM*(4.0*rst[1] - 1.0 + 3.0*rst[0] - 6.0*RS - 3.0*RR);
+  dhdt[11]  = -2.0*rst[2]*(rst[1] - 2.0*(RSM*rst[1] + RS) + 3.0*RSM*RS);
+
+  dhdr[16]  = -0.5*27.0*rst[2]*TM*(rst[1] - 2.0*RS - SS);
+  dhds[16]  = -0.5*27.0*rst[2]*TM*(rst[0] - RR - 2.0*RS);
+  dhdt[16]  = -0.5*27.0*T2M*RSM*RS;
+
+  dhdr[17]  =  0.5*27.0*rst[2]*TP*(rst[1] - 2.0*RS - SS);
+  dhds[17]  =  0.5*27.0*rst[2]*TP*(rst[0] - RR - 2.0*RS);
+  dhdt[17]  =  0.5*27.0*T2P*RSM*RS;
+
+  dhdr[20]  =  TP*TM*(4.0 - 8.0*rst[0] - 16.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[20]  =  TP*TM*(-16.0*rst[0] + 12.0*RR + 24.0*RS);
+  dhdt[20]  = -2.0*rst[2]*RSM*(4.0*rst[0] - 12.0*RS);
+
+  dhdr[18]  =  TP*TM*(-8.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[18]  =  TP*TM*(-8.0*rst[0] + 12.0*RR + 24.0*RS);
+  dhdt[18]  = -2.0*rst[2]*(4.0*RS - 12.0*RSM*RS);
+
+  dhdr[19]  =  TP*TM*(-16.0*rst[1] + 24.0*RS + 12.0*SS);
+  dhds[19]  =  TP*TM*(4.0 - 16.0*rst[0] - 8.0*rst[1] + 12.0*RR + 24.0*RS);
+  dhdt[19]  = -2.0*rst[2]*RSM*(4.0*rst[1] - 12.0*RS);
+
+  dhdr[15]  =  27.0*TM*TP*(rst[1] - 2.0*RS - SS);
+  dhds[15]  =  27.0*TM*TP*(rst[0] - RR - 2.0*RS);
+  dhdt[15]  = -2.0*27.0*rst[2]*RSM*RS;
+}
+
 
 C_FUNC_DEF double v_wedge_equiangle_skew( int num_nodes, double coordinates[][3] )
 {
@@ -312,7 +425,6 @@ C_FUNC_DEF void v_wedge_quality( int num_nodes, double coordinates[][3],
     metric_vals->condition = v_wedge_condition(num_nodes, coordinates);
   if(metrics_request_flag & V_WEDGE_EQUIANGLE_SKEW)
     metric_vals->equiangle_skew = v_wedge_equiangle_skew(num_nodes, coordinates);
-
 }
 
 
@@ -593,111 +705,142 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
  Verdict Function : v_wedge_jacobian
  */
 
-C_FUNC_DEF double v_wedge_jacobian( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
 {
-  double min_jacobian = 0, current_jacobian = 0;
-  VerdictVector vec1,vec2,vec3;
+  if(num_nodes == 21)
+  {
+    double dhdr[21];
+    double dhds[21];
+    double dhdt[21];
+    double min_determinant = VERDICT_DBL_MAX;
 
-  // Node 0
-  vec1.set( coordinates[1][0] - coordinates[0][0],
-      coordinates[1][1] - coordinates[0][1],
-      coordinates[1][2] - coordinates[0][2] );
+    for(int i=0; i<15; i++)
+    {
+      WEDGE21_gradients_of_the_shape_functions_for_RST(WEDGE21_node_local_coord[i], dhdr, dhds, dhdt);
+      double jacobian[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
 
-  vec2.set( coordinates[3][0] - coordinates[0][0],
-      coordinates[3][1] - coordinates[0][1],
-      coordinates[3][2] - coordinates[0][2] );
+      for(int j=0; j<21; j++)
+      {
+        jacobian[0][0]+=coordinates[j][0]*dhdr[j];
+        jacobian[0][1]+=coordinates[j][0]*dhds[j];
+        jacobian[0][2]+=coordinates[j][0]*dhdt[j];
+        jacobian[1][0]+=coordinates[j][1]*dhdr[j];
+        jacobian[1][1]+=coordinates[j][1]*dhds[j];
+        jacobian[1][2]+=coordinates[j][1]*dhdt[j];
+        jacobian[2][0]+=coordinates[j][2]*dhdr[j];
+        jacobian[2][1]+=coordinates[j][2]*dhds[j];
+        jacobian[2][2]+=coordinates[j][2]*dhdt[j];
+      }
+      double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
+      min_determinant = VERDICT_MIN(det, min_determinant);
+    }
+    return min_determinant;
+  }
+  else
+  {
+    double min_jacobian = 0, current_jacobian = 0;
+    VerdictVector vec1,vec2,vec3;
 
-  vec3.set( coordinates[2][0] - coordinates[0][0],
-      coordinates[2][1] - coordinates[0][1],
-      coordinates[2][2] - coordinates[0][2] );
+    // Node 0
+    vec1.set( coordinates[1][0] - coordinates[0][0],
+        coordinates[1][1] - coordinates[0][1],
+        coordinates[1][2] - coordinates[0][2] );
 
-  current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = current_jacobian;
+    vec2.set( coordinates[3][0] - coordinates[0][0],
+        coordinates[3][1] - coordinates[0][1],
+        coordinates[3][2] - coordinates[0][2] );
 
-  //node 1
-  vec1.set( coordinates[2][0] - coordinates[1][0],
-      coordinates[2][1] - coordinates[1][1],
-      coordinates[2][2] - coordinates[1][2] );
+    vec3.set( coordinates[2][0] - coordinates[0][0],
+        coordinates[2][1] - coordinates[0][1],
+        coordinates[2][2] - coordinates[0][2] );
 
-  vec2.set( coordinates[4][0] - coordinates[1][0],
-      coordinates[4][1] - coordinates[1][1],
-      coordinates[4][2] - coordinates[1][2] );
+    current_jacobian = vec2 % (vec1 * vec3);
+    min_jacobian = current_jacobian;
 
-  vec3.set( coordinates[0][0] - coordinates[1][0],
-      coordinates[0][1] - coordinates[1][1],
-      coordinates[0][2] - coordinates[1][2] );
+    //node 1
+    vec1.set( coordinates[2][0] - coordinates[1][0],
+        coordinates[2][1] - coordinates[1][1],
+        coordinates[2][2] - coordinates[1][2] );
 
-  current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    vec2.set( coordinates[4][0] - coordinates[1][0],
+        coordinates[4][1] - coordinates[1][1],
+        coordinates[4][2] - coordinates[1][2] );
 
-  //node 2
-  vec1.set( coordinates[0][0] - coordinates[2][0],
-      coordinates[0][1] - coordinates[2][1],
-      coordinates[0][2] - coordinates[2][2] );
+    vec3.set( coordinates[0][0] - coordinates[1][0],
+        coordinates[0][1] - coordinates[1][1],
+        coordinates[0][2] - coordinates[1][2] );
 
-  vec2.set( coordinates[5][0] - coordinates[2][0],
-      coordinates[5][1] - coordinates[2][1],
-      coordinates[5][2] - coordinates[2][2] );
+    current_jacobian = vec2 % (vec1 * vec3);
+    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
 
-  vec3.set( coordinates[1][0] - coordinates[2][0],
-      coordinates[1][1] - coordinates[2][1],
-      coordinates[1][2] - coordinates[2][2] );
+    //node 2
+    vec1.set( coordinates[0][0] - coordinates[2][0],
+        coordinates[0][1] - coordinates[2][1],
+        coordinates[0][2] - coordinates[2][2] );
 
-  current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    vec2.set( coordinates[5][0] - coordinates[2][0],
+        coordinates[5][1] - coordinates[2][1],
+        coordinates[5][2] - coordinates[2][2] );
 
-  //node 3
-  vec1.set( coordinates[0][0] - coordinates[3][0],
-      coordinates[0][1] - coordinates[3][1],
-      coordinates[0][2] - coordinates[3][2] );
+    vec3.set( coordinates[1][0] - coordinates[2][0],
+        coordinates[1][1] - coordinates[2][1],
+        coordinates[1][2] - coordinates[2][2] );
 
-  vec2.set( coordinates[4][0] - coordinates[3][0],
-      coordinates[4][1] - coordinates[3][1],
-      coordinates[4][2] - coordinates[3][2] );
+    current_jacobian = vec2 % (vec1 * vec3);
+    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
 
-  vec3.set( coordinates[5][0] - coordinates[3][0],
-      coordinates[5][1] - coordinates[3][1],
-      coordinates[5][2] - coordinates[3][2] );
+    //node 3
+    vec1.set( coordinates[0][0] - coordinates[3][0],
+        coordinates[0][1] - coordinates[3][1],
+        coordinates[0][2] - coordinates[3][2] );
 
-  current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    vec2.set( coordinates[4][0] - coordinates[3][0],
+        coordinates[4][1] - coordinates[3][1],
+        coordinates[4][2] - coordinates[3][2] );
 
-  //node 4
-  vec1.set( coordinates[1][0] - coordinates[4][0],
-      coordinates[1][1] - coordinates[4][1],
-      coordinates[1][2] - coordinates[4][2] );
+    vec3.set( coordinates[5][0] - coordinates[3][0],
+        coordinates[5][1] - coordinates[3][1],
+        coordinates[5][2] - coordinates[3][2] );
 
-  vec2.set( coordinates[5][0] - coordinates[4][0],
-      coordinates[5][1] - coordinates[4][1],
-      coordinates[5][2] - coordinates[4][2] );
+    current_jacobian = vec2 % (vec1 * vec3);
+    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
 
-  vec3.set( coordinates[3][0] - coordinates[4][0],
-      coordinates[3][1] - coordinates[4][1],
-      coordinates[3][2] - coordinates[4][2] );
+    //node 4
+    vec1.set( coordinates[1][0] - coordinates[4][0],
+        coordinates[1][1] - coordinates[4][1],
+        coordinates[1][2] - coordinates[4][2] );
 
-  current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    vec2.set( coordinates[5][0] - coordinates[4][0],
+        coordinates[5][1] - coordinates[4][1],
+        coordinates[5][2] - coordinates[4][2] );
 
-  //node 5
-  vec1.set( coordinates[3][0] - coordinates[5][0],
-      coordinates[3][1] - coordinates[5][1],
-      coordinates[3][2] - coordinates[5][2] );
+    vec3.set( coordinates[3][0] - coordinates[4][0],
+        coordinates[3][1] - coordinates[4][1],
+        coordinates[3][2] - coordinates[4][2] );
 
-  vec2.set( coordinates[4][0] - coordinates[5][0],
-      coordinates[4][1] - coordinates[5][1],
-      coordinates[4][2] - coordinates[5][2] );
+    current_jacobian = vec2 % (vec1 * vec3);
+    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
 
-  vec3.set( coordinates[2][0] - coordinates[5][0],
-      coordinates[2][1] - coordinates[5][1],
-      coordinates[2][2] - coordinates[5][2] );
+    //node 5
+    vec1.set( coordinates[3][0] - coordinates[5][0],
+        coordinates[3][1] - coordinates[5][1],
+        coordinates[3][2] - coordinates[5][2] );
 
-  current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    vec2.set( coordinates[4][0] - coordinates[5][0],
+        coordinates[4][1] - coordinates[5][1],
+        coordinates[4][2] - coordinates[5][2] );
 
-  if ( min_jacobian > 0 )
-    return (double) VERDICT_MIN( min_jacobian, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( min_jacobian, -VERDICT_DBL_MAX );
+    vec3.set( coordinates[2][0] - coordinates[5][0],
+        coordinates[2][1] - coordinates[5][1],
+        coordinates[2][2] - coordinates[5][2] );
 
+    current_jacobian = vec2 % (vec1 * vec3);
+    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+
+    if ( min_jacobian > 0 )
+      return (double) VERDICT_MIN( min_jacobian, VERDICT_DBL_MAX );
+    return (double) VERDICT_MAX( min_jacobian, -VERDICT_DBL_MAX );
+  }
 }
 
 /* distortion is a measure of how well a particular wedge element maps to a
