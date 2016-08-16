@@ -1157,6 +1157,7 @@ C_FUNC_DEF double v_tet_jacobian( int num_nodes, double coordinates[][3] )
       double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
       min_determinant = VERDICT_MIN(det, min_determinant);
     }
+    return min_determinant;
   }
   else
   {
