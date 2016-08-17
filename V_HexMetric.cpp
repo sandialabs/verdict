@@ -56,6 +56,160 @@ static int v_hex_get_weight( VerdictVector &v1,
   return 1;
 }
 
+
+static double HEX27_node_local_coord[27][3] =
+{
+  {-1,-1,-1},
+  {1,-1,-1},
+  {1,1,-1},
+  {-1,1,-1},
+  {-1,-1,1},
+  {1,-1,1},
+  {1,1,1},
+  {-1,1,1},
+  {0,-1,-1},
+  {1,0,-1},
+  {0,1,-1},
+  {-1,0,-1},
+  {-1,-1,0},
+  {1,-1,0},
+  {1,1,0},
+  {-1,1,0},
+  {0,-1,1},
+  {1,0,1},
+  {0,1,1},
+  {-1,0,1},
+  {0,0,0},
+  {0,0,-1},
+  {0,0,1},
+  {-1,0,0},
+  {1,0,0},
+  {0,-1,0},
+  {0,1,0}
+};
+
+static void HEX27_gradients_of_the_shape_functions_for_RST(const double rst[3], double dhdr[27],double dhds[27],double dhdt[27])
+{
+  double g1r = -0.5 * rst[0] * (1 - rst[0]);
+  double g1s = -0.5 * rst[1] * (1 - rst[1]);
+  double g1t = -0.5 * rst[2] * (1 - rst[2]);
+
+  double g2r = (1 + rst[0])*(1 - rst[0]);
+  double g2s = (1 + rst[1])*(1 - rst[1]);
+  double g2t = (1 + rst[2])*(1 - rst[2]);
+
+  double g3r = 0.5 * rst[0] * (1 + rst[0]);
+  double g3s = 0.5 * rst[1] * (1 + rst[1]);
+  double g3t = 0.5 * rst[2] * (1 + rst[2]);
+
+  double g1r_r = rst[0] - 0.5;
+  double g1s_s = rst[1] - 0.5;
+  double g1t_t = rst[2] - 0.5;
+
+  double g2r_r = -2*rst[0];
+  double g2s_s = -2*rst[1];
+  double g2t_t = -2*rst[2];
+
+  double g3r_r = rst[0] + 0.5;
+  double g3s_s = rst[1] + 0.5;
+  double g3t_t = rst[2] + 0.5;
+
+  //r-derivatives
+  dhdr[0] = g1r_r * g1s * g1t;
+  dhdr[1] = g3r_r * g1s * g1t;
+  dhdr[2] = g3r_r * g3s * g1t;
+  dhdr[3] = g1r_r * g3s * g1t;
+  dhdr[4] = g1r_r * g1s * g3t;
+  dhdr[5] = g3r_r * g1s * g3t;
+  dhdr[6] = g3r_r * g3s * g3t;
+  dhdr[7] = g1r_r * g3s * g3t;
+  dhdr[8] = g2r_r * g1s * g1t;
+  dhdr[9] = g3r_r * g2s * g1t;
+  dhdr[10]= g2r_r * g3s * g1t;
+  dhdr[11]= g1r_r * g2s * g1t;
+  dhdr[16]= g2r_r * g1s * g3t;
+  dhdr[17]= g3r_r * g2s * g3t;
+  dhdr[18]= g2r_r * g3s * g3t;
+  dhdr[19]= g1r_r * g2s * g3t;
+  dhdr[12]= g1r_r * g1s * g2t;
+  dhdr[13]= g3r_r * g1s * g2t;
+  dhdr[14]= g3r_r * g3s * g2t;
+  dhdr[15]= g1r_r * g3s * g2t;
+  dhdr[23]= g1r_r * g2s * g2t;
+  dhdr[24]= g3r_r * g2s * g2t;
+  dhdr[25]= g2r_r * g1s * g2t;
+  dhdr[26]= g2r_r * g3s * g2t;
+  dhdr[21]= g2r_r * g2s * g1t;
+  dhdr[22]= g2r_r * g2s * g3t;
+  dhdr[20]= g2r_r * g2s * g2t;
+
+  //s-derivatives
+  dhds[0] = g1r * g1s_s * g1t;
+  dhds[1] = g3r * g1s_s * g1t;
+  dhds[2] = g3r * g3s_s * g1t;
+  dhds[3] = g1r * g3s_s * g1t;
+  dhds[4] = g1r * g1s_s * g3t;
+  dhds[5] = g3r * g1s_s * g3t;
+  dhds[6] = g3r * g3s_s * g3t;
+  dhds[7] = g1r * g3s_s * g3t;
+  dhds[8] = g2r * g1s_s * g1t;
+  dhds[9] = g3r * g2s_s * g1t;
+  dhds[10] = g2r * g3s_s * g1t;
+  dhds[11] = g1r * g2s_s * g1t;
+  dhds[16] = g2r * g1s_s * g3t;
+  dhds[17] = g3r * g2s_s * g3t;
+  dhds[18] = g2r * g3s_s * g3t;
+  dhds[19] = g1r * g2s_s * g3t;
+  dhds[12] = g1r * g1s_s * g2t;
+  dhds[13] = g3r * g1s_s * g2t;
+  dhds[14] = g3r * g3s_s * g2t;
+  dhds[15] = g1r * g3s_s * g2t;
+  dhds[23] = g1r * g2s_s * g2t;
+  dhds[24] = g3r * g2s_s * g2t;
+  dhds[25] = g2r * g1s_s * g2t;
+  dhds[26] = g2r * g3s_s * g2t;
+  dhds[21] = g2r * g2s_s * g1t;
+  dhds[22] = g2r * g2s_s * g3t;
+  dhds[20] = g2r * g2s_s * g2t;
+
+  //t-derivatives
+  dhdt[0] = g1r * g1s * g1t_t;
+  dhdt[1] = g3r * g1s * g1t_t;
+  dhdt[2] = g3r * g3s * g1t_t;
+  dhdt[3] = g1r * g3s * g1t_t;
+  dhdt[4] = g1r * g1s * g3t_t;
+  dhdt[5] = g3r * g1s * g3t_t;
+  dhdt[6] = g3r * g3s * g3t_t;
+  dhdt[7] = g1r * g3s * g3t_t;
+  dhdt[8] = g2r * g1s * g1t_t;
+  dhdt[9] = g3r * g2s * g1t_t;
+  dhdt[10] = g2r * g3s * g1t_t;
+  dhdt[11] = g1r * g2s * g1t_t;
+  dhdt[16] = g2r * g1s * g3t_t;
+  dhdt[17] = g3r * g2s * g3t_t;
+  dhdt[18] = g2r * g3s * g3t_t;
+  dhdt[19] = g1r * g2s * g3t_t;
+  dhdt[12] = g1r * g1s * g2t_t;
+  dhdt[13] = g3r * g1s * g2t_t;
+  dhdt[14] = g3r * g3s * g2t_t;
+  dhdt[15] = g1r * g3s * g2t_t;
+  dhdt[23] = g1r * g2s * g2t_t;
+  dhdt[24] = g3r * g2s * g2t_t;
+  dhdt[25] = g2r * g1s * g2t_t;
+  dhdt[26] = g2r * g3s * g2t_t;
+  dhdt[21] = g2r * g2s * g1t_t;
+  dhdt[22] = g2r * g2s * g3t_t;
+  dhdt[20] = g2r * g2s * g2t_t;
+
+  for(int i=0; i<27; i++)
+  {
+    dhdr[i] *= 2;
+    dhds[i] *= 2;
+    dhdt[i] *= 2;
+  }
+}
+
+
 //! returns the average volume of a hex
 C_FUNC_DEF void v_set_hex_size( double size )
 {
@@ -1563,99 +1717,130 @@ C_FUNC_DEF double v_hex_condition( int /*num_nodes*/, double coordinates[][3] )
 
   Minimum pointwise volume of local map at 8 corners & center of hex
 */
-C_FUNC_DEF double v_hex_jacobian( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_hex_jacobian( int num_nodes, double coordinates[][3] )
 {
-  
-  VerdictVector node_pos[8];
-  make_hex_nodes ( coordinates, node_pos );
+  if(num_nodes == 27)
+  {
+    double dhdr[27];
+    double dhds[27];
+    double dhdt[27];
+    double min_determinant = VERDICT_DBL_MAX;
 
-  double jacobian = VERDICT_DBL_MAX;
-  double current_jacobian; 
-  VerdictVector xxi, xet, xze;
+    for(int i=0; i<27; i++)
+    {
+      HEX27_gradients_of_the_shape_functions_for_RST(HEX27_node_local_coord[i], dhdr, dhds, dhdt);
+      double jacobian[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
 
-  xxi = v_calc_hex_efg(1, node_pos );
-  xet = v_calc_hex_efg(2, node_pos );
-  xze = v_calc_hex_efg(3, node_pos );
+      for(int j=0; j<27; j++)
+      {
+        jacobian[0][0]+=coordinates[j][0]*dhdr[j];
+        jacobian[0][1]+=coordinates[j][0]*dhds[j];
+        jacobian[0][2]+=coordinates[j][0]*dhdt[j];
+        jacobian[1][0]+=coordinates[j][1]*dhdr[j];
+        jacobian[1][1]+=coordinates[j][1]*dhds[j];
+        jacobian[1][2]+=coordinates[j][1]*dhdt[j];
+        jacobian[2][0]+=coordinates[j][2]*dhdr[j];
+        jacobian[2][1]+=coordinates[j][2]*dhds[j];
+        jacobian[2][2]+=coordinates[j][2]*dhdt[j];
+      }
+      double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
+      min_determinant = VERDICT_MIN(det, min_determinant);
+    }
+    return min_determinant;
+  }
+  else
+  {
+    VerdictVector node_pos[8];
+    make_hex_nodes ( coordinates, node_pos );
+
+    double jacobian = VERDICT_DBL_MAX;
+    double current_jacobian;
+    VerdictVector xxi, xet, xze;
+
+    xxi = v_calc_hex_efg(1, node_pos );
+    xet = v_calc_hex_efg(2, node_pos );
+    xze = v_calc_hex_efg(3, node_pos );
 
 
-  current_jacobian = xxi % (xet * xze) / 64.0;
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    current_jacobian = xxi % (xet * xze) / 64.0;
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  // J(0,0,0):
+    // J(0,0,0):
 
-  xxi = node_pos[1] - node_pos[0];
-  xet = node_pos[3] - node_pos[0];
-  xze = node_pos[4] - node_pos[0];
+    xxi = node_pos[1] - node_pos[0];
+    xet = node_pos[3] - node_pos[0];
+    xze = node_pos[4] - node_pos[0];
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  // J(1,0,0):
-  
-  xxi = node_pos[2] - node_pos[1];
-  xet = node_pos[0] - node_pos[1];
-  xze = node_pos[5] - node_pos[1];
+    // J(1,0,0):
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    xxi = node_pos[2] - node_pos[1];
+    xet = node_pos[0] - node_pos[1];
+    xze = node_pos[5] - node_pos[1];
 
-  // J(1,1,0):
-  
-  xxi = node_pos[3] - node_pos[2];
-  xet = node_pos[1] - node_pos[2];
-  xze = node_pos[6] - node_pos[2];
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    // J(1,1,0):
 
-  // J(0,1,0):
-  
-  xxi = node_pos[0] - node_pos[3];
-  xet = node_pos[2] - node_pos[3];
-  xze = node_pos[7] - node_pos[3];
+    xxi = node_pos[3] - node_pos[2];
+    xet = node_pos[1] - node_pos[2];
+    xze = node_pos[6] - node_pos[2];
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  // J(0,0,1):
+    // J(0,1,0):
 
-  xxi = node_pos[7] - node_pos[4];
-  xet = node_pos[5] - node_pos[4];
-  xze = node_pos[0] - node_pos[4];
+    xxi = node_pos[0] - node_pos[3];
+    xet = node_pos[2] - node_pos[3];
+    xze = node_pos[7] - node_pos[3];
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  // J(1,0,1):
+    // J(0,0,1):
 
-  xxi = node_pos[4] - node_pos[5];
-  xet = node_pos[6] - node_pos[5];
-  xze = node_pos[1] - node_pos[5];
+    xxi = node_pos[7] - node_pos[4];
+    xet = node_pos[5] - node_pos[4];
+    xze = node_pos[0] - node_pos[4];
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  // J(1,1,1):
+    // J(1,0,1):
 
-  xxi = node_pos[5] - node_pos[6];
-  xet = node_pos[7] - node_pos[6];
-  xze = node_pos[2] - node_pos[6];
+    xxi = node_pos[4] - node_pos[5];
+    xet = node_pos[6] - node_pos[5];
+    xze = node_pos[1] - node_pos[5];
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  // J(0,1,1):
+    // J(1,1,1):
 
-  xxi = node_pos[6] - node_pos[7];
-  xet = node_pos[4] - node_pos[7];
-  xze = node_pos[3] - node_pos[7];
+    xxi = node_pos[5] - node_pos[6];
+    xet = node_pos[7] - node_pos[6];
+    xze = node_pos[2] - node_pos[6];
 
-  current_jacobian = xxi % (xet * xze);
-  if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
-  if ( jacobian > 0 )
-    return (double) VERDICT_MIN( jacobian, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( jacobian, -VERDICT_DBL_MAX );
+    // J(0,1,1):
+
+    xxi = node_pos[6] - node_pos[7];
+    xet = node_pos[4] - node_pos[7];
+    xze = node_pos[3] - node_pos[7];
+
+    current_jacobian = xxi % (xet * xze);
+    if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
+
+    if ( jacobian > 0 )
+      return (double) VERDICT_MIN( jacobian, VERDICT_DBL_MAX );
+    return (double) VERDICT_MAX( jacobian, -VERDICT_DBL_MAX );
+  }
 }
 
 /*!
@@ -3452,7 +3637,13 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
   if (metrics_request_flag & V_HEX_DISTORTION)
                 metric_vals->distortion = v_hex_distortion(num_nodes, coordinates);
 
-  
+
+  // compute jacobian for hex27
+  if(metrics_request_flag & V_HEX_JACOBIAN && num_nodes == 27)
+  {
+    metric_vals->jacobian = v_hex_jacobian(num_nodes, coordinates);
+  }
+
   //take care of any overflow problems
   //max_edge_ratio
   if ( metric_vals->max_edge_ratio > 0 )
