@@ -22,25 +22,17 @@ PURPOSE.  See the above copyright notice for more information.
 
 #include "verdict.h"
 #include "v_vector.h"
-#include <math.h>
+#include <cmath>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-using namespace std;
+#include <string>
+#include <sstream>
 
 
 #define MAX_NODES_PER_ELEMENT 27
 #define MAX_TESTS_PER_ELEMENT 20
 
 
-#ifdef VERDICT_USE_FLOAT
-#define VERDICT_SIGNIFICANT_FIG 7    // 7 significant figures for floats
-#else
-#define VERDICT_SIGNIFICANT_FIG 15   // 15 significant figures for doubles
-#endif
-
+#define VERDICT_SIGNIFICANT_FIG 5    // 7 significant figures for doubles
 
 struct test_case
 {
@@ -58,7 +50,6 @@ int main( )
 {
   // all test cases go here  
   test_case testcases[] = {
-/*
   {
   "edge calc 1",
   {v_edge_length, 0},
@@ -110,7 +101,7 @@ int main( )
   {2.5, 4.330127, 0}, 
   },
 
-  { 0,0,0,0,0,0,0}
+  { 10.825317,60,60,1.0,1.0,.00853333,1.0}
   },
     {
       "singular tri",
@@ -123,7 +114,7 @@ int main( )
         {0,0,0}, 
         {0.5,0.8660254037,0}, 
         {1,0,0} },
-      { 123, 1234, 1234, 1234, 1234, 1234, 1234, 1234, 1234,0}
+      { .433013, 1, 1, 1, 60, 60, .1875, 1, .1875,0}
     },
   {
   "simple quad",
@@ -135,7 +126,7 @@ int main( )
   {1,7,0}, 
   {0,7,0 } 
   }, 
-  { 1.3333333333333333333, 0 }
+  { 0, 0 }
   },
 
   {
@@ -155,7 +146,7 @@ int main( )
 
 
   }, 
-  { 1.34, .30, .20, .20, .23, 0,0, 0, 0, 0 , 0, 0, 0, 0, 0, 0}
+  { 1.42996, .09245, .745356, .008, 2.69258, .57735, 56.7891, 90, 2.30793, 1.11417 , .557086, .433289, .433289, .557086, .56268, 0}
   },
   {
   "tet test",
@@ -170,7 +161,7 @@ int main( )
  
   },
 
-  {0,0,0,0,0,0,0}
+  {166.66666,1.22474,1000,.839947,.0000302381,1,0}
   },
   {
   "hex test",
@@ -193,72 +184,65 @@ int main( )
   },
 
 
-  {0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0.34,0}
+  {0.24589,0.178458,0.813062,0.62097,0.689622,0.524594,1.27306,.477,0.77785,0.789785,0.524143,0.532186,.584798}
   },
 
-*/
     // keep this one last
     { 0, {0} , 0, {{0}} , {0} } };
 
 
-     
+
+  v_set_tri_size(1);
+  v_set_quad_size(1);
+  v_set_tet_size(1);
+  v_set_hex_size(1);
       
     
-  int i;
-  int j = 0;
-  double answer_from_lib;
-  double tolerance;
-//   double norm_answer_from_lib;
-   
-#define MAX_STR_LEN 30
-
-  char exponent[MAX_STR_LEN];
-  char *base_ptr;
-  int base;
   bool passed = true; // have all the tests performed so far passed?
 
-  cout.setf( ios::scientific, ios::floatfield );
-  cout.precision(VERDICT_SIGNIFICANT_FIG + 3 );
+  std::cout.setf( std::ios::scientific, std::ios::floatfield );
+  std::cout.precision(VERDICT_SIGNIFICANT_FIG);
 
-  cout << endl;
+  std::cout << std::endl;
 
    
   // loop through each test
-  for ( i = 0; testcases[i].testname != 0; i++ )
+  for (int i = 0; testcases[i].testname != 0; i++ )
     {
      
-    for ( j = 0;  testcases[i].function[j] != 0; j++ )
+    for (int j = 0;  testcases[i].function[j] != 0; j++ )
       {       
-      answer_from_lib = 
+      double answer_from_lib =
         (testcases[i].function[j])
         (testcases[i].num_nodes, testcases[i].coords);
        
-      sprintf(exponent, "%e", testcases[i].answer[j]);
-      base_ptr = strstr( exponent, "e" );
-       
-      base_ptr = &base_ptr[1];
+      std::stringstream expected;
+      expected.setf(std::ios::scientific, std::ios::floatfield);
+      expected.precision(VERDICT_SIGNIFICANT_FIG);
+      expected << testcases[i].answer[j];
 
-      base = atoi(base_ptr);
+      std::stringstream answer;
+      answer.setf(std::ios::scientific, std::ios::floatfield);
+      answer.precision(VERDICT_SIGNIFICANT_FIG);
+      answer << answer_from_lib;
 
-      tolerance = pow (10.0, - VERDICT_SIGNIFICANT_FIG ) * pow ( 10.0, base );
-
-      if ( fabs( answer_from_lib - testcases[i].answer[j] ) > tolerance )
+      if ( expected.str() != answer.str() )
         {
-        cout << endl;
-        cout << "Test case \"" << testcases[i].testname
-             << "\" #" << j+1 << " FAILED" << endl;
+        std::cout << std::endl;
+        std::cout << "Test case \"" << testcases[i].testname
+             << "\" #" << j+1 << " FAILED" << std::endl;
 
-        cout    << "answer calculated was    " 
-                << answer_from_lib << endl
+        std::cout    << "answer calculated was    "
+                << answer.str() << std::endl
                 << "answer expected was      " 
-                << testcases[i].answer[j] 
-                << endl << endl;
+                << expected.str()
+                << std::endl << std::endl;
         passed = false;
         }
       else
         {
-        cout << "Test case \"" << testcases[i].testname 
-             << "\" #" << j+1 << " passed" << endl;
+        std::cout << "Test case \"" << testcases[i].testname
+             << "\" #" << j+1 << " passed" << std::endl;
 //           << "answer calculated was    " 
 //                << answer_from_lib << endl
 //           << "answer expected was      " 
@@ -268,7 +252,7 @@ int main( )
       }
     }
 
-  cout << endl;
+  std::cout << std::endl;
 
   return passed ? 0 : 1;
 }
