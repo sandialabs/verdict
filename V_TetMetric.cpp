@@ -1276,7 +1276,7 @@ C_FUNC_DEF double v_tet_distortion( int num_nodes, double coordinates[][3] )
 
    double distortion = VERDICT_DBL_MAX;
    int   number_of_gauss_points=0;
-   if (num_nodes ==4)
+   if (num_nodes < 10)
       // for linear tet, the distortion is always 1 because
       // straight edge tets are the target shape for tet
       return 1.0;
