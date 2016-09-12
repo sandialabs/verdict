@@ -1848,10 +1848,49 @@ C_FUNC_DEF double v_hex_jacobian( int num_nodes, double coordinates[][3] )
 
   Minimum Jacobian divided by the lengths of the 3 edge vectors
 */
-C_FUNC_DEF double v_hex_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
 {
 
-  double jacobi, min_norm_jac = VERDICT_DBL_MAX;  
+  double jacobi, min_norm_jac = VERDICT_DBL_MAX;
+
+  if(num_nodes == 27)
+  {
+    double dhdr[27];
+    double dhds[27];
+    double dhdt[27];
+
+    for(int i=0; i<27; i++)
+    {
+      HEX27_gradients_of_the_shape_functions_for_RST(HEX27_node_local_coord[i], dhdr, dhds, dhdt);
+      double jacobian[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+
+      for(int j=0; j<27; j++)
+      {
+        jacobian[0][0]+=coordinates[j][0]*dhdr[j];
+        jacobian[1][0]+=coordinates[j][0]*dhds[j];
+        jacobian[2][0]+=coordinates[j][0]*dhdt[j];
+        jacobian[0][1]+=coordinates[j][1]*dhdr[j];
+        jacobian[1][1]+=coordinates[j][1]*dhds[j];
+        jacobian[2][1]+=coordinates[j][1]*dhdt[j];
+        jacobian[0][2]+=coordinates[j][2]*dhdr[j];
+        jacobian[1][2]+=coordinates[j][2]*dhds[j];
+        jacobian[2][2]+=coordinates[j][2]*dhdt[j];
+      }
+      VerdictVector xxi(jacobian[0]);
+      VerdictVector xet(jacobian[1]);
+      VerdictVector xze(jacobian[2]);
+      jacobi = xxi % ( xet * xze );
+      double scale = sqrt(xxi.length_squared() * xet.length_squared() * xze.length_squared());
+      jacobi /= scale;
+      if(jacobi < min_norm_jac)
+      {
+        min_norm_jac = jacobi;
+      }
+    }
+  }
+  else
+  {
+
   double min_jacobi = VERDICT_DBL_MAX;
   double temp_norm_jac, lengths;
   double len1_sq, len2_sq, len3_sq; 
@@ -2075,6 +2114,7 @@ C_FUNC_DEF double v_hex_scaled_jacobian( int /*num_nodes*/, double coordinates[]
     min_norm_jac = temp_norm_jac;  
   else 
     temp_norm_jac = jacobi;
+  }
 
   if ( min_norm_jac> 0 )
     return (double) VERDICT_MIN( min_norm_jac, VERDICT_DBL_MAX );
@@ -3642,6 +3682,12 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
   if(metrics_request_flag & V_HEX_JACOBIAN && num_nodes == 27)
   {
     metric_vals->jacobian = v_hex_jacobian(num_nodes, coordinates);
+  }
+
+  // compute scaled jacobian for hex27
+  if(metrics_request_flag & V_HEX_SCALED_JACOBIAN && num_nodes == 27)
+  {
+    metric_vals->scaled_jacobian = v_hex_scaled_jacobian(num_nodes, coordinates);
   }
 
   //take care of any overflow problems
