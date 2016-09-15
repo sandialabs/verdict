@@ -1853,6 +1853,7 @@ C_FUNC_DEF double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3] 
 
   double jacobi, min_norm_jac = VERDICT_DBL_MAX;
 
+#if 0
   if(num_nodes == 27)
   {
     double dhdr[27];
@@ -1889,6 +1890,7 @@ C_FUNC_DEF double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3] 
     }
   }
   else
+#endif
   {
 
   double min_jacobi = VERDICT_DBL_MAX;
@@ -3684,11 +3686,13 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
     metric_vals->jacobian = v_hex_jacobian(num_nodes, coordinates);
   }
 
+#if 0
   // compute scaled jacobian for hex27
   if(metrics_request_flag & V_HEX_SCALED_JACOBIAN && num_nodes == 27)
   {
     metric_vals->scaled_jacobian = v_hex_scaled_jacobian(num_nodes, coordinates);
   }
+#endif
 
   //take care of any overflow problems
   //max_edge_ratio
