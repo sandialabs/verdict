@@ -2632,12 +2632,18 @@ C_FUNC_DEF double v_hex_distortion( int num_nodes, double coordinates[][3] )
 
    //use 2x2 gauss points for linear hex and 3x3 for 2nd order hex
    int number_of_gauss_points=0;
-   if (num_nodes ==8)
+   if (num_nodes < 20)
+   {
       //2x2 quadrature rule
       number_of_gauss_points = 2;
-   else if (num_nodes ==20)
+      num_nodes = 8;
+   }
+   else if (num_nodes >= 20)
+   {
       //3x3 quadrature rule
       number_of_gauss_points = 3;
+      num_nodes = 20;
+   }
 
    int number_dimension = 3;
    int total_number_of_gauss_points = number_of_gauss_points
