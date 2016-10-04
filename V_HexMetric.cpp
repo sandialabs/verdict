@@ -36,19 +36,16 @@ extern void v_quad_minimum_maximum_angle( double min_max_angles[2], double coord
 static double v_hex_size = 0;
 
 //! weights based on the average size of a hex
-static int v_hex_get_weight( VerdictVector &v1, 
-    VerdictVector &v2,
-    VerdictVector &v3 )
+static int v_hex_get_weight( VerdictVector &v1, VerdictVector &v2, VerdictVector &v3, double average_size)
 {
-
-  if ( v_hex_size == 0)
+  if ( average_size  == 0)
     return 0;
 
   v1.set(1,0,0);
   v2.set(0,1,0);
   v3.set(0,0,1);
 
-  double scale = pow(v_hex_size/ (v1 % (v2 * v3 )), 0.33333333333); 
+  double scale = pow(average_size/ (v1 % (v2 * v3 )), 0.33333333333);
   v1 *= scale;
   v2 *= scale;
   v3 *= scale;
@@ -57,7 +54,7 @@ static int v_hex_get_weight( VerdictVector &v1,
 }
 
 
-static double HEX27_node_local_coord[27][3] =
+static const double HEX27_node_local_coord[27][3] =
 {
   {-1,-1,-1},
   {1,-1,-1},
@@ -2474,7 +2471,12 @@ C_FUNC_DEF double v_hex_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_hex_relative_size_squared( int num_nodes, double coordinates[][3] )
+{
+  return v_hex_relative_size_squared_2(num_nodes, coordinates, v_hex_size);
+}
+
+C_FUNC_DEF double v_hex_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_hex_volume )
 {
   double size = 0;
   double tau; 
@@ -2482,7 +2484,7 @@ C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordin
   VerdictVector xxi, xet, xze;
   double det, det_sum = 0;
 
-  v_hex_get_weight( xxi, xet, xze );
+  v_hex_get_weight( xxi, xet, xze, average_hex_volume );
  
   //This is the average relative size 
   double detw = xxi % (xet * xze);
@@ -2593,7 +2595,12 @@ C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordin
 */
 C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3] )
 {
-  double size = v_hex_relative_size_squared( num_nodes, coordinates );
+  return v_hex_shape_and_size_2(num_nodes, coordinates, v_hex_size);
+}
+
+C_FUNC_DEF double v_hex_shape_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume )
+{
+  double size = v_hex_relative_size_squared_2( num_nodes, coordinates, average_hex_volume );
   double shape = v_hex_shape( num_nodes, coordinates );
 
   double shape_size = size * shape;
@@ -2613,7 +2620,12 @@ C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3] )
 */
 C_FUNC_DEF double v_hex_shear_and_size( int num_nodes, double coordinates[][3] )
 {
-  double size = v_hex_relative_size_squared( num_nodes, coordinates );
+  return v_hex_shear_and_size_2(num_nodes, coordinates, v_hex_size);
+}
+
+C_FUNC_DEF double v_hex_shear_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume )
+{
+  double size = v_hex_relative_size_squared_2( num_nodes, coordinates, average_hex_volume );
   double shear = v_hex_shear( num_nodes, coordinates );
 
   double shear_size = shear * size; 
@@ -2664,9 +2676,10 @@ C_FUNC_DEF double v_hex_distortion( int num_nodes, double coordinates[][3] )
 
 
    //create an object of GaussIntegration
-   GaussIntegration::initialize(number_of_gauss_points,num_nodes,number_dimension );
-   GaussIntegration::calculate_shape_function_3d_hex();
-   GaussIntegration::get_shape_func(shape_function[0], dndy1[0], dndy2[0], dndy3[0],weight);
+   GaussIntegration gint;
+   gint.initialize(number_of_gauss_points,num_nodes,number_dimension );
+   gint.calculate_shape_function_3d_hex();
+   gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], dndy3[0],weight);
 
 
    VerdictVector xxi, xet, xze, xin;
@@ -2703,7 +2716,7 @@ C_FUNC_DEF double v_hex_distortion( int num_nodes, double coordinates[][3] )
    double dndy2_at_node[maxNumberNodes][maxNumberNodes];
    double dndy3_at_node[maxNumberNodes][maxNumberNodes];
 
-   GaussIntegration::calculate_derivative_at_nodes_3d( dndy1_at_node, dndy2_at_node, dndy3_at_node);
+   gint.calculate_derivative_at_nodes_3d( dndy1_at_node, dndy2_at_node, dndy3_at_node);
    int node_id;
    for (node_id=0;node_id<num_nodes; node_id++)
    {
@@ -3176,7 +3189,7 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
     // get weights if we need based on average size of a hex
     if (metrics_request_flag & (V_HEX_RELATIVE_SIZE_SQUARED | V_HEX_SHAPE_AND_SIZE | V_HEX_SHEAR_AND_SIZE ))
     {
-      v_hex_get_weight(xxi, xet, xze);
+      v_hex_get_weight(xxi, xet, xze, v_hex_size);
       detw = xxi % (xet * xze);
       if (detw < VERDICT_DBL_MIN)
         rel_size_error = VERDICT_TRUE;

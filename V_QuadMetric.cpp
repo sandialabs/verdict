@@ -32,14 +32,12 @@
 
 //! the average area of a quad
 static double v_quad_size = 0;
-
 static ComputeNormal compute_normal = NULL;
 
 /*!
   weights based on the average size of a quad
 */
-static int v_quad_get_weight (
-  double &m11, double &m21, double &m12, double &m22 )
+static int v_quad_get_weight (double &m11, double &m21, double &m12, double &m22, double average_quad_size )
 {
   
   m11=1;
@@ -47,7 +45,7 @@ static int v_quad_get_weight (
   m12=0;
   m22=1;
   
-  double scale = sqrt( v_quad_size/(m11*m22-m21*m12));
+  double scale = sqrt( average_quad_size/(m11*m22-m21*m12));
 
   m11 *= scale;
   m21 *= scale;
@@ -57,6 +55,7 @@ static int v_quad_get_weight (
   return 1;
 
 }
+
 
 //! return the average area of a quad
 C_FUNC_DEF void v_set_quad_size( double size )
@@ -1260,20 +1259,25 @@ C_FUNC_DEF double v_quad_shape( int /*num_nodes*/, double coordinates[][3] )
 
 }
 
+
 /*!
   the relative size of a quad
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-C_FUNC_DEF double v_quad_relative_size_squared( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_quad_relative_size_squared( int num_nodes, double coordinates[][3] )
+{
+  return v_quad_relative_size_squared_2(num_nodes, coordinates, v_quad_size);
+}
+
+C_FUNC_DEF double v_quad_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_quad_area )
 {
  
   double quad_area = v_quad_area (4, coordinates); 
   double rel_size = 0;
   
-  v_set_quad_size( quad_area );
   double w11,w21,w12,w22;
-  v_quad_get_weight(w11,w21,w12,w22);
+  v_quad_get_weight(w11,w21,w12,w22, average_quad_area);
   double avg_area = v_determinant(w11,w21,w12,w22);
   
   if ( avg_area > VERDICT_DBL_MIN ) 
@@ -1301,8 +1305,13 @@ C_FUNC_DEF double v_quad_relative_size_squared( int /*num_nodes*/, double coordi
 */
 C_FUNC_DEF double v_quad_shape_and_size( int num_nodes, double coordinates[][3] )
 {
+  return v_quad_shape_and_size_2(num_nodes, coordinates, v_quad_size);
+}
+
+C_FUNC_DEF double v_quad_shape_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area )
+{
   double shape, size;
-  size = v_quad_relative_size_squared( num_nodes, coordinates );
+  size = v_quad_relative_size_squared_2( num_nodes, coordinates, average_quad_area );
   shape = v_quad_shape( num_nodes, coordinates );
 
   double shape_and_size = shape * size;
@@ -1320,9 +1329,14 @@ C_FUNC_DEF double v_quad_shape_and_size( int num_nodes, double coordinates[][3] 
 */
 C_FUNC_DEF double v_quad_shear_and_size( int num_nodes, double coordinates[][3] )
 {
+  return v_quad_shear_and_size_2(num_nodes, coordinates, v_quad_size);
+}
+
+C_FUNC_DEF double v_quad_shear_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area )
+{
   double shear, size;
   shear = v_quad_shear( num_nodes, coordinates );
-  size = v_quad_relative_size_squared( num_nodes, coordinates );
+  size = v_quad_relative_size_squared_2( num_nodes, coordinates, average_quad_area );
 
   double shear_and_size = shear * size;
 
@@ -1398,9 +1412,10 @@ C_FUNC_DEF double v_quad_distortion( int num_nodes, double coordinates[][3] )
     double weight[maxTotalNumberGaussPoints];
 
     //create an object of GaussIntegration
-    GaussIntegration::initialize(number_of_gauss_points,num_nodes );
-    GaussIntegration::calculate_shape_function_2d_quad();
-    GaussIntegration::get_shape_func(shape_function[0], dndy1[0], dndy2[0], weight);
+    GaussIntegration gint;
+    gint.initialize(number_of_gauss_points,num_nodes );
+    gint.calculate_shape_function_2d_quad();
+    gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], weight);
 
     // calculate element area
     int ife,ja;
@@ -1424,7 +1439,7 @@ C_FUNC_DEF double v_quad_distortion( int num_nodes, double coordinates[][3] )
     double dndy1_at_node[maxNumberNodes][maxNumberNodes];
     double dndy2_at_node[maxNumberNodes][maxNumberNodes];
 
-    GaussIntegration::calculate_derivative_at_nodes( dndy1_at_node,  dndy2_at_node);
+    gint.calculate_derivative_at_nodes( dndy1_at_node,  dndy2_at_node);
 
     VerdictVector normal_at_nodes[9];
 
@@ -1703,7 +1718,7 @@ C_FUNC_DEF void v_quad_quality( int num_nodes, double coordinates[][3],
     double quad_area = v_quad_area (4, coordinates); 
     v_set_quad_size( quad_area );
     double w11,w21,w12,w22;
-    v_quad_get_weight(w11,w21,w12,w22);
+    v_quad_get_weight(w11,w21,w12,w22,v_quad_size);
     double avg_area = v_determinant(w11,w21,w12,w22);
 
     if( avg_area < VERDICT_DBL_MIN )
@@ -2076,4 +2091,3 @@ C_FUNC_DEF void v_quad_quality( int num_nodes, double coordinates[][3],
   }
 
 }
-

@@ -56,10 +56,19 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_hex_stretch @VERDICT_MANGLE_PREFIX@_v_hex_stretch
 #define v_hex_taper @VERDICT_MANGLE_PREFIX@_v_hex_taper
 #define v_hex_volume @VERDICT_MANGLE_PREFIX@_v_hex_volume
+#define v_hex_equiangle_skew @VERDICT_MANGLE_PREFIX@_v_hex_equiangle_skew
+#define v_hex_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@_v_hex_relative_size_squared_2
+#define v_hex_shape_and_size_2 @VERDICT_MANGLE_PREFIX@_v_hex_shape_and_size_2
+#define v_hex_shear_and_size_2 @VERDICT_MANGLE_PREFIX@_v_hex_shear_and_size_2
 #define v_knife_quality @VERDICT_MANGLE_PREFIX@_v_knife_quality
 #define v_knife_volume @VERDICT_MANGLE_PREFIX@_v_knife_volume
 #define v_pyramid_quality @VERDICT_MANGLE_PREFIX@_v_pyramid_quality
 #define v_pyramid_volume @VERDICT_MANGLE_PREFIX@_v_pyramid_volume
+#define v_pyramid_equiangle_skewv @VERDICT_MANGLE_PREFIX@_v_pyramid_equiangle_skew
+#define v_pyramid_jacobian @VERDICT_MANGLE_PREFIX@_v_pyramid_jacobian
+#define v_pyramid_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_pyramid_scaled_jacobian
+#define v_pyramid_shape @VERDICT_MANGLE_PREFIX@_v_pyramid_shape
+#define v_pyramid_equiangle_skew @VERDICT_MANGLE_PREFIX@_v_pyramid_equiangle_skew
 #define v_quad_area @VERDICT_MANGLE_PREFIX@_v_quad_area
 #define v_quad_aspect_ratio @VERDICT_MANGLE_PREFIX@_v_quad_aspect_ratio
 #define v_quad_condition @VERDICT_MANGLE_PREFIX@_v_quad_condition
@@ -84,6 +93,9 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_quad_stretch @VERDICT_MANGLE_PREFIX@_v_quad_stretch
 #define v_quad_taper @VERDICT_MANGLE_PREFIX@_v_quad_taper
 #define v_quad_warpage @VERDICT_MANGLE_PREFIX@_v_quad_warpage
+#define v_quad_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_quad_relative_size_squared_2
+#define v_quad_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_quad_shape_and_size_2
+#define v_quad_shear_and_size_2 @VERDICT_MANGLE_PREFIX@v_quad_shear_and_size_2
 #define v_set_hex_size @VERDICT_MANGLE_PREFIX@_v_set_hex_size
 #define v_set_quad_normal_func @VERDICT_MANGLE_PREFIX@_v_set_quad_normal_func
 #define v_set_quad_size @VERDICT_MANGLE_PREFIX@_v_set_quad_size
@@ -107,6 +119,11 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_tet_shape @VERDICT_MANGLE_PREFIX@_v_tet_shape
 #define v_tet_shape_and_size @VERDICT_MANGLE_PREFIX@_v_tet_shape_and_size
 #define v_tet_volume @VERDICT_MANGLE_PREFIX@_v_tet_volume
+#define v_tet_equiangle_skew @VERDICT_MANGLE_PREFIX@v_tet_equiangle_skew
+#define v_tet_equivolume_skew @VERDICT_MANGLE_PREFIX@v_tet_equivolume_skew
+#define v_tet_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_tet_relative_size_squared_2
+#define v_tet_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_tet_shape_and_size_2
+#define v_tet_squish_index @VERDICT_MANGLE_PREFIX@v_tet_squish_index
 #define v_tri_area @VERDICT_MANGLE_PREFIX@_v_tri_area
 #define v_tri_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_tri_aspect_frobenius
 #define v_tri_aspect_ratio @VERDICT_MANGLE_PREFIX@_v_tri_aspect_ratio
@@ -121,17 +138,20 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_tri_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_tri_scaled_jacobian
 #define v_tri_shape @VERDICT_MANGLE_PREFIX@_v_tri_shape
 #define v_tri_shape_and_size @VERDICT_MANGLE_PREFIX@_v_tri_shape_and_size
+#define v_tri_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_tri_relative_size_squared_2
+#define v_tri_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_tri_shape_and_size_2
 #define v_wedge_quality @VERDICT_MANGLE_PREFIX@_v_wedge_quality
 #define v_wedge_volume @VERDICT_MANGLE_PREFIX@_v_wedge_volume
-#define v_wedge_condition @VERDICT_MANGLE_PREFIX@_wedge_condition
-#define v_wedge_distortion @VERDICT_MANGLE_PREFIX@_wedge_distortion
-#define v_wedge_edge_ratio @VERDICT_MANGLE_PREFIX@_wedge_edge_ratio
-#define v_wedge_jacobian @VERDICT_MANGLE_PREFIX@_wedge_jacobian
-#define v_wedge_max_aspect_frobenius @VERDICT_MANGLE_PREFIX@_wedge_max_aspect_frobenius
-#define v_wedge_max_stretch @VERDICT_MANGLE_PREFIX@_wedge_max_stretch
-#define v_wedge_mean_aspect_frobenius @VERDICT_MANGLE_PREFIX@_wedge_mean_aspect_frobenius
-#define v_wedge_scaled_jacobian @VERDICT_MANGLE_PREFIX@_wedge_scaled_jacobian
-#define v_wedge_shape @VERDICT_MANGLE_PREFIX@_wedge_shape
+#define v_wedge_condition @VERDICT_MANGLE_PREFIX@_v_wedge_condition
+#define v_wedge_distortion @VERDICT_MANGLE_PREFIX@_v_wedge_distortion
+#define v_wedge_edge_ratio @VERDICT_MANGLE_PREFIX@_v_wedge_edge_ratio
+#define v_wedge_jacobian @VERDICT_MANGLE_PREFIX@_v_wedge_jacobian
+#define v_wedge_max_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_wedge_max_aspect_frobenius
+#define v_wedge_max_stretch @VERDICT_MANGLE_PREFIX@_v_wedge_max_stretch
+#define v_wedge_mean_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_wedge_mean_aspect_frobenius
+#define v_wedge_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_wedge_scaled_jacobian
+#define v_wedge_shape @VERDICT_MANGLE_PREFIX@_v_wedge_shape
+#define v_wedge_equiangle_skew @VERDICT_MANGLE_PREFIX@_v_wedge_equiangle_skew
 
 
 #endif /* __verdict_mangle_h */

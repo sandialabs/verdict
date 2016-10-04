@@ -20,6 +20,8 @@ PURPOSE.  See the above copyright notice for more information.
  */
 #define VERDICT_EXPORTS
 
+#define VERDICT_THREAD_SAFE 0
+
 #include "verdict.h"
 #include "v_vector.h"
 #include <cmath>
@@ -146,7 +148,7 @@ int main( )
 
 
   }, 
-  { 1.42996, .09245, .745356, .008, 2.69258, .57735, 56.7891, 90, 2.30793, 1.11417 , .557086, .433289, .433289, .557086, .56268, 0}
+  { 1.42996, .09245, .745356, .008, 2.69258, .57735, 56.7891, 90, 2.30793, 1.11417 , .557086, .433289, .059764, .0768395, .56268, 0}
   },
   {
   "tet test",

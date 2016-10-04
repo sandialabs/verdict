@@ -102,6 +102,11 @@
 # define C_FUNC_DEF VERDICT_EXTERN_C
 #endif
 
+/* expose only the thread safe apis */
+#if !defined(VERDICT_THREAD_SAFE)
+#define VERDICT_THREAD_SAFE 1
+#endif
+
 
 /* typedef for the user if they want to use
  *    function pointers */
@@ -904,6 +909,7 @@ struct TriMetricVals
   \c CMAKE_INSTALL_PREFIX contains a different directory and re-run \c cmake.
  */
 
+#if !VERDICT_THREAD_SAFE
     //! Calculates quality metrics for hexahedral elements.
     C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3], 
         unsigned int metrics_request_flag, struct HexMetricVals *metric_vals ); 
@@ -935,13 +941,16 @@ struct TriMetricVals
     //! Calculates quality metrics for edge elements.
     C_FUNC_DEF void v_edge_quality( int num_nodes, double coordinates[][3], 
         unsigned int metrics_request_flag, struct EdgeMetricVals *metric_vals ); 
-
+#endif
 
 
 /* individual quality functions for hex elements */
 
+#if !VERDICT_THREAD_SAFE
     //! Sets average size (volume) of hex, needed for v_hex_relative_size(...)
+    //! alternatively, one may use the thread-safe version of functions
     C_FUNC_DEF void v_set_hex_size( double size );
+#endif
 
     //! Calculates hex edge ratio metric.
     /**  Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
@@ -1035,19 +1044,31 @@ struct TriMetricVals
     /** 3/Mean Ratio of weighted Jacobian matrix.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication.  */
-    C_FUNC_DEF double v_hex_relative_size_squared( int num_nodes, double coordinates[][3] ); 
+#if !VERDICT_THREAD_SAFE
+    C_FUNC_DEF double v_hex_relative_size_squared( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_hex_relative_size_squared()
+    C_FUNC_DEF double v_hex_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_hex_volume );
 
     //! Calculates hex shape-size metric.
     /** Product of Shape and Relative Size.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication.  */
-    C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3] ); 
+#if !VERDICT_THREAD_SAFE
+    C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_hex_shape_and_size()
+    C_FUNC_DEF double v_hex_shape_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume );
 
     //! Calculates hex shear-size metric   
     /** Product of Shear and Relative Size.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication.  */
+#if !VERDICT_THREAD_SAFE
     C_FUNC_DEF double v_hex_shear_and_size( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_hex_shear_and_size()
+    C_FUNC_DEF double v_hex_shear_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume );
 
     //! Calculates hex distortion metric   
     /** {min(|J|)/actual volume}*parent volume, parent volume = 8 for hex.
@@ -1056,8 +1077,11 @@ struct TriMetricVals
 
 /* individual quality functions for tet elements */
 
+#if !VERDICT_THREAD_SAFE
     //! Sets average size (volume) of tet, needed for v_tet_relative_size(...)
+    //! alternatively, one may use the thread-safe version of functions
     C_FUNC_DEF void v_set_tet_size( double size );
+#endif
 
     //! Calculates tet edge ratio metric.
     /**  Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
@@ -1141,13 +1165,21 @@ struct TriMetricVals
     /** Min( J, 1/J ), where J is determinant of weighted Jacobian matrix.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */ 
-    C_FUNC_DEF double v_tet_relative_size_squared( int num_nodes, double coordinates[][3] ); 
+#if !VERDICT_THREAD_SAFE
+    C_FUNC_DEF double v_tet_relative_size_squared( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_tet_relative_size_squared()
+    C_FUNC_DEF double v_tet_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_tet_size );
 
     //! Calculates tet shape-size metric.
     /** Product of Shape and Relative Size. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */ 
-    C_FUNC_DEF double v_tet_shape_and_size( int num_nodes, double coordinates[][3] ); 
+#if !VERDICT_THREAD_SAFE
+    C_FUNC_DEF double v_tet_shape_and_size( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_tet_shape_and_size()
+    C_FUNC_DEF double v_tet_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tet_size );
 
     //! Calculates tet distortion metric.
     /** {min(|J|)/actual volume}*parent volume, parent volume = 1/6 for tet.
@@ -1236,8 +1268,12 @@ struct TriMetricVals
 
     
 /* individual quality functions for quad elements */
+
+#if !VERDICT_THREAD_SAFE
     //! Sets average size (area) of quad, needed for v_quad_relative_size(...)
+    //! alternatively, one may use the thread-safe version of functions
     C_FUNC_DEF void v_set_quad_size( double size );
+#endif
 
     //! Calculates quad edge ratio
     /** edge ratio
@@ -1354,36 +1390,55 @@ struct TriMetricVals
     /** Min( J, 1/J ), where J is determinant of weighted Jacobian matrix. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
+#if !VERDICT_THREAD_SAFE
     C_FUNC_DEF double v_quad_relative_size_squared( int num_nodes, double coordinates[][3] ); 
+#endif
+    //! a thread-safe version of v_quad_relative_size_squared()
+    C_FUNC_DEF double v_quad_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_quad_area );
 
     //! Calculates quad shape-size metric.
     /** Product of Shape and Relative Size. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_quad_shape_and_size( int num_nodes, double coordinates[][3] ); 
+#if !VERDICT_THREAD_SAFE
+    C_FUNC_DEF double v_quad_shape_and_size( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_quad_shape_and_size()
+    C_FUNC_DEF double v_quad_shape_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area );
 
     //! Calculates quad shear-size metric.
     /** Product of Shear and Relative Size. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_quad_shear_and_size( int num_nodes, double coordinates[][3] ); 
+#if !VERDICT_THREAD_SAFE
+    C_FUNC_DEF double v_quad_shear_and_size( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_quad_shear_and_size()
+    C_FUNC_DEF double v_quad_shear_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area );
 
     //! Calculates quad distortion metric.
     /** {min(|J|)/actual area}*parent area, parent area = 4 for quad.
        Reference --- SDRC/IDEAS Simulation: Finite Element Modeling--User's Guide */
     C_FUNC_DEF double v_quad_distortion( int num_nodes, double coordinates[][3] ); 
 
-	//! Sets function pointer to calculate quad normal wrt surface 
+#if !VERDICT_THREAD_SAFE
+    //! Sets function pointer to calculate quad normal wrt surface
+    //! this affects condition number and scaled jacobian for a quad
     C_FUNC_DEF void v_set_quad_normal_func( ComputeNormal func );
+#endif
 
 
 /* individual quality functions for triangle elements */
 
+#if !VERDICT_THREAD_SAFE
     //! Sets average size (area) of tri, needed for v_tri_relative_size(...) 
+    //! alternatively, one may use the thread-safe version of functions
     C_FUNC_DEF void  v_set_tri_size( double size );
 
     //! Sets function pointer to calculate triangle normal wrt surface 
+    //! this affects condition number and scaled jacobian of a triangle
     C_FUNC_DEF void v_set_tri_normal_func( ComputeNormal func );
+#endif
 
     //! Calculates triangle metric.
     /** edge ratio
@@ -1441,7 +1496,11 @@ struct TriMetricVals
     /** Min( J, 1/J ), where J is determinant of weighted Jacobian matrix. 
        Reference ---  P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_tri_relative_size_squared( int num_nodes, double coordinates[][3] ); 
+#if !VERDICT_THREAD_SAFE
+    C_FUNC_DEF double v_tri_relative_size_squared( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_tri_relative_size_squared()
+    C_FUNC_DEF double v_tri_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_tri_area );
 
     //! Calculates triangle metric.
     /** 2/Condition number of weighted Jacobian matrix. 
@@ -1453,7 +1512,11 @@ struct TriMetricVals
     /**  Product of Shape and Relative Size. 
        Reference ---  P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
+#if !VERDICT_THREAD_SAFE
     C_FUNC_DEF double v_tri_shape_and_size( int num_nodes, double coordinates[][3] );
+#endif
+    //! a thread-safe version of v_tri_shape_and_size()
+    C_FUNC_DEF double v_tri_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tri_area );
 
     //! Calculates triangle metric.
     /** {min(|J|)/actual area}*parent area, parent area = 1/2 for triangular element. 

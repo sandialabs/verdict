@@ -57,7 +57,7 @@ static const double one_third = 1.0/3.0;
 
 
 
-static double WEDGE21_node_local_coord[21][3] =
+static const double WEDGE21_node_local_coord[21][3] =
 {
   {0,0,-1}, {1.0,0,-1}, {0,1.0,-1}, {0,0,1.0}, {1.0,0,1.0}, {0,1.0,1.0},
   {0.5,0,-1}, {0.5,0.5,-1}, {0,0.5,-1},

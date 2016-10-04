@@ -37,17 +37,16 @@ static ComputeNormal compute_normal = NULL;
   get weights based on the average area of a set of
   tris
 */
-static int v_tri_get_weight ( double &m11,
-    double &m21,
-    double &m12,
-    double &m22 )
+static int v_tri_get_weight ( double &m11, double &m21,
+                              double &m12, double &m22,
+                              double average_tri_area)
 {
   static const double rootOf3 = sqrt(3.0);
   m11=1;
   m21=0;
   m12=0.5;
   m22=0.5*rootOf3;
-  double scale = sqrt(2.0*verdict_tri_size/(m11*m22-m21*m12));
+  double scale = sqrt(2.0*average_tri_area/(m11*m22-m21*m12));
   
   m11 *= scale;
   m21 *= scale;
@@ -624,13 +623,18 @@ C_FUNC_DEF double v_tri_shape( int num_nodes, double coordinates[][3] )
 
   Min(J,1/J) where J is the determinant of the weighted jacobian matrix.
 */
-C_FUNC_DEF double v_tri_relative_size_squared( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_tri_relative_size_squared( int num_nodes, double coordinates[][3] )
+{
+  return v_tri_relative_size_squared_2(num_nodes, coordinates, verdict_tri_size);
+}
+
+C_FUNC_DEF double v_tri_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_tri_area )
 {
   double w11, w21, w12, w22;
 
   VerdictVector xxi, xet, tri_normal;
   
-  v_tri_get_weight(w11,w21,w12,w22);
+  v_tri_get_weight(w11,w21,w12,w22, average_tri_area);
 
   double detw = v_determinant(w11,w21,w12,w22);
 
@@ -668,9 +672,14 @@ C_FUNC_DEF double v_tri_relative_size_squared( int /*num_nodes*/, double coordin
 */
 C_FUNC_DEF double v_tri_shape_and_size( int num_nodes, double coordinates[][3] )
 {
+  return v_tri_shape_and_size_2(num_nodes, coordinates, verdict_tri_size);
+}
+
+C_FUNC_DEF double v_tri_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tri_area )
+{
   double size, shape;  
 
-  size = v_tri_relative_size_squared( num_nodes, coordinates );
+  size = v_tri_relative_size_squared_2( num_nodes, coordinates, average_tri_area );
   shape = v_tri_shape( num_nodes, coordinates );
   
   double shape_and_size = size * shape;
@@ -728,9 +737,10 @@ C_FUNC_DEF double v_tri_distortion( int num_nodes, double coordinates[][3] )
    //create an object of GaussIntegration
    int number_dims = 2;
    int is_tri = 1;
-   GaussIntegration::initialize(number_of_gauss_points,num_nodes, number_dims, is_tri);
-   GaussIntegration::calculate_shape_function_2d_tri();
-   GaussIntegration::get_shape_func(shape_function[0], dndy1[0], dndy2[0], weight);
+   GaussIntegration gint;
+   gint.initialize(number_of_gauss_points,num_nodes, number_dims, is_tri);
+   gint.calculate_shape_function_2d_tri();
+   gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], weight);
 
          // calculate element area
    int ife, ja;
@@ -755,7 +765,7 @@ C_FUNC_DEF double v_tri_distortion( int num_nodes, double coordinates[][3] )
    double dndy2_at_node[maxNumberNodes][maxNumberNodes];
 
 
-   GaussIntegration::calculate_derivative_at_nodes_2d_tri( dndy1_at_node,  dndy2_at_node);
+   gint.calculate_derivative_at_nodes_2d_tri( dndy1_at_node,  dndy2_at_node);
 
    VerdictVector normal_at_nodes[7];
 
@@ -1144,7 +1154,7 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
   {
     // get weights
     double w11, w21, w12, w22;
-    v_tri_get_weight(w11,w21,w12,w22);
+    v_tri_get_weight(w11,w21,w12,w22,verdict_tri_size);
     // get the determinant
     double detw = v_determinant(w11,w21,w12,w22);
     // use the area from above and divide with the determinant

@@ -39,10 +39,8 @@
 #define maxNumberGaussPointsTet 4
 
 
-namespace GaussIntegration  
+struct GaussIntegration
 {
-
-
    void get_signs_for_node_local_coord_hex(int node_id, double &sign_y1, 
                                            double &sign_y2, double &sign_y3);
    //- to get the signs for  coordinates of hex nodes in the local computational space 
@@ -105,6 +103,25 @@ namespace GaussIntegration
    void get_node_local_coord_tet(int node_id, double &y1, double &y2, 
                                                 double &y3, double &y4);
    //- get nodal volume coordinates for tetrahedron element
-}
+
+
+   int numberGaussPoints;
+   int numberNodes;
+   int numberDims;
+   double gaussPointY[maxNumberGaussPoints];
+   double gaussWeight[maxNumberGaussPoints];
+   double shapeFunction[maxTotalNumberGaussPoints][maxNumberNodes];
+   double dndy1GaussPts[maxTotalNumberGaussPoints][maxNumberNodes];
+   double dndy2GaussPts[maxTotalNumberGaussPoints][maxNumberNodes];
+   double dndy3GaussPts[maxTotalNumberGaussPoints][maxNumberNodes];
+   double totalGaussWeight[maxTotalNumberGaussPoints];
+   int totalNumberGaussPts;
+   double y1Area[maxNumberGaussPointsTri];
+   double y2Area[maxNumberGaussPointsTri];
+   double y1Volume[maxNumberGaussPointsTet];
+   double y2Volume[maxNumberGaussPointsTet];
+   double y3Volume[maxNumberGaussPointsTet];
+   double y4Volume[maxNumberGaussPointsTet];
+};
 
 #endif 

@@ -29,6 +29,8 @@
 #include <vector>
 #include <algorithm>
 
+static const double SQRT2_HALVES = sqrt(2.0)/2.0;
+
 extern double v_quad_equiangle_skew( int num_nodes, double coordinates[][3] );
 extern double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] );
 
@@ -224,8 +226,6 @@ C_FUNC_DEF double v_pyramid_scaled_jacobian( int num_nodes, double coordinates[]
 
 C_FUNC_DEF double v_pyramid_shape( int num_nodes, double coordinates[][3] )
 {
-  static double SQRT2_HALVES = sqrt(2.0)/2.0;
-
   // ideally there will be four equilateral triangles and one square.
   // Test each face
   double base[4][3];

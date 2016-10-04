@@ -34,6 +34,7 @@ static const double fourninths= 4.0/9.0;
 
 //! the average volume of a tet
 static double v_tet_size = 0;
+
 C_FUNC_DEF double v_tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   static const double normal_coeff = 180. * .3183098861837906715377675267450287;
@@ -157,8 +158,7 @@ C_FUNC_DEF void v_set_tet_size( double size )
   get the weights based on the average size
   of a tet
 */
-static int v_tet_get_weight (
-  VerdictVector &w1, VerdictVector &w2, VerdictVector &w3 )
+static int v_tet_get_weight (VerdictVector &w1, VerdictVector &w2, VerdictVector &w3, double average_tet_volume )
 {
   static const double rt3 = sqrt(3.0);
   static const double root_of_2 = sqrt(2.0);
@@ -167,7 +167,7 @@ static int v_tet_get_weight (
   w2.set(0.5, 0.5*rt3, 0 );
   w3.set(0.5, rt3/6.0, root_of_2/rt3);
 
-  double scale = pow( 6.*v_tet_size/v_determinant(w1,w2,w3),0.3333333333333);
+  double scale = pow( 6.*average_tet_volume/v_determinant(w1,w2,w3),0.3333333333333);
 
   w1 *= scale;
   w2 *= scale;
@@ -914,7 +914,7 @@ C_FUNC_DEF double v_tet_squish_index( int /*num_nodes*/, double coordinates[][3]
 }
 
 
-static double TET15_node_local_coord[15][3] =
+static const double TET15_node_local_coord[15][3] =
 {
   {0,0,0},
   {1.0,0,0},
@@ -1227,11 +1227,16 @@ C_FUNC_DEF double v_tet_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min(J,1/J), where J is the determinant of the weighted Jacobian matrix
 */
-C_FUNC_DEF double v_tet_relative_size_squared( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double v_tet_relative_size_squared( int num_nodes, double coordinates[][3] )
+{
+  return v_tet_relative_size_squared_2(num_nodes, coordinates, v_tet_size);
+
+}
+C_FUNC_DEF double v_tet_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_tet_volume )
 {
   double size;
   VerdictVector w1, w2, w3;
-  v_tet_get_weight(w1,w2,w3);
+  v_tet_get_weight(w1,w2,w3, average_tet_volume);
   double avg_volume = (w1 % (w2 *w3))/6.0;
 
   double volume = v_tet_volume(4, coordinates);
@@ -1257,10 +1262,15 @@ C_FUNC_DEF double v_tet_relative_size_squared( int /*num_nodes*/, double coordin
 */
 C_FUNC_DEF double v_tet_shape_and_size( int num_nodes, double coordinates[][3] )
 {
+  return v_tet_shape_and_size_2(num_nodes, coordinates, v_tet_size);
+}
+
+C_FUNC_DEF double v_tet_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tet_volume )
+{
 
   double shape, size;
   shape = v_tet_shape( num_nodes, coordinates );
-  size = v_tet_relative_size_squared (num_nodes, coordinates );
+  size = v_tet_relative_size_squared_2 (num_nodes, coordinates, average_tet_volume );
 
   return (double)(shape * size);
 
@@ -1299,9 +1309,10 @@ C_FUNC_DEF double v_tet_distortion( int num_nodes, double coordinates[][3] )
    double weight[maxTotalNumberGaussPoints];
 
    // create an object of GaussIntegration for tet
-   GaussIntegration::initialize(number_of_gauss_points,num_nodes, number_dims, is_tri);
-   GaussIntegration::calculate_shape_function_3d_tet();
-   GaussIntegration::get_shape_func(shape_function[0], dndy1[0], dndy2[0], dndy3[0],weight);
+   GaussIntegration gint;
+   gint.initialize(number_of_gauss_points,num_nodes, number_dims, is_tri);
+   gint.calculate_shape_function_3d_tet();
+   gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], dndy3[0],weight);
 
    // vector xxi is the derivative vector of coordinates w.r.t local xi coordinate in the
    // computation space
@@ -1345,7 +1356,7 @@ C_FUNC_DEF double v_tet_distortion( int num_nodes, double coordinates[][3] )
    double dndy3_at_node[maxNumberNodes][maxNumberNodes];
 
 
-   GaussIntegration::calculate_derivative_at_nodes_3d_tet( dndy1_at_node,
+   gint.calculate_derivative_at_nodes_3d_tet( dndy1_at_node,
                                                            dndy2_at_node,
                                                            dndy3_at_node);
    int node_id;
@@ -1515,7 +1526,7 @@ C_FUNC_DEF void v_tet_quality( int num_nodes, double coordinates[][3],
   if(metrics_request_flag & (V_TET_RELATIVE_SIZE_SQUARED | V_TET_SHAPE_AND_SIZE ))
   {
     VerdictVector w1, w2, w3;
-    v_tet_get_weight(w1,w2,w3);
+    v_tet_get_weight(w1,w2,w3, v_tet_size);
     double avg_vol = (w1 % (w2 *w3))/6;
 
     if( avg_vol < VERDICT_DBL_MIN )
