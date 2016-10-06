@@ -33,6 +33,12 @@
 static double verdict_tri_size = 0;
 static ComputeNormal compute_normal = NULL;
 
+static const double root_of_3 = sqrt(3.0);
+static const double aspect_ratio_normal_coeff = sqrt( 3. ) / 6.;
+static const double two_times_root_of_3 = 2*sqrt(3.0);
+static const double two_over_root_of_3 = 2./sqrt(3.0);
+
+
 /*! 
   get weights based on the average area of a set of
   tris
@@ -41,11 +47,10 @@ static int v_tri_get_weight ( double &m11, double &m21,
                               double &m12, double &m22,
                               double average_tri_area)
 {
-  static const double rootOf3 = sqrt(3.0);
   m11=1;
   m21=0;
   m12=0.5;
-  m22=0.5*rootOf3;
+  m22=0.5*root_of_3;
   double scale = sqrt(2.0*average_tri_area/(m11*m22-m21*m12));
   
   m11 *= scale;
@@ -167,8 +172,6 @@ C_FUNC_DEF double v_tri_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 */
 C_FUNC_DEF double v_tri_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double normal_coeff = sqrt( 3. ) / 6.;
-
   // three vectors for each side 
   VerdictVector a( coordinates[1][0] - coordinates[0][0],
                    coordinates[1][1] - coordinates[0][1],
@@ -197,7 +200,7 @@ C_FUNC_DEF double v_tri_aspect_ratio( int /*num_nodes*/, double coordinates[][3]
   else
   {
     double aspect_ratio;
-    aspect_ratio = normal_coeff * hm * (a1 + b1 + c1) / denominator;
+    aspect_ratio = aspect_ratio_normal_coeff * hm * (a1 + b1 + c1) / denominator;
     
     if( aspect_ratio > 0 )
       return (double) VERDICT_MIN( aspect_ratio, VERDICT_DBL_MAX );
@@ -263,7 +266,6 @@ C_FUNC_DEF double v_tri_radius_ratio( int /*num_nodes*/, double coordinates[][3]
 
 C_FUNC_DEF double v_tri_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double two_times_root_of_3 = 2*sqrt(3.0);
 
   // three vectors for each side 
   VerdictVector side1( coordinates[1][0] - coordinates[0][0],
@@ -498,8 +500,6 @@ double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] )
 */
 C_FUNC_DEF double v_tri_condition( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double rt3 = sqrt(3.0);
-  
   VerdictVector v1(coordinates[1][0] - coordinates[0][0],
                    coordinates[1][1] - coordinates[0][1],
                    coordinates[1][2] - coordinates[0][2] );
@@ -514,7 +514,7 @@ C_FUNC_DEF double v_tri_condition( int /*num_nodes*/, double coordinates[][3] )
   if (areax2 == 0.0 ) 
     return (double)VERDICT_DBL_MAX;
 
-  double condition = (double)( ((v1%v1) + (v2%v2) - (v1%v2)) / (areax2*rt3) );
+  double condition = (double)( ((v1%v1) + (v2%v2) - (v1%v2)) / (areax2*root_of_3) );
 
     //check for inverted if we have access to the normal
   if( compute_normal )
@@ -542,7 +542,6 @@ C_FUNC_DEF double v_tri_condition( int /*num_nodes*/, double coordinates[][3] )
 */
 C_FUNC_DEF double v_tri_scaled_jacobian( int /*num_nodes*/, double coordinates[][3])
 {
-  static const double detw = 2./sqrt(3.0);
   VerdictVector first, second;
   double jacobian; 
   
@@ -572,7 +571,7 @@ C_FUNC_DEF double v_tri_scaled_jacobian( int /*num_nodes*/, double coordinates[]
   if( max_edge_length_product < VERDICT_DBL_MIN )
     return (double)0.0;
 
-  jacobian *= detw;
+  jacobian *= two_over_root_of_3;
   jacobian /= max_edge_length_product; 
 
   if( compute_normal )
@@ -1041,10 +1040,8 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
       sides_lengths_squared[1] +
       sides_lengths_squared[2] ;
 
-    // calculate once and reuse
-    static const double twoTimesRootOf3 = 2*sqrt(3.0);
 
-    double div = (twoTimesRootOf3 * 
+    double div = (two_times_root_of_3 *
       ( (sides[0] * sides[2]).length() ));
 
     if(div == 0.0)
@@ -1068,11 +1065,9 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
   // calculate the scaled jacobian
   if(metrics_request_flag & V_TRI_SCALED_JACOBIAN)
   {
-    // calculate once and reuse
-    static const double twoOverRootOf3 = 2/sqrt(3.0);
     // use the area from above
     
-    double tmp = tri_normal.length() * twoOverRootOf3;
+    double tmp = tri_normal.length() * two_over_root_of_3;
       
     // now scale it by the lengths of the sides
     double min_scaled_jac = VERDICT_DBL_MAX;
@@ -1098,8 +1093,6 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
   // calculate the condition number
   if(metrics_request_flag & V_TRI_CONDITION)
   {
-    // calculate once and reuse
-    static const double rootOf3 = sqrt(3.0);
       //if it is inverted, the condition number is considered to be infinity.
     if(is_inverted){
       metric_vals->condition = VERDICT_DBL_MAX;
@@ -1112,7 +1105,7 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
         metric_vals->condition = (double) ( (sides[0]%sides[0] +
                                                    sides[2]%sides[2] -
                                                    sides[0]%sides[2])  /
-                                                  (area2x*rootOf3) );
+                                                  (area2x*root_of_3) );
     }
     
   }
@@ -1126,8 +1119,6 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
       metric_vals->shape = 0.0;
     }
     else{//otherwise, we calculate the shape
-        // calculate once and reuse
-      static const double rootOf3 = sqrt(3.0);
         // reuse area from before
       double area2x = metric_vals->area * 2;
         // dot products
@@ -1144,7 +1135,7 @@ C_FUNC_DEF void v_tri_quality( int num_nodes, double coordinates[][3],
       if( sum_dots == 0.0 ) 
         metric_vals->shape = 0.0;
       else
-        metric_vals->shape = (double)(rootOf3 * area2x / sum_dots);
+        metric_vals->shape = (double)(root_of_3 * area2x / sum_dots);
     }
     
   }

@@ -35,6 +35,11 @@ extern void v_quad_minimum_maximum_angle( double min_max_angles[2], double coord
 //! the average volume of a hex
 static double v_hex_size = 0;
 
+static const double two_thirds = 2.0/3.0;
+static const double third=1.0/3.0;
+static const double root_of_3 = sqrt(3.0);
+
+
 //! weights based on the average size of a hex
 static int v_hex_get_weight( VerdictVector &v1, VerdictVector &v2, VerdictVector &v3, double average_size)
 {
@@ -451,7 +456,6 @@ static double v_oddy_comp( const VerdictVector &xxi,
     const VerdictVector &xet, 
     const VerdictVector &xze )
 {
-  static const double third=1.0/3.0;
   
   double g11, g12, g13, g22, g23, g33, rt_g;
   
@@ -1115,12 +1119,10 @@ C_FUNC_DEF double v_hex_volume( int /*num_nodes*/, double coordinates[][3] )
 */
 C_FUNC_DEF double v_hex_stretch( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double HEX_STRETCH_SCALE_FACTOR = sqrt(3.0);
-  
   double min_edge = v_hex_edge_length( 0, coordinates );
   double max_diag = v_diag_length( 1, coordinates );  
   
-  double stretch = HEX_STRETCH_SCALE_FACTOR * v_safe_ratio(min_edge, max_diag);
+  double stretch = root_of_3 * v_safe_ratio(min_edge, max_diag);
 
   if ( stretch > 0 )
     return (double) VERDICT_MIN( stretch, VERDICT_DBL_MAX );
@@ -2331,7 +2333,6 @@ C_FUNC_DEF double v_hex_shape( int /*num_nodes*/, double coordinates[][3] )
 
   double det, shape;
   double min_shape = 1.0; 
-  static const double two_thirds = 2.0/3.0;
 
   VerdictVector xxi, xet, xze;
 
@@ -3164,7 +3165,6 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
                               V_HEX_STRETCH ))
   {
 
-    static const double two_thirds = 2.0/3.0;
     VerdictVector edges[12];
     // the length squares
     double length_squared[12];
@@ -3675,14 +3675,13 @@ C_FUNC_DEF void v_hex_quality( int num_nodes, double coordinates[][3],
 
     if (metrics_request_flag & V_HEX_STRETCH)
     {
-      static const double HEX_STRETCH_SCALE_FACTOR = sqrt(3.0);
       double min_edge=length_squared[0];
       for(int j=1; j<12; j++)
         min_edge = VERDICT_MIN(min_edge, length_squared[j]);
 
       double max_diag = v_diag_length(1, coordinates);
         
-      metric_vals->stretch = (double)(HEX_STRETCH_SCALE_FACTOR * ( v_safe_ratio( sqrt(min_edge), max_diag) ));
+      metric_vals->stretch = (double)(root_of_3 * ( v_safe_ratio( sqrt(min_edge), max_diag) ));
     }
   }
   // calculate the Equiangle Skew

@@ -31,14 +31,20 @@
 static const double one_third = 1.0/3.0;
 static const double one_fourth = 1.0/4.0;
 static const double fourninths= 4.0/9.0;
+static const double rt3 = sqrt(3.0);
+static const double root_of_2 = sqrt(2.0);
+static const double normal_coeff = 180. * .3183098861837906715377675267450287;
+static const double aspect_ratio_normal_coeff = sqrt(6.) / 12.;
+static const double two_thirds = 2.0/3.0;
+static const double root_of_3 = sqrt(3.0);
+static const double root_of_6 = sqrt(6.0);
+
 
 //! the average volume of a tet
 static double v_tet_size = 0;
 
 C_FUNC_DEF double v_tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double normal_coeff = 180. * .3183098861837906715377675267450287;
-
   VerdictVector ab,ac,bc,bd, ad, cd;
 
   ab.set( coordinates[1][0] - coordinates[0][0],
@@ -160,9 +166,6 @@ C_FUNC_DEF void v_set_tet_size( double size )
 */
 static int v_tet_get_weight (VerdictVector &w1, VerdictVector &w2, VerdictVector &w3, double average_tet_volume )
 {
-  static const double rt3 = sqrt(3.0);
-  static const double root_of_2 = sqrt(2.0);
-
   w1.set(1,0,0);
   w2.set(0.5, 0.5*rt3, 0 );
   w3.set(0.5, rt3/6.0, root_of_2/rt3);
@@ -328,8 +331,6 @@ C_FUNC_DEF double v_tet_scaled_jacobian( int /*num_nodes*/, double coordinates[]
   if( length_product < VERDICT_DBL_MIN )
     return (double) VERDICT_DBL_MAX;
 
-  static const double root_of_2 = sqrt(2.0);
-
   return (double)(root_of_2 * jacobi / length_product);
 
 }
@@ -478,7 +479,6 @@ C_FUNC_DEF double v_tet_aspect_beta( int /*num_nodes*/, double coordinates[][3] 
 */
 C_FUNC_DEF double v_tet_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double normal_coeff = sqrt(6.) / 12.;
 
   //Determine side vectors
   VerdictVector ab, bc, ac, ad, bd, cd;
@@ -535,7 +535,7 @@ C_FUNC_DEF double v_tet_aspect_ratio( int /*num_nodes*/, double coordinates[][3]
   D = bd.length();
 
   double aspect_ratio;
-  aspect_ratio = normal_coeff * hm * ( A + B + C + D ) / fabs( detTet );
+  aspect_ratio = aspect_ratio_normal_coeff * hm * ( A + B + C + D ) / fabs( detTet );
 
   if( aspect_ratio > 0 )
     return (double) VERDICT_MIN( aspect_ratio, VERDICT_DBL_MAX );
@@ -601,7 +601,6 @@ C_FUNC_DEF double v_tet_aspect_gamma( int /*num_nodes*/, double coordinates[][3]
 */
 C_FUNC_DEF double v_tet_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double normal_exp = 1. / 3.;
 
   VerdictVector ab, ac, ad;
 
@@ -620,7 +619,7 @@ C_FUNC_DEF double v_tet_aspect_frobenius( int /*num_nodes*/, double coordinates[
   double denominator = ab % ( ac * ad );
   denominator *= denominator;
   denominator *= 2.;
-  denominator = 3. * pow( denominator, normal_exp );
+  denominator = 3. * pow( denominator, one_third );
 
   if( denominator < VERDICT_DBL_MIN )
     return (double)VERDICT_DBL_MAX;
@@ -655,7 +654,6 @@ C_FUNC_DEF double v_tet_aspect_frobenius( int /*num_nodes*/, double coordinates[
 */
 C_FUNC_DEF double v_tet_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double normal_coeff = 180. * .3183098861837906715377675267450287;
 
   //Determine side vectors
   VerdictVector ab, bc, ad, cd;
@@ -1189,9 +1187,6 @@ C_FUNC_DEF double v_tet_jacobian( int num_nodes, double coordinates[][3] )
 C_FUNC_DEF double v_tet_shape( int /*num_nodes*/, double coordinates[][3] )
 {
 
-   static const double two_thirds = 2.0/3.0;
-   static const double root_of_2 = sqrt(2.0);
-
    VerdictVector edge0, edge2, edge3;
 
   edge0.set(coordinates[1][0] - coordinates[0][0],
@@ -1440,11 +1435,9 @@ C_FUNC_DEF void v_tet_quality( int num_nodes, double coordinates[][3],
                 coordinates[3][1] - coordinates[2][1],
                 coordinates[3][2] - coordinates[2][2] );
 
-  // common numbers
-  static const double root_of_2 = sqrt(2.0);
 
   // calculate the jacobian
-  static const int do_jacobian = V_TET_JACOBIAN | V_TET_VOLUME |
+  int do_jacobian = V_TET_JACOBIAN | V_TET_VOLUME |
     V_TET_ASPECT_BETA | V_TET_ASPECT_GAMMA | V_TET_SHAPE |
     V_TET_RELATIVE_SIZE_SQUARED | V_TET_SHAPE_AND_SIZE |
     V_TET_SCALED_JACOBIAN | V_TET_CONDITION;
@@ -1508,7 +1501,6 @@ C_FUNC_DEF void v_tet_quality( int num_nodes, double coordinates[][3],
       metric_vals->shape = (double)0.0;
     }
     else{
-      static const double two_thirds = 2.0/3.0;
       double num = 3.0 * pow(root_of_2 * metric_vals->jacobian, two_thirds);
       double den = 1.5 *
         (edges[0] % edges[0]  + edges[2] % edges[2]  + edges[3] % edges[3]) -
@@ -1585,9 +1577,6 @@ C_FUNC_DEF void v_tet_quality( int num_nodes, double coordinates[][3],
   // calculate the condition number
   if(metrics_request_flag & V_TET_CONDITION)
   {
-    static const double root_of_3 = sqrt(3.0);
-    static const double root_of_6 = sqrt(6.0);
-
     VerdictVector c_1, c_2, c_3;
     c_1 = edges[0];
     c_2 = (-2*edges[2] - edges[0])/root_of_3;

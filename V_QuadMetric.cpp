@@ -34,6 +34,10 @@
 static double v_quad_size = 0;
 static ComputeNormal compute_normal = NULL;
 
+static const double radius_ratio_normal_coeff = 1. / ( 2. * sqrt( 2. ) );
+static const double root_of_2 = sqrt(2.0);
+
+
 /*!
   weights based on the average size of a quad
 */
@@ -530,8 +534,6 @@ C_FUNC_DEF double v_quad_aspect_ratio( int /*num_nodes*/, double coordinates[][3
 */
 C_FUNC_DEF double v_quad_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
-  static const double normal_coeff = 1. / ( 2. * sqrt( 2. ) );
-
   VerdictVector edges[4];
   v_make_quad_edges( edges, coordinates );
 
@@ -574,7 +576,7 @@ C_FUNC_DEF double v_quad_radius_ratio( int /*num_nodes*/, double coordinates[][3
   if( t0 < VERDICT_DBL_MIN ) 
     return (double)VERDICT_DBL_MAX;
 
-  double radius_ratio = normal_coeff * sqrt( ( a2 + b2 + c2 + d2 ) * h2 ) / t0;
+  double radius_ratio = radius_ratio_normal_coeff * sqrt( ( a2 + b2 + c2 + d2 ) * h2 ) / t0;
   
   if( radius_ratio > 0 )
     return (double) VERDICT_MIN( radius_ratio, VERDICT_DBL_MAX );
@@ -814,8 +816,6 @@ C_FUNC_DEF double v_quad_stretch( int /*num_nodes*/, double coordinates[][3] )
             coordinates[3][2] - coordinates[1][2]);
   double diag13 = temp.length_squared();
   
-  static const double QUAD_STRETCH_FACTOR = sqrt(2.0);
-
   // 'diag02' is now the max diagonal of the quad
   diag02 = VERDICT_MAX( diag02, diag13 );
 
@@ -823,7 +823,7 @@ C_FUNC_DEF double v_quad_stretch( int /*num_nodes*/, double coordinates[][3] )
     return (double) VERDICT_DBL_MAX;
   else
   {
-    double stretch = (double) ( QUAD_STRETCH_FACTOR *
+    double stretch = (double) ( root_of_2 *
                            sqrt( VERDICT_MIN(
                                   VERDICT_MIN( lengths_squared[0], lengths_squared[1] ),
                                   VERDICT_MIN( lengths_squared[2], lengths_squared[3] ) ) /
@@ -1872,15 +1872,13 @@ C_FUNC_DEF void v_quad_quality( int num_nodes, double coordinates[][3],
               coordinates[3][2] - coordinates[1][2]);
     double diag13 = temp.length_squared();
     
-    static const double QUAD_STRETCH_FACTOR = sqrt(2.0);
-
     // 'diag02' is now the max diagonal of the quad
     diag02 = VERDICT_MAX( diag02, diag13 );
 
     if( diag02 < VERDICT_DBL_MIN )
       metric_vals->stretch = VERDICT_DBL_MAX; 
     else
-      metric_vals->stretch =  QUAD_STRETCH_FACTOR *
+      metric_vals->stretch =  root_of_2 *
                               VERDICT_MIN(
                                 VERDICT_MIN( lengths[0], lengths[1] ),
                                 VERDICT_MIN( lengths[2], lengths[3] ) ) /

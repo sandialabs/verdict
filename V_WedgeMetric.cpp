@@ -36,6 +36,7 @@ void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[]
 
 
 static const double one_third = 1.0/3.0;
+static const double two_thirds = 2.0/3.0;
 
 /*
    the wedge element
@@ -1090,7 +1091,6 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
 {
   double current_jacobian = 0, current_shape, norm_jacobi = 0;
   double min_shape = 1.0;
-  static const double two_thirds = 2.0/3.0;
   VerdictVector vec1,vec2,vec3;
 
   // Node 0
