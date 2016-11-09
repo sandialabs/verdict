@@ -1075,6 +1075,8 @@ struct TriMetricVals
        Reference --- SDRC/IDEAS Simulation: Finite Element Modeling--User's Guide */
     C_FUNC_DEF double v_hex_distortion( int num_nodes, double coordinates[][3] );
 
+    C_FUNC_DEF double v_hex_equiangle_skew( int num_nodes, double coordinates[][3] );
+
 /* individual quality functions for tet elements */
 
 #if !VERDICT_THREAD_SAFE
@@ -1185,6 +1187,15 @@ struct TriMetricVals
     /** {min(|J|)/actual volume}*parent volume, parent volume = 1/6 for tet.
        Reference --- SDRC/IDEAS Simulation: Finite Element Modeling--User's Guide */ 
     C_FUNC_DEF double v_tet_distortion( int num_nodes, double coordinates[][3] ); 
+
+    //! Calculates tet equivolume skew metric.
+    C_FUNC_DEF double v_tet_equivolume_skew( int num_nodes, double coordinates[][3] );
+
+    //! Calculates tet squish index metric.
+    C_FUNC_DEF double v_tet_squish_index( int num_nodes, double coordinates[][3] );
+
+    //! Calculates tet equiangle skew metric.
+    C_FUNC_DEF double v_tet_equiangle_skew( int num_nodes, double coordinates[][3] );
     
 /* individual quality functions for pyramid elements */ 
 
@@ -1202,6 +1213,8 @@ struct TriMetricVals
         Reference -- Adaptation of Hex shape metric. */
     C_FUNC_DEF double v_pyramid_shape( int num_nodes, double coordinates[][3] );
 
+    //! Calculates the pyramid equiangle skew metric.
+    C_FUNC_DEF double v_pyramid_equiangle_skew( int num_nodes, double coordinates[][3] );
 
 
 /* individual quality functions for wedge elements */
@@ -1253,6 +1266,9 @@ struct TriMetricVals
     /** max(F_0123, F_1204, F_2015, F_3540, F_4351, F_5432)
       Reference --- Adaptation of hex max aspect frobenius */
     C_FUNC_DEF double v_wedge_condition( int num_nodes, double coordinates[][3] );
+
+    //! Calculates wedge equiangle skew metric
+    C_FUNC_DEF double v_wedge_equiangle_skew( int num_nodes, double coordinates[][3] );
 
 
 /* individual quality functions for knife elements */
@@ -1421,6 +1437,9 @@ struct TriMetricVals
        Reference --- SDRC/IDEAS Simulation: Finite Element Modeling--User's Guide */
     C_FUNC_DEF double v_quad_distortion( int num_nodes, double coordinates[][3] ); 
 
+    //! Calculates the quad equiangle skew
+    C_FUNC_DEF double v_quad_equiangle_skew( int num_nodes, double coordinates[][3] );
+
 #if !VERDICT_THREAD_SAFE
     //! Sets function pointer to calculate quad normal wrt surface
     //! this affects condition number and scaled jacobian for a quad
@@ -1522,6 +1541,9 @@ struct TriMetricVals
     /** {min(|J|)/actual area}*parent area, parent area = 1/2 for triangular element. 
        Reference --- SDRC/IDEAS Simulation: Finite Element Modeling--User's Guide */
     C_FUNC_DEF double v_tri_distortion( int num_nodes, double coordinates[][3] );
+
+    //! Calculates triangle equiangle skew metric.
+    C_FUNC_DEF double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] );
 
 
 
