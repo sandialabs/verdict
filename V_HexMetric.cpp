@@ -1092,20 +1092,61 @@ C_FUNC_DEF double v_hex_taper( int /*num_nodes*/, double coordinates[][3] )
 
 /*!
   volume of a hex
-
-  Jacobian at hex center
+  Split the hex into 24 tets.
+  sum the volume of each tet.
 */
 C_FUNC_DEF double v_hex_volume( int /*num_nodes*/, double coordinates[][3] )
 {
+
   VerdictVector node_pos[8];
   make_hex_nodes ( coordinates, node_pos );
-  
-  VerdictVector efg1 = v_calc_hex_efg( 1, node_pos);
-  VerdictVector efg2 = v_calc_hex_efg( 2, node_pos);
-  VerdictVector efg3 = v_calc_hex_efg( 3, node_pos);
 
-  double volume;
-  volume = (double) (efg1 % (efg2 * efg3))/64.0;
+  //define the nodes of each face of the hex
+  int faces[6][4]=
+  {
+    {0,1,5,4},
+    {1,2,6,5},
+    {2,3,7,6},
+    {3,0,4,7},
+    {3,2,1,0},
+    {4,5,6,7},
+  };
+
+  //calculate the center of each face
+  VerdictVector fcenter[6];
+  for(int f=0;f<6;f++)
+  {
+   fcenter[f]=(node_pos[faces[f][0]] + node_pos[faces[f][1]] + node_pos[faces[f][2]] + node_pos[faces[f][3]]) * 0.25;
+  }
+
+  //calculate the center of the hex
+  VerdictVector hcenter = (node_pos[0] + node_pos[1] + node_pos[2] + node_pos[3] +
+                         node_pos[4] + node_pos[5] + node_pos[6] + node_pos[7]) * 0.125;
+
+
+  double volume=0.0;
+  for(int i=0;i<6;i++)
+  {
+    //for each face calculate the vectors from the nodes and center of the face to the center of the hex.
+    //These vectors define three of the sides of the tets.
+    VerdictVector side[5];
+    side[4]=hcenter-fcenter[i];//vector from center of face to center of hex.
+    for(int s=0;s<4;s++)
+    {
+      side[s]=hcenter-node_pos[faces[i][s]];//vector from face node to center of hex.
+    }
+
+    //for each of the four tets that originate from this face.
+    //calculate the volume of the tet.
+    //This is done by calculating the triple product of three vectors that originate from a corner node of the tet.
+    //This is also the jacobain at the corner node of the tet.
+    //The volume is 1/6 of jacobian at a corner node.
+    for(int j=0;j<3;j++)//first three tets
+    {
+      volume += (double)((side[4] % (side[j+1] * side[j])) / 6.0);
+    }
+    volume += (double)((side[4] % (side[0] * side[3])) / 6.0);//fourth tet.
+  }
 
   if ( volume > 0 )
     return (double) VERDICT_MIN( volume, VERDICT_DBL_MAX );
