@@ -3,6 +3,8 @@ project(verdict)
 
 cmake_minimum_required( VERSION 2.8 )
 
+set(CMAKE_MACOSX_RPATH 1)
+
 set( verdict_MAJOR_VERSION "1")
 set( verdict_MINOR_VERSION "2")
 set( verdict_BUILD_VERSION "0")
