@@ -25,6 +25,7 @@
 #include "V_GaussIntegration.hpp"
 #include "verdict_defines.hpp"
 #include <memory.h>
+#include <vector>
 
 #if defined(__BORLANDC__)
 #pragma warn -8004 /* "assigned a value that is never used" */

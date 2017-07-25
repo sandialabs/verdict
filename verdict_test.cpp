@@ -29,10 +29,8 @@ PURPOSE.  See the above copyright notice for more information.
 #include <string>
 #include <sstream>
 
-
 #define MAX_NODES_PER_ELEMENT 27
 #define MAX_TESTS_PER_ELEMENT 20
-
 
 #define VERDICT_SIGNIFICANT_FIG 5    // 7 significant figures for doubles
 
