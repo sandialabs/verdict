@@ -24,7 +24,7 @@ if ( VERDICT_MANGLE )
 endif ( VERDICT_MANGLE )
 mark_as_advanced( VERDICT_MANGLE )
 
-option( VERDICT_ENABLE_TESTING "Should tests of the VERDICT library be built?" OFF )
+option( VERDICT_ENABLE_TESTING "Should tests of the VERDICT library be built?" ON )
 
 include_directories(
   ${verdict_BINARY_DIR}
@@ -83,15 +83,18 @@ endif ( VERDICT_LIBRARY_PROPERTIES )
 if ( VERDICT_ENABLE_TESTING )
   enable_testing()
 
-  set( verdict_TESTSRCS
-    verdict_test.cpp
-  )
+  function(ADD_VERDICT_UNITTESTS DIR)
+    ADD_SUBDIRECTORY(${verdict_SOURCE_DIR}/${DIR} ${verdict_BINARY_DIR}/${DIR})
+  
+    FOREACH(TEST ${ARGN})
+      ADD_TEST(NAME UT-${TEST}
+               WORKING_DIRECTORY ${verdict_BINARY_DIR}/${DIR}
+               COMMAND ${TEST})
+      set_tests_properties(UT-${TEST} PROPERTIES ENVIRONMENT "${CUBIT_TEST_ENV}")
+    ENDFOREACH(TEST ${ARGN})
+  endfunction()
 
-  add_executable( verdict_test ${verdict_TESTSRCS} )
-  target_link_libraries( verdict_test ${verdict_LIBRARY} )
-
-  add_test( NAME verdict_test COMMAND verdict_test )
-  set_tests_properties( verdict_test PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED" )
+  ADD_VERDICT_UNITTESTS(unittests unittests_verdict)
 endif ( VERDICT_ENABLE_TESTING )
 
 if ( NOT verdict_INSTALL_DOC_DIR )
@@ -193,17 +196,3 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
   endif (WIN32 AND NOT UNIX)
   include(CPack)
 endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-
-
-function(ADD_VERDICT_UNITTESTS DIR)
-  ADD_SUBDIRECTORY(${verdict_SOURCE_DIR}/${DIR} ${verdict_BINARY_DIR}/${DIR})
-  
-  FOREACH(TEST ${ARGN})
-    ADD_TEST(NAME UT-${TEST}
-             WORKING_DIRECTORY ${verdict_BINARY_DIR}/${DIR}
-             COMMAND ${TEST})
-    set_tests_properties(UT-${TEST} PROPERTIES ENVIRONMENT "${CUBIT_TEST_ENV}")
-  ENDFOREACH(TEST ${ARGN})
-endfunction()
-
-ADD_VERDICT_UNITTESTS(unittests unittests_verdict)
