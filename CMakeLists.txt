@@ -193,3 +193,17 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
   endif (WIN32 AND NOT UNIX)
   include(CPack)
 endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+
+
+function(ADD_VERDICT_UNITTESTS DIR)
+  ADD_SUBDIRECTORY(${verdict_SOURCE_DIR}/${DIR} ${verdict_BINARY_DIR}/${DIR})
+  
+  FOREACH(TEST ${ARGN})
+    ADD_TEST(NAME UT-${TEST}
+             WORKING_DIRECTORY ${verdict_BINARY_DIR}/${DIR}
+             COMMAND ${TEST})
+    set_tests_properties(UT-${TEST} PROPERTIES ENVIRONMENT "${CUBIT_TEST_ENV}")
+  ENDFOREACH(TEST ${ARGN})
+endfunction()
+
+ADD_VERDICT_UNITTESTS(unittests unittests_verdict)
