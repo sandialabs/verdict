@@ -36,8 +36,6 @@ static const double root_of_2 = sqrt(2.0);
 static const double normal_coeff = 180. * .3183098861837906715377675267450287;
 static const double aspect_ratio_normal_coeff = sqrt(6.) / 12.;
 static const double two_thirds = 2.0/3.0;
-static const double root_of_3 = sqrt(3.0);
-static const double root_of_6 = sqrt(6.0);
 
 C_FUNC_DEF double v_tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
