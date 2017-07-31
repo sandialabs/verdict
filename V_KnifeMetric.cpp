@@ -149,24 +149,3 @@ C_FUNC_DEF double v_knife_volume( int num_nodes, double coordinates[][3] )
   return (double)volume;
     
 }
-
-
-/*!
- 
-  calculate the quality metrics of a knife element.
-
-  There is only one, but we put this here to be consistent with
-  functions for other element types.  Who knows if we'll add
-  more metrics.
-*/
-
-C_FUNC_DEF void v_knife_quality( int num_nodes, double coordinates[][3], 
-    unsigned int metrics_request_flag, KnifeMetricVals *metric_vals )
-{
-  memset( metric_vals, 0, sizeof(KnifeMetricVals) );
-
-  if(metrics_request_flag & V_KNIFE_VOLUME)
-    metric_vals->volume = v_knife_volume(num_nodes, coordinates);
-}
-
-

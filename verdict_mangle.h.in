@@ -34,7 +34,6 @@ used when the shared library is loaded/unloaded from an executable.
 
 /* C function names */
 #define v_edge_length @VERDICT_MANGLE_PREFIX@_v_edge_length
-#define v_edge_quality @VERDICT_MANGLE_PREFIX@_v_edge_quality
 #define v_hex_condition @VERDICT_MANGLE_PREFIX@_v_hex_condition
 #define v_hex_diagonal @VERDICT_MANGLE_PREFIX@_v_hex_diagonal
 #define v_hex_dimension @VERDICT_MANGLE_PREFIX@_v_hex_dimension
@@ -45,13 +44,9 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_hex_max_edge_ratio @VERDICT_MANGLE_PREFIX@_v_hex_max_edge_ratio
 #define v_hex_med_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_hex_med_aspect_frobenius
 #define v_hex_oddy @VERDICT_MANGLE_PREFIX@_v_hex_oddy
-#define v_hex_quality @VERDICT_MANGLE_PREFIX@_v_hex_quality
-#define v_hex_relative_size_squared @VERDICT_MANGLE_PREFIX@_v_hex_relative_size_squared
 #define v_hex_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_hex_scaled_jacobian
 #define v_hex_shape @VERDICT_MANGLE_PREFIX@_v_hex_shape
-#define v_hex_shape_and_size @VERDICT_MANGLE_PREFIX@_v_hex_shape_and_size
 #define v_hex_shear @VERDICT_MANGLE_PREFIX@_v_hex_shear
-#define v_hex_shear_and_size @VERDICT_MANGLE_PREFIX@_v_hex_shear_and_size
 #define v_hex_skew @VERDICT_MANGLE_PREFIX@_v_hex_skew
 #define v_hex_stretch @VERDICT_MANGLE_PREFIX@_v_hex_stretch
 #define v_hex_taper @VERDICT_MANGLE_PREFIX@_v_hex_taper
@@ -60,9 +55,7 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_hex_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@_v_hex_relative_size_squared_2
 #define v_hex_shape_and_size_2 @VERDICT_MANGLE_PREFIX@_v_hex_shape_and_size_2
 #define v_hex_shear_and_size_2 @VERDICT_MANGLE_PREFIX@_v_hex_shear_and_size_2
-#define v_knife_quality @VERDICT_MANGLE_PREFIX@_v_knife_quality
 #define v_knife_volume @VERDICT_MANGLE_PREFIX@_v_knife_volume
-#define v_pyramid_quality @VERDICT_MANGLE_PREFIX@_v_pyramid_quality
 #define v_pyramid_volume @VERDICT_MANGLE_PREFIX@_v_pyramid_volume
 #define v_pyramid_equiangle_skewv @VERDICT_MANGLE_PREFIX@_v_pyramid_equiangle_skew
 #define v_pyramid_jacobian @VERDICT_MANGLE_PREFIX@_v_pyramid_jacobian
@@ -81,14 +74,10 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_quad_med_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_quad_med_aspect_frobenius
 #define v_quad_minimum_angle @VERDICT_MANGLE_PREFIX@_v_quad_minimum_angle
 #define v_quad_oddy @VERDICT_MANGLE_PREFIX@_v_quad_oddy
-#define v_quad_quality @VERDICT_MANGLE_PREFIX@_v_quad_quality
 #define v_quad_radius_ratio @VERDICT_MANGLE_PREFIX@_v_quad_radius_ratio
-#define v_quad_relative_size_squared @VERDICT_MANGLE_PREFIX@_v_quad_relative_size_squared
 #define v_quad_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_quad_scaled_jacobian
 #define v_quad_shape @VERDICT_MANGLE_PREFIX@_v_quad_shape
-#define v_quad_shape_and_size @VERDICT_MANGLE_PREFIX@_v_quad_shape_and_size
 #define v_quad_shear @VERDICT_MANGLE_PREFIX@_v_quad_shear
-#define v_quad_shear_and_size @VERDICT_MANGLE_PREFIX@_v_quad_shear_and_size
 #define v_quad_skew @VERDICT_MANGLE_PREFIX@_v_quad_skew
 #define v_quad_stretch @VERDICT_MANGLE_PREFIX@_v_quad_stretch
 #define v_quad_taper @VERDICT_MANGLE_PREFIX@_v_quad_taper
@@ -96,12 +85,6 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_quad_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_quad_relative_size_squared_2
 #define v_quad_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_quad_shape_and_size_2
 #define v_quad_shear_and_size_2 @VERDICT_MANGLE_PREFIX@v_quad_shear_and_size_2
-#define v_set_hex_size @VERDICT_MANGLE_PREFIX@_v_set_hex_size
-#define v_set_quad_normal_func @VERDICT_MANGLE_PREFIX@_v_set_quad_normal_func
-#define v_set_quad_size @VERDICT_MANGLE_PREFIX@_v_set_quad_size
-#define v_set_tet_size @VERDICT_MANGLE_PREFIX@_v_set_tet_size
-#define v_set_tri_normal_func @VERDICT_MANGLE_PREFIX@_v_set_tri_normal_func
-#define v_set_tri_size @VERDICT_MANGLE_PREFIX@_v_set_tri_size
 #define v_tet_aspect_beta @VERDICT_MANGLE_PREFIX@_v_tet_aspect_beta
 #define v_tet_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_tet_aspect_frobenius
 #define v_tet_aspect_gamma @VERDICT_MANGLE_PREFIX@_v_tet_aspect_gamma
@@ -112,12 +95,9 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_tet_edge_ratio @VERDICT_MANGLE_PREFIX@_v_tet_edge_ratio
 #define v_tet_jacobian @VERDICT_MANGLE_PREFIX@_v_tet_jacobian
 #define v_tet_minimum_angle @VERDICT_MANGLE_PREFIX@_v_tet_minimum_angle
-#define v_tet_quality @VERDICT_MANGLE_PREFIX@_v_tet_quality
 #define v_tet_radius_ratio @VERDICT_MANGLE_PREFIX@_v_tet_radius_ratio
-#define v_tet_relative_size_squared @VERDICT_MANGLE_PREFIX@_v_tet_relative_size_squared
 #define v_tet_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_tet_scaled_jacobian
 #define v_tet_shape @VERDICT_MANGLE_PREFIX@_v_tet_shape
-#define v_tet_shape_and_size @VERDICT_MANGLE_PREFIX@_v_tet_shape_and_size
 #define v_tet_volume @VERDICT_MANGLE_PREFIX@_v_tet_volume
 #define v_tet_equiangle_skew @VERDICT_MANGLE_PREFIX@v_tet_equiangle_skew
 #define v_tet_equivolume_skew @VERDICT_MANGLE_PREFIX@v_tet_equivolume_skew
@@ -132,15 +112,11 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_tri_edge_ratio @VERDICT_MANGLE_PREFIX@_v_tri_edge_ratio
 #define v_tri_maximum_angle @VERDICT_MANGLE_PREFIX@_v_tri_maximum_angle
 #define v_tri_minimum_angle @VERDICT_MANGLE_PREFIX@_v_tri_minimum_angle
-#define v_tri_quality @VERDICT_MANGLE_PREFIX@_v_tri_quality
 #define v_tri_radius_ratio @VERDICT_MANGLE_PREFIX@_v_tri_radius_ratio
-#define v_tri_relative_size_squared @VERDICT_MANGLE_PREFIX@_v_tri_relative_size_squared
 #define v_tri_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_tri_scaled_jacobian
 #define v_tri_shape @VERDICT_MANGLE_PREFIX@_v_tri_shape
-#define v_tri_shape_and_size @VERDICT_MANGLE_PREFIX@_v_tri_shape_and_size
 #define v_tri_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_tri_relative_size_squared_2
 #define v_tri_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_tri_shape_and_size_2
-#define v_wedge_quality @VERDICT_MANGLE_PREFIX@_v_wedge_quality
 #define v_wedge_volume @VERDICT_MANGLE_PREFIX@_v_wedge_volume
 #define v_wedge_condition @VERDICT_MANGLE_PREFIX@_v_wedge_condition
 #define v_wedge_distortion @VERDICT_MANGLE_PREFIX@_v_wedge_distortion

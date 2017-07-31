@@ -397,38 +397,6 @@ C_FUNC_DEF double v_wedge_volume( int /*num_nodes*/, double coordinates[][3] )
   return (double)volume;
 }
 
-
-
-C_FUNC_DEF void v_wedge_quality( int num_nodes, double coordinates[][3], 
-    unsigned int metrics_request_flag, WedgeMetricVals *metric_vals )
-{
-  memset( metric_vals, 0, sizeof(WedgeMetricVals) );
-
-  if(metrics_request_flag & V_WEDGE_VOLUME)
-    metric_vals->volume = v_wedge_volume(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_EDGE_RATIO)
-    metric_vals->edge_ratio = v_wedge_edge_ratio(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_MAX_ASPECT_FROBENIUS)
-    metric_vals->max_aspect_frobenius = v_wedge_max_aspect_frobenius(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_MEAN_ASPECT_FROBENIUS)
-    metric_vals->mean_aspect_frobenius = v_wedge_mean_aspect_frobenius(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_JACOBIAN)
-    metric_vals->jacobian = v_wedge_jacobian(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_SCALED_JACOBIAN)
-    metric_vals->scaled_jacobian = v_wedge_scaled_jacobian(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_DISTORTION)
-    metric_vals->distortion = v_wedge_distortion(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_MAX_STRETCH)
-    metric_vals->max_stretch = v_wedge_max_stretch(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_SHAPE)
-    metric_vals->shape = v_wedge_shape(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_CONDITION)
-    metric_vals->condition = v_wedge_condition(num_nodes, coordinates);
-  if(metrics_request_flag & V_WEDGE_EQUIANGLE_SKEW)
-    metric_vals->equiangle_skew = v_wedge_equiangle_skew(num_nodes, coordinates);
-}
-
-
 /* Edge ratio
    The edge ratio quality metric is the ratio of the longest to shortest edge of
    a wedge.

@@ -494,23 +494,3 @@ double v_distance_point_to_pyramid_base( int num_nodes, double coordinates[][3],
 
   return distance;
 }
-
-
-
-C_FUNC_DEF void v_pyramid_quality( int num_nodes, double coordinates[][3],
-    unsigned int metrics_request_flag, PyramidMetricVals *metric_vals )
-{
-  memset( metric_vals, 0, sizeof( PyramidMetricVals ) );
-
-  if(metrics_request_flag & V_PYRAMID_VOLUME)
-    metric_vals->volume = v_pyramid_volume(num_nodes, coordinates);
-  else if(metrics_request_flag & V_PYRAMID_JACOBIAN)
-    metric_vals->jacobian = v_pyramid_jacobian(num_nodes, coordinates);
-  else if(metrics_request_flag & V_PYRAMID_SCALED_JACOBIAN)
-    metric_vals->scaled_jacobian = v_pyramid_scaled_jacobian(num_nodes, coordinates);
-  else if(metrics_request_flag & V_PYRAMID_SHAPE)
-    metric_vals->shape = v_pyramid_shape(num_nodes, coordinates);
-  else if(metrics_request_flag & V_PYRAMID_EQUIANGLE_SKEW)
-    metric_vals->equiangle_skew = v_pyramid_equiangle_skew(num_nodes, coordinates);
-}
-
