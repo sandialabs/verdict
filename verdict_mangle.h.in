@@ -52,9 +52,9 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_hex_taper @VERDICT_MANGLE_PREFIX@_v_hex_taper
 #define v_hex_volume @VERDICT_MANGLE_PREFIX@_v_hex_volume
 #define v_hex_equiangle_skew @VERDICT_MANGLE_PREFIX@_v_hex_equiangle_skew
-#define v_hex_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@_v_hex_relative_size_squared_2
-#define v_hex_shape_and_size_2 @VERDICT_MANGLE_PREFIX@_v_hex_shape_and_size_2
-#define v_hex_shear_and_size_2 @VERDICT_MANGLE_PREFIX@_v_hex_shear_and_size_2
+#define v_hex_relative_size_squared @VERDICT_MANGLE_PREFIX@_v_hex_relative_size_squared
+#define v_hex_shape_and_size @VERDICT_MANGLE_PREFIX@_v_hex_shape_and_size
+#define v_hex_shear_and_size @VERDICT_MANGLE_PREFIX@_v_hex_shear_and_size
 #define v_knife_volume @VERDICT_MANGLE_PREFIX@_v_knife_volume
 #define v_pyramid_volume @VERDICT_MANGLE_PREFIX@_v_pyramid_volume
 #define v_pyramid_equiangle_skewv @VERDICT_MANGLE_PREFIX@_v_pyramid_equiangle_skew
@@ -82,9 +82,9 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_quad_stretch @VERDICT_MANGLE_PREFIX@_v_quad_stretch
 #define v_quad_taper @VERDICT_MANGLE_PREFIX@_v_quad_taper
 #define v_quad_warpage @VERDICT_MANGLE_PREFIX@_v_quad_warpage
-#define v_quad_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_quad_relative_size_squared_2
-#define v_quad_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_quad_shape_and_size_2
-#define v_quad_shear_and_size_2 @VERDICT_MANGLE_PREFIX@v_quad_shear_and_size_2
+#define v_quad_relative_size_squared @VERDICT_MANGLE_PREFIX@v_quad_relative_size_squared
+#define v_quad_shape_and_size @VERDICT_MANGLE_PREFIX@v_quad_shape_and_size
+#define v_quad_shear_and_size @VERDICT_MANGLE_PREFIX@v_quad_shear_and_size
 #define v_tet_aspect_beta @VERDICT_MANGLE_PREFIX@_v_tet_aspect_beta
 #define v_tet_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_tet_aspect_frobenius
 #define v_tet_aspect_gamma @VERDICT_MANGLE_PREFIX@_v_tet_aspect_gamma
@@ -101,8 +101,8 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_tet_volume @VERDICT_MANGLE_PREFIX@_v_tet_volume
 #define v_tet_equiangle_skew @VERDICT_MANGLE_PREFIX@v_tet_equiangle_skew
 #define v_tet_equivolume_skew @VERDICT_MANGLE_PREFIX@v_tet_equivolume_skew
-#define v_tet_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_tet_relative_size_squared_2
-#define v_tet_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_tet_shape_and_size_2
+#define v_tet_relative_size_squared @VERDICT_MANGLE_PREFIX@v_tet_relative_size_squared
+#define v_tet_shape_and_size @VERDICT_MANGLE_PREFIX@v_tet_shape_and_size
 #define v_tet_squish_index @VERDICT_MANGLE_PREFIX@v_tet_squish_index
 #define v_tri_area @VERDICT_MANGLE_PREFIX@_v_tri_area
 #define v_tri_aspect_frobenius @VERDICT_MANGLE_PREFIX@_v_tri_aspect_frobenius
@@ -115,8 +115,8 @@ used when the shared library is loaded/unloaded from an executable.
 #define v_tri_radius_ratio @VERDICT_MANGLE_PREFIX@_v_tri_radius_ratio
 #define v_tri_scaled_jacobian @VERDICT_MANGLE_PREFIX@_v_tri_scaled_jacobian
 #define v_tri_shape @VERDICT_MANGLE_PREFIX@_v_tri_shape
-#define v_tri_relative_size_squared_2 @VERDICT_MANGLE_PREFIX@v_tri_relative_size_squared_2
-#define v_tri_shape_and_size_2 @VERDICT_MANGLE_PREFIX@v_tri_shape_and_size_2
+#define v_tri_relative_size_squared @VERDICT_MANGLE_PREFIX@v_tri_relative_size_squared
+#define v_tri_shape_and_size @VERDICT_MANGLE_PREFIX@v_tri_shape_and_size
 #define v_wedge_volume @VERDICT_MANGLE_PREFIX@_v_wedge_volume
 #define v_wedge_condition @VERDICT_MANGLE_PREFIX@_v_wedge_condition
 #define v_wedge_distortion @VERDICT_MANGLE_PREFIX@_v_wedge_distortion

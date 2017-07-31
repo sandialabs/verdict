@@ -610,7 +610,7 @@ C_FUNC_DEF double v_tri_shape( int num_nodes, double coordinates[][3] )
 
   Min(J,1/J) where J is the determinant of the weighted jacobian matrix.
 */
-C_FUNC_DEF double v_tri_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_tri_area )
+C_FUNC_DEF double v_tri_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_tri_area )
 {
   double w11, w21, w12, w22;
 
@@ -652,11 +652,11 @@ C_FUNC_DEF double v_tri_relative_size_squared_2( int /*num_nodes*/, double coord
   
   Product of the Shape and Relative Size
 */
-C_FUNC_DEF double v_tri_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tri_area )
+C_FUNC_DEF double v_tri_shape_and_size( int num_nodes, double coordinates[][3], double average_tri_area )
 {
   double size, shape;  
 
-  size = v_tri_relative_size_squared_2( num_nodes, coordinates, average_tri_area );
+  size = v_tri_relative_size_squared( num_nodes, coordinates, average_tri_area );
   shape = v_tri_shape( num_nodes, coordinates );
   
   double shape_and_size = size * shape;

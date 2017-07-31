@@ -1214,7 +1214,7 @@ C_FUNC_DEF double v_tet_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min(J,1/J), where J is the determinant of the weighted Jacobian matrix
 */
-C_FUNC_DEF double v_tet_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_tet_volume )
+C_FUNC_DEF double v_tet_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_tet_volume )
 {
   double size;
   VerdictVector w1, w2, w3;
@@ -1242,12 +1242,12 @@ C_FUNC_DEF double v_tet_relative_size_squared_2( int /*num_nodes*/, double coord
 
   Product of the shape and relative size
 */
-C_FUNC_DEF double v_tet_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tet_volume )
+C_FUNC_DEF double v_tet_shape_and_size( int num_nodes, double coordinates[][3], double average_tet_volume )
 {
 
   double shape, size;
   shape = v_tet_shape( num_nodes, coordinates );
-  size = v_tet_relative_size_squared_2 (num_nodes, coordinates, average_tet_volume );
+  size = v_tet_relative_size_squared(num_nodes, coordinates, average_tet_volume );
 
   return (double)(shape * size);
 

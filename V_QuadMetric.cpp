@@ -1253,7 +1253,7 @@ C_FUNC_DEF double v_quad_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-C_FUNC_DEF double v_quad_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_quad_area )
+C_FUNC_DEF double v_quad_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_quad_area )
 {
  
   double quad_area = v_quad_area (4, coordinates); 
@@ -1286,10 +1286,10 @@ C_FUNC_DEF double v_quad_relative_size_squared_2( int /*num_nodes*/, double coor
 
   Product of Shape and Relative Size
 */
-C_FUNC_DEF double v_quad_shape_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area )
+C_FUNC_DEF double v_quad_shape_and_size( int num_nodes, double coordinates[][3], double average_quad_area )
 {
   double shape, size;
-  size = v_quad_relative_size_squared_2( num_nodes, coordinates, average_quad_area );
+  size = v_quad_relative_size_squared( num_nodes, coordinates, average_quad_area );
   shape = v_quad_shape( num_nodes, coordinates );
 
   double shape_and_size = shape * size;
@@ -1305,11 +1305,11 @@ C_FUNC_DEF double v_quad_shape_and_size_2( int num_nodes, double coordinates[][3
 
   product of shear and relative size
 */
-C_FUNC_DEF double v_quad_shear_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area )
+C_FUNC_DEF double v_quad_shear_and_size( int num_nodes, double coordinates[][3], double average_quad_area )
 {
   double shear, size;
   shear = v_quad_shear( num_nodes, coordinates );
-  size = v_quad_relative_size_squared_2( num_nodes, coordinates, average_quad_area );
+  size = v_quad_relative_size_squared( num_nodes, coordinates, average_quad_area );
 
   double shear_and_size = shear * size;
 

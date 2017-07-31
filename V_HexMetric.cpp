@@ -2507,7 +2507,7 @@ C_FUNC_DEF double v_hex_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-C_FUNC_DEF double v_hex_relative_size_squared_2( int /*num_nodes*/, double coordinates[][3], double average_hex_volume )
+C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_hex_volume )
 {
   double size = 0;
   double tau; 
@@ -2624,9 +2624,9 @@ C_FUNC_DEF double v_hex_relative_size_squared_2( int /*num_nodes*/, double coord
 
   Product of Shape and Relative Size
 */
-C_FUNC_DEF double v_hex_shape_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume )
+C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
 {
-  double size = v_hex_relative_size_squared_2( num_nodes, coordinates, average_hex_volume );
+  double size = v_hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
   double shape = v_hex_shape( num_nodes, coordinates );
 
   double shape_size = size * shape;
@@ -2644,9 +2644,9 @@ C_FUNC_DEF double v_hex_shape_and_size_2( int num_nodes, double coordinates[][3]
 
   Product of Shear and Relative Size
 */
-C_FUNC_DEF double v_hex_shear_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume )
+C_FUNC_DEF double v_hex_shear_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
 {
-  double size = v_hex_relative_size_squared_2( num_nodes, coordinates, average_hex_volume );
+  double size = v_hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
   double shear = v_hex_shear( num_nodes, coordinates );
 
   double shear_size = shear * size; 

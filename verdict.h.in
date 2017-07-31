@@ -312,19 +312,19 @@ extern "C" {
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication.  */
 
-    C_FUNC_DEF double v_hex_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_hex_volume );
+    C_FUNC_DEF double v_hex_relative_size_squared( int num_nodes, double coordinates[][3], double average_hex_volume );
 
     //! Calculates hex shape-size metric.
     /** Product of Shape and Relative Size.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication.  */
-    C_FUNC_DEF double v_hex_shape_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume );
+    C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3], double average_hex_volume );
 
     //! Calculates hex shear-size metric   
     /** Product of Shear and Relative Size.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication.  */
-    C_FUNC_DEF double v_hex_shear_and_size_2( int num_nodes, double coordinates[][3], double average_hex_volume );
+    C_FUNC_DEF double v_hex_shear_and_size( int num_nodes, double coordinates[][3], double average_hex_volume );
 
     //! Calculates hex distortion metric   
     /** {min(|J|)/actual volume}*parent volume, parent volume = 8 for hex.
@@ -417,13 +417,13 @@ extern "C" {
     /** Min( J, 1/J ), where J is determinant of weighted Jacobian matrix.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */ 
-    C_FUNC_DEF double v_tet_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_tet_size );
+    C_FUNC_DEF double v_tet_relative_size_squared( int num_nodes, double coordinates[][3], double average_tet_size );
 
     //! Calculates tet shape-size metric.
     /** Product of Shape and Relative Size. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */ 
-    C_FUNC_DEF double v_tet_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tet_size );
+    C_FUNC_DEF double v_tet_shape_and_size( int num_nodes, double coordinates[][3], double average_tet_size );
 
     //! Calculates tet distortion metric.
     /** {min(|J|)/actual volume}*parent volume, parent volume = 1/6 for tet.
@@ -642,19 +642,19 @@ extern "C" {
     /** Min( J, 1/J ), where J is determinant of weighted Jacobian matrix. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_quad_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_quad_area );
+    C_FUNC_DEF double v_quad_relative_size_squared( int num_nodes, double coordinates[][3], double average_quad_area );
 
     //! Calculates quad shape-size metric.
     /** Product of Shape and Relative Size. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_quad_shape_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area );
+    C_FUNC_DEF double v_quad_shape_and_size( int num_nodes, double coordinates[][3], double average_quad_area );
 
     //! Calculates quad shear-size metric.
     /** Product of Shear and Relative Size. 
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_quad_shear_and_size_2( int num_nodes, double coordinates[][3], double average_quad_area );
+    C_FUNC_DEF double v_quad_shear_and_size( int num_nodes, double coordinates[][3], double average_quad_area );
 
     //! Calculates quad distortion metric.
     /** {min(|J|)/actual area}*parent area, parent area = 4 for quad.
@@ -722,7 +722,7 @@ extern "C" {
     /** Min( J, 1/J ), where J is determinant of weighted Jacobian matrix. 
        Reference ---  P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_tri_relative_size_squared_2( int num_nodes, double coordinates[][3], double average_tri_area );
+    C_FUNC_DEF double v_tri_relative_size_squared( int num_nodes, double coordinates[][3], double average_tri_area );
 
     //! Calculates triangle metric.
     /** 2/Condition number of weighted Jacobian matrix. 
@@ -734,7 +734,7 @@ extern "C" {
     /**  Product of Shape and Relative Size. 
        Reference ---  P. Knupp, Algebraic Mesh Quality Metrics for
        Unstructured Initial Meshes, submitted for publication. */
-    C_FUNC_DEF double v_tri_shape_and_size_2( int num_nodes, double coordinates[][3], double average_tri_area );
+    C_FUNC_DEF double v_tri_shape_and_size( int num_nodes, double coordinates[][3], double average_tri_area );
 
     //! Calculates triangle metric.
     /** {min(|J|)/actual area}*parent area, parent area = 1/2 for triangular element. 
@@ -743,7 +743,5 @@ extern "C" {
 
     //! Calculates triangle equiangle skew metric.
     C_FUNC_DEF double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] );
-
-
 
 #endif  /* __verdict_h */
