@@ -169,7 +169,6 @@ TEST(verdict, simple_tri)
       { v_tri_maximum_angle, 60 },
       { v_tri_condition, 1.0 },
       { v_tri_shape, 1.0 },
-      //    { v_tri_shape_and_size, 0.00853333 },
       { v_tri_distortion, 1.0 }
     },
     3,
@@ -194,8 +193,6 @@ TEST(verdict, singular_tri)
       { v_tri_distortion, 1 },
       { v_tri_minimum_angle, 60 },
       { v_tri_maximum_angle, 60 },
-      //       {v_tri_relative_size_squared, 0.1875},
-      //      { v_tri_shape_and_size, 0.1875 },
       { v_tri_shape, 1 }
     },
     3,
@@ -242,15 +239,13 @@ TEST(verdict, simple_quad2)
       { v_quad_jacobian, 1.11417 },
       { v_quad_shear, 0.557086 },
       { v_quad_shape, 0.433289 },
-      //{ v_quad_shape_and_size,  0.059764   },
-      //{ v_quad_shear_and_size,  0.0768395    },
       { v_quad_distortion, 0.56268 }
     },
     4,
     {
-      { 2, 0, 0 },    //1
+      { 2, 0, 0 },   //1
       { 1, 1, 2 },   //2
-      { 0, 1, 0 },      //3
+      { 0, 1, 0 },   //3
       { 0, 0, 0 },   //0
       }
   };
@@ -267,7 +262,6 @@ TEST(verdict, tet_test1)
       { v_tet_condition, 1.22474 },
       { v_tet_jacobian, 1000 },
       { v_tet_shape, 0.839947 },
-      //{v_tet_shape_and_size,  0.0000302381  },
       { v_tet_distortion, 1 }
     },
     4,
@@ -297,8 +291,6 @@ TEST(verdict, hex_test1)
       { v_hex_jacobian, 0.477 },
       { v_hex_shear, 0.77785 },
       { v_hex_shape, 0.789785 },
-      //{ v_hex_shear_and_size, 0.524143 },
-      //{ v_hex_shape_and_size, 0.532186 },
       { v_hex_distortion, 0.584798 }
     },
     8,
