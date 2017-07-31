@@ -29,8 +29,6 @@
 #include <memory.h>
 #include <stddef.h>
 
-// the average area of a tri
-static double verdict_tri_size = 0;
 static ComputeNormal compute_normal = NULL;
 
 static const double root_of_3 = sqrt(3.0);

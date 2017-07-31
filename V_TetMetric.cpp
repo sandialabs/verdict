@@ -39,10 +39,6 @@ static const double two_thirds = 2.0/3.0;
 static const double root_of_3 = sqrt(3.0);
 static const double root_of_6 = sqrt(6.0);
 
-
-//! the average volume of a tet
-static double v_tet_size = 0;
-
 C_FUNC_DEF double v_tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector ab,ac,bc,bd, ad, cd;
@@ -1206,8 +1202,6 @@ C_FUNC_DEF double v_tet_shape( int /*num_nodes*/, double coordinates[][3] )
 
   return (double)VERDICT_MAX( num/den, 0 );
 }
-
-
 
 /*!
   the relative size of a tet

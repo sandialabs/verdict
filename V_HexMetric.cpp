@@ -33,9 +33,6 @@
 
 extern void v_quad_minimum_maximum_angle( double min_max_angles[2], double coordinates[][3] );
 
-//! the average volume of a hex
-static double v_hex_size = 0;
-
 static const double two_thirds = 2.0/3.0;
 static const double third=1.0/3.0;
 static const double root_of_3 = sqrt(3.0);
@@ -2636,8 +2633,6 @@ C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3], 
   return (double) VERDICT_MAX( shape_size, -VERDICT_DBL_MAX );
 
 }
-
-
 
 /*!
   shear and size of a hex

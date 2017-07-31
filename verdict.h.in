@@ -12,7 +12,6 @@
 
 =========================================================================*/
 
-
 /*! \file verdict.h
   \brief Header file for verdict library that calculates metrics for finite elements.
     Also see: \ref index "Main Page" 
@@ -172,7 +171,6 @@ extern "C" {
     double my_area       = v_quad_area(4, quad_nodes);  
     double my_relative_size = v_quad_relative_size( 4, quad_nodes );
     \endcode
-
 */
 
 /*!\page ObtainConfigureBuildInstall Obtain, Configure, Build, and Install Verdict

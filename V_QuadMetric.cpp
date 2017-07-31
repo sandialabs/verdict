@@ -30,8 +30,6 @@
 #include <stddef.h>
 
 
-//! the average area of a quad
-static double v_quad_size = 0;
 static ComputeNormal compute_normal = NULL;
 
 static const double radius_ratio_normal_coeff = 1. / ( 2. * sqrt( 2. ) );
