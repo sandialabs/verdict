@@ -1352,3 +1352,4 @@ C_FUNC_DEF double v_tet_distortion( int num_nodes, double coordinates[][3] )
 
    return (double)distortion;
 }
+

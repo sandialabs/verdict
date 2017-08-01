@@ -24,6 +24,7 @@
 #include "VerdictVector.hpp"
 #include "V_GaussIntegration.hpp"
 #include "verdict_defines.hpp"
+#include <V_HexMetric.hpp>
 #include <memory.h>
 #include <vector>
 
@@ -2154,6 +2155,59 @@ C_FUNC_DEF double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3] 
   return (double) VERDICT_MAX( min_norm_jac, -VERDICT_DBL_MAX );
 }
 
+namespace verdict {
+  /*!
+    Nodal jacobian ratio of a hex
+
+    Minimum nodal jacobian divided by the maximum.  Detects element skewness.
+  */
+
+  inline std::pair<double, double> minMaxVal(const double a1, const double a2) {
+    if (a1 < a2) {
+      return std::pair<double, double>(a1, a2);
+    } else {
+      return std::pair<double, double>(a2, a1);
+    }
+  }
+
+  inline std::pair<double, double> minMaxValPair(const std::pair<double, double>& a1, const std::pair<double, double>& a2) {
+    return std::pair<double, double>(std::min(a1.first, a2.first), std::max(a1.second, a2.second));
+  }
+
+  double v_hex_nodal_jacobian_ratio( int num_nodes, double* coordinates) {
+    double Jdet8x[8];
+    verdict::v_hex_nodal_jacobians(coordinates, Jdet8x);
+    //
+    //  Compute the minimum and maximum nodal determinates, use an optimal algorithm
+    //
+    // std::pair<double, double> minMaxResult = std::minmax_element(Jdet8x, Jdet8x+8);
+ 
+    std::pair<double, double> m01(minMaxVal(Jdet8x[0], Jdet8x[1]));
+    std::pair<double, double> m23(minMaxVal(Jdet8x[2], Jdet8x[3]));
+    std::pair<double, double> m45(minMaxVal(Jdet8x[4], Jdet8x[5]));
+    std::pair<double, double> m67(minMaxVal(Jdet8x[6], Jdet8x[7]));
+
+    std::pair<double, double> m0123(minMaxValPair(m01, m23));
+    std::pair<double, double> m4567(minMaxValPair(m45, m67));
+
+    std::pair<double, double> m01234567(minMaxValPair(m0123, m4567));
+
+
+    //
+    //  Turn the determinates into a normalized quality ratio.
+    //  If the maximum nodal jacobian is negative the element is fully inverted, return huge negative number
+    //  Otherwise return ratio of the maximum nodal determinate to the minimum
+    //
+
+    if (m01234567.second <= VERDICT_DBL_MIN) {
+      return -100000;
+    } else {
+      return m01234567.first / m01234567.second;
+    }
+
+  }
+}
+
 /*!
   shear of a hex
   
@@ -3091,3 +3145,4 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
 
 }
 */
+

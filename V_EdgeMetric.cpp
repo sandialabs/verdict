@@ -35,3 +35,4 @@ C_FUNC_DEF double v_edge_length( int /*num_nodes*/, double coordinates[][3] )
   double z = coordinates[1][2] - coordinates[0][2];
   return (double)( sqrt (x*x + y*y + z*z) );
 }
+

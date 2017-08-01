@@ -860,3 +860,4 @@ C_FUNC_DEF double v_tri_distortion( int num_nodes, double coordinates[][3] )
     return (double) VERDICT_MIN( distortion, VERDICT_DBL_MAX );
   return (double) VERDICT_MAX( distortion, -VERDICT_DBL_MAX );
 }
+

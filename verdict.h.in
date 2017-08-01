@@ -169,7 +169,7 @@ extern "C" {
     double my_shape      = v_quad_shape(4, quad_nodes);
     double my_distortion = v_quad_distortion(4, quad_nodes); 
     double my_area       = v_quad_area(4, quad_nodes);  
-    double my_relative_size = v_quad_relative_size( 4, quad_nodes );
+    double my_relative_size = v_quad_relative_size(4, quad_nodes);
     \endcode
 */
 

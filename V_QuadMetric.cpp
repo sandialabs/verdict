@@ -29,7 +29,6 @@
 #include <memory.h>
 #include <stddef.h>
 
-
 static ComputeNormal compute_normal = NULL;
 
 static const double radius_ratio_normal_coeff = 1. / ( 2. * sqrt( 2. ) );
@@ -1530,3 +1529,4 @@ C_FUNC_DEF double v_quad_distortion( int num_nodes, double coordinates[][3] )
 
   return (double)distortion;
 }
+
