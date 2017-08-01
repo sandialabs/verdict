@@ -27,6 +27,7 @@
 #include <V_HexMetric.hpp>
 #include <memory.h>
 #include <vector>
+#include <algorithm>
 
 #if defined(__BORLANDC__)
 #pragma warn -8004 /* "assigned a value that is never used" */
