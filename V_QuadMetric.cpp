@@ -38,7 +38,6 @@ static ComputeNormal compute_normal = NULL;
 static const double radius_ratio_normal_coeff = 1. / ( 2. * sqrt( 2. ) );
 static const double root_of_2 = sqrt(2.0);
 
-
 /*!
   weights based on the average size of a quad
 */
