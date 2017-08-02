@@ -25,13 +25,18 @@ PURPOSE.  See the above copyright notice for more information.
 #include "verdict.h"
 #include "VerdictVector.hpp"
 #include <memory.h> 
+#include <algorithm>
+
 #include "verdict_defines.hpp"
 #include "V_GaussIntegration.hpp"
 
-extern double v_tri_equiangle_skew( int num_nodes, double coordinates[][3] );
-extern double v_quad_equiangle_skew( int num_nodes, double coordinates[][3] );
+extern double tri_equiangle_skew( int num_nodes, double coordinates[][3] );
+extern double quad_equiangle_skew( int num_nodes, double coordinates[][3] );
+
+namespace verdict
+{
 // local methods
-void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
+void make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
                           double quad1[][3], double quad2[][3], double quad3[][3]);
 
 
@@ -165,7 +170,7 @@ static void WEDGE21_gradients_of_the_shape_functions_for_RST(const double rst[3]
 }
 
 
-C_FUNC_DEF double v_wedge_equiangle_skew( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double wedge_equiangle_skew( int num_nodes, double coordinates[][3] )
 {
   double tri1[3][3];
   double tri2[3][3];
@@ -173,14 +178,14 @@ C_FUNC_DEF double v_wedge_equiangle_skew( int num_nodes, double coordinates[][3]
   double quad2[4][3];
   double quad3[4][3];
 
-  v_make_wedge_faces(coordinates, tri1,tri2,quad1,quad2,quad3);
+  make_wedge_faces(coordinates, tri1,tri2,quad1,quad2,quad3);
 
 
-  double tri1_skew=v_tri_equiangle_skew(3,tri1);
-  double tri2_skew=v_tri_equiangle_skew(3,tri2);
-  double quad1_skew=v_quad_equiangle_skew( 4, quad1 );
-  double quad2_skew=v_quad_equiangle_skew( 4, quad2 );
-  double quad3_skew=v_quad_equiangle_skew( 4, quad3 );
+  double tri1_skew=tri_equiangle_skew(3,tri1);
+  double tri2_skew=tri_equiangle_skew(3,tri2);
+  double quad1_skew=quad_equiangle_skew( 4, quad1 );
+  double quad2_skew=quad_equiangle_skew( 4, quad2 );
+  double quad3_skew=quad_equiangle_skew( 4, quad3 );
 
   double max_skew=tri1_skew;
   max_skew = max_skew > tri2_skew      ? max_skew : tri2_skew;
@@ -201,7 +206,7 @@ C_FUNC_DEF double v_wedge_equiangle_skew( int num_nodes, double coordinates[][3]
 
  */
 
-C_FUNC_DEF double v_wedge_volume( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_volume( int /*num_nodes*/, double coordinates[][3] )
 {
 
   // We need to divide the wedge into 11 tets.
@@ -391,7 +396,7 @@ C_FUNC_DEF double v_wedge_volume( int /*num_nodes*/, double coordinates[][3] )
   double volume=0.0;
   for(int t=0;t<11;t++)
   {
-    volume+=v_tet_volume(4,tet_coords[t]);
+    volume+=tet_volume(4,tet_coords[t]);
   }
 
   return (double)volume;
@@ -409,7 +414,7 @@ C_FUNC_DEF double v_wedge_volume( int /*num_nodes*/, double coordinates[][3] )
    q for right, unit wedge : 1
    Reference : -
    */
-C_FUNC_DEF double v_wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector a,b,c,d,e,f,g,h,i;
 
@@ -488,8 +493,8 @@ C_FUNC_DEF double v_wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3]
   double edge_ratio = sqrt( max / min );
 
   if( edge_ratio > 0 )
-    return (double) VERDICT_MIN( edge_ratio, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( edge_ratio, -VERDICT_DBL_MAX );
+    return (double) std::min( edge_ratio, VERDICT_DBL_MAX );
+  return (double) std::max( edge_ratio, -VERDICT_DBL_MAX );
 
 }
 
@@ -508,11 +513,11 @@ C_FUNC_DEF double v_wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3]
  Full Range :
  q for right, unit wedge : 1
  Reference : Adapted from section 7.7
- Verdict Function : v_wedge_max_aspect_frobenius or v_wedge_condition
+ Verdict Function : wedge_max_aspect_frobenius or wedge_condition
 
  */
 
-C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
   double mini_tris[4][3];
   double aspect1 = 0, aspect2 = 0, aspect3 = 0, aspect4 = 0, aspect5 = 0, aspect6 = 0;
@@ -523,7 +528,7 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[2][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[3][i];}
 
-  aspect1 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect1 = tet_aspect_frobenius(4,mini_tris);
 
   //Take second tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[1][i];}
@@ -531,7 +536,7 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[0][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[4][i];}
 
-  aspect2 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect2 = tet_aspect_frobenius(4,mini_tris);
 
   //3rd tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[2][i];}
@@ -539,7 +544,7 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[1][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[5][i];}
 
-  aspect3 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect3 = tet_aspect_frobenius(4,mini_tris);
 
   //4th tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[3][i];}
@@ -547,7 +552,7 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[4][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[0][i];}
 
-  aspect4 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect4 = tet_aspect_frobenius(4,mini_tris);
 
   //5th tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[4][i];}
@@ -555,7 +560,7 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[5][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[1][i];}
 
-  aspect5 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect5 = tet_aspect_frobenius(4,mini_tris);
 
   //6th tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[5][i];}
@@ -563,18 +568,18 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[3][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[2][i];}
 
-  aspect6 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect6 = tet_aspect_frobenius(4,mini_tris);
 
-  double max_aspect = VERDICT_MAX(aspect1,aspect2);
-  max_aspect = VERDICT_MAX(max_aspect,aspect3);
-  max_aspect = VERDICT_MAX(max_aspect,aspect4);
-  max_aspect = VERDICT_MAX(max_aspect,aspect5);
-  max_aspect = VERDICT_MAX(max_aspect,aspect6);
+  double max_aspect = std::max(aspect1,aspect2);
+  max_aspect = std::max(max_aspect,aspect3);
+  max_aspect = std::max(max_aspect,aspect4);
+  max_aspect = std::max(max_aspect,aspect5);
+  max_aspect = std::max(max_aspect,aspect6);
   max_aspect = max_aspect/1.16477;
 
   if ( max_aspect > 0 )
-    return (double) VERDICT_MIN( max_aspect, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( max_aspect, -VERDICT_DBL_MAX );
+    return (double) std::min( max_aspect, VERDICT_DBL_MAX );
+  return (double) std::max( max_aspect, -VERDICT_DBL_MAX );
 
 }
 /*
@@ -591,11 +596,11 @@ C_FUNC_DEF double v_wedge_max_aspect_frobenius( int /*num_nodes*/, double coordi
    Full Range :
    q for right, unit wedge : 1
    Reference : Adapted from section 7.8
-   Verdict Function : v_wedge_mean_aspect_frobenius
+   Verdict Function : wedge_mean_aspect_frobenius
 
    */
 
-C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_mean_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
   double mini_tris[4][3];
   double aspect1 = 0, aspect2 = 0, aspect3 = 0, aspect4 = 0, aspect5 = 0, aspect6 = 0;
@@ -606,7 +611,7 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[2][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[3][i];}
 
-  aspect1 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect1 = tet_aspect_frobenius(4,mini_tris);
 
   //Take second tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[1][i];}
@@ -614,7 +619,7 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[0][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[4][i];}
 
-  aspect2 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect2 = tet_aspect_frobenius(4,mini_tris);
 
   //3rd tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[2][i];}
@@ -622,7 +627,7 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[1][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[5][i];}
 
-  aspect3 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect3 = tet_aspect_frobenius(4,mini_tris);
 
   //4th tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[3][i];}
@@ -630,7 +635,7 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[4][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[0][i];}
 
-  aspect4 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect4 = tet_aspect_frobenius(4,mini_tris);
 
   //5th tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[4][i];}
@@ -638,7 +643,7 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[5][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[1][i];}
 
-  aspect5 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect5 = tet_aspect_frobenius(4,mini_tris);
 
   //6th tet
   for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[5][i];}
@@ -646,14 +651,14 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
   for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[3][i];}
   for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[2][i];}
 
-  aspect6 = v_tet_aspect_frobenius(4,mini_tris);
+  aspect6 = tet_aspect_frobenius(4,mini_tris);
 
   double mean_aspect = (aspect1 + aspect2 + aspect3 + aspect4 + aspect5 + aspect6)/6;
   mean_aspect = mean_aspect/1.16477;
 
   if ( mean_aspect > 0 )
-    return (double) VERDICT_MIN( mean_aspect, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( mean_aspect, -VERDICT_DBL_MAX );
+    return (double) std::min( mean_aspect, VERDICT_DBL_MAX );
+  return (double) std::max( mean_aspect, -VERDICT_DBL_MAX );
 
 }
 
@@ -671,10 +676,10 @@ C_FUNC_DEF double v_wedge_mean_aspect_frobenius( int /*num_nodes*/, double coord
  Full Range : [-DBL_MAX,DBL_MAX]
  q for right, unit wedge : sqrt(3)/2
  Reference : Adapted from section 6.10
- Verdict Function : v_wedge_jacobian
+ Verdict Function : wedge_jacobian
  */
 
-C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double wedge_jacobian( int num_nodes, double coordinates[][3] )
 {
   if(num_nodes == 21)
   {
@@ -701,7 +706,7 @@ C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
         jacobian[2][2]+=coordinates[j][2]*dhdt[j];
       }
       double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
-      min_determinant = VERDICT_MIN(det, min_determinant);
+      min_determinant = std::min(det, min_determinant);
     }
     return min_determinant;
   }
@@ -740,7 +745,7 @@ C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
         coordinates[0][2] - coordinates[1][2] );
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian,min_jacobian);
 
     //node 2
     vec1.set( coordinates[0][0] - coordinates[2][0],
@@ -756,7 +761,7 @@ C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
         coordinates[1][2] - coordinates[2][2] );
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian,min_jacobian);
 
     //node 3
     vec1.set( coordinates[0][0] - coordinates[3][0],
@@ -772,7 +777,7 @@ C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
         coordinates[5][2] - coordinates[3][2] );
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian,min_jacobian);
 
     //node 4
     vec1.set( coordinates[1][0] - coordinates[4][0],
@@ -788,7 +793,7 @@ C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
         coordinates[3][2] - coordinates[4][2] );
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian,min_jacobian);
 
     //node 5
     vec1.set( coordinates[3][0] - coordinates[5][0],
@@ -804,11 +809,11 @@ C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
         coordinates[2][2] - coordinates[5][2] );
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = VERDICT_MIN(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian,min_jacobian);
 
     if ( min_jacobian > 0 )
-      return (double) VERDICT_MIN( min_jacobian, VERDICT_DBL_MAX );
-    return (double) VERDICT_MAX( min_jacobian, -VERDICT_DBL_MAX );
+      return (double) std::min( min_jacobian, VERDICT_DBL_MAX );
+    return (double) std::max( min_jacobian, -VERDICT_DBL_MAX );
   }
 }
 
@@ -831,21 +836,21 @@ C_FUNC_DEF double v_wedge_jacobian( int num_nodes, double coordinates[][3] )
  Full Range : [-DBL_MAX,DBL_MAX]
  q for right, unit wedge : 1
  Reference : Adapted from section 7.3
- Verdict Function : v_wedge_distortion
+ Verdict Function : wedge_distortion
  */
 
-C_FUNC_DEF double v_wedge_distortion( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double wedge_distortion( int num_nodes, double coordinates[][3] )
 {
 
   double jacobian = 0, distortion = 45, current_volume = 0, master_volume = 0.433013;
 
-  jacobian = v_wedge_jacobian( num_nodes, coordinates );
-  current_volume = v_wedge_volume( num_nodes, coordinates);
+  jacobian = wedge_jacobian( num_nodes, coordinates );
+  current_volume = wedge_volume( num_nodes, coordinates);
   distortion = jacobian*master_volume/current_volume/0.866025;
 
   if ( distortion > 0 )
-    return (double) VERDICT_MIN( distortion, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( distortion, -VERDICT_DBL_MAX );
+    return (double) std::min( distortion, VERDICT_DBL_MAX );
+  return (double) std::max( distortion, -VERDICT_DBL_MAX );
 
 }
 
@@ -860,10 +865,10 @@ C_FUNC_DEF double v_wedge_distortion( int num_nodes, double coordinates[][3] )
    Full Range : [0,DBL_MAX]
    q for right, unit wedge : 1
    Reference : Adapted from section 5.21
-   Verdict Function : v_wedge_max_stretch
+   Verdict Function : wedge_max_stretch
    */
 
-C_FUNC_DEF double v_wedge_max_stretch( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_max_stretch( int /*num_nodes*/, double coordinates[][3] )
 {
   //This function finds the stretch of the 3 quadrilateral faces and returns the maximum value
 
@@ -875,28 +880,28 @@ C_FUNC_DEF double v_wedge_max_stretch( int /*num_nodes*/, double coordinates[][3
   for (i = 0; i < 3; i++){quad_face[1][i] = coordinates[1][i];}
   for (i = 0; i < 3; i++){quad_face[2][i] = coordinates[4][i];}
   for (i = 0; i < 3; i++){quad_face[3][i] = coordinates[3][i];}
-  stretch1 = v_quad_stretch(4,quad_face);
+  stretch1 = quad_stretch(4,quad_face);
 
   //second face
   for (i = 0; i < 3; i++){quad_face[0][i] = coordinates[1][i];}
   for (i = 0; i < 3; i++){quad_face[1][i] = coordinates[2][i];}
   for (i = 0; i < 3; i++){quad_face[2][i] = coordinates[5][i];}
   for (i = 0; i < 3; i++){quad_face[3][i] = coordinates[4][i];}
-  stretch2 = v_quad_stretch(4,quad_face);
+  stretch2 = quad_stretch(4,quad_face);
 
   //third face
   for (i = 0; i < 3; i++){quad_face[0][i] = coordinates[2][i];}
   for (i = 0; i < 3; i++){quad_face[1][i] = coordinates[0][i];}
   for (i = 0; i < 3; i++){quad_face[2][i] = coordinates[3][i];}
   for (i = 0; i < 3; i++){quad_face[3][i] = coordinates[5][i];}
-  stretch3 = v_quad_stretch(4,quad_face);
+  stretch3 = quad_stretch(4,quad_face);
 
-  stretch = VERDICT_MAX(stretch1,stretch2);
-  stretch = VERDICT_MAX(stretch,stretch3);
+  stretch = std::max(stretch1,stretch2);
+  stretch = std::max(stretch,stretch3);
 
   if ( stretch > 0 )
-    return (double) VERDICT_MIN( stretch, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( stretch, -VERDICT_DBL_MAX );
+    return (double) std::min( stretch, VERDICT_DBL_MAX );
+  return (double) std::max( stretch, -VERDICT_DBL_MAX );
 
 }
 
@@ -915,10 +920,10 @@ C_FUNC_DEF double v_wedge_max_stretch( int /*num_nodes*/, double coordinates[][3
    Full Range : [?,DBL_MAX]
    q for right, unit wedge : 1
    Reference : Adapted from section 6.14 and 7.11
-   Verdict Function : v_wedge_scaled_jacobian
+   Verdict Function : wedge_scaled_jacobian
    */
 
-C_FUNC_DEF double v_wedge_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
 {
   double min_jacobian = 0, current_jacobian = 0,lengths = 42;
   VerdictVector vec1,vec2,vec3;
@@ -957,7 +962,7 @@ C_FUNC_DEF double v_wedge_scaled_jacobian( int /*num_nodes*/, double coordinates
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
 
   //node 2
   vec1.set( coordinates[0][0] - coordinates[2][0],
@@ -975,7 +980,7 @@ C_FUNC_DEF double v_wedge_scaled_jacobian( int /*num_nodes*/, double coordinates
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
 
   //node 3
   vec1.set( coordinates[0][0] - coordinates[3][0],
@@ -993,7 +998,7 @@ C_FUNC_DEF double v_wedge_scaled_jacobian( int /*num_nodes*/, double coordinates
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
 
   //node 4
   vec1.set( coordinates[1][0] - coordinates[4][0],
@@ -1011,7 +1016,7 @@ C_FUNC_DEF double v_wedge_scaled_jacobian( int /*num_nodes*/, double coordinates
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
 
   //node 5
   vec1.set( coordinates[3][0] - coordinates[5][0],
@@ -1029,13 +1034,13 @@ C_FUNC_DEF double v_wedge_scaled_jacobian( int /*num_nodes*/, double coordinates
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = VERDICT_MIN(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
 
   min_jacobian *= 2/sqrt(3.0);
 
   if ( min_jacobian > 0 )
-    return (double) VERDICT_MIN( min_jacobian, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( min_jacobian, -VERDICT_DBL_MAX );
+    return (double) std::min( min_jacobian, VERDICT_DBL_MAX );
+  return (double) std::max( min_jacobian, -VERDICT_DBL_MAX );
 
 }
 
@@ -1052,10 +1057,10 @@ C_FUNC_DEF double v_wedge_scaled_jacobian( int /*num_nodes*/, double coordinates
    Full Range : [0,1]
    q for right, unit wedge : 1
    Reference : Adapted from section 7.12
-   Verdict Function : v_wedge_shape
+   Verdict Function : wedge_shape
    */
 
-C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_shape( int /*num_nodes*/, double coordinates[][3] )
 {
   double current_jacobian = 0, current_shape, norm_jacobi = 0;
   double min_shape = 1.0;
@@ -1079,7 +1084,7 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
   {
     norm_jacobi = current_jacobian*2.0/sqrt(3.0);
     current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = VERDICT_MIN(current_shape,min_shape);
+    min_shape = std::min(current_shape,min_shape);
   }
   else
   {
@@ -1104,7 +1109,7 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
   {
     norm_jacobi = current_jacobian*2.0/sqrt(3.0);
     current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = VERDICT_MIN(current_shape,min_shape);
+    min_shape = std::min(current_shape,min_shape);
   }
   else
   {
@@ -1129,7 +1134,7 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
   {
     norm_jacobi = current_jacobian*2.0/sqrt(3.0);
     current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = VERDICT_MIN(current_shape,min_shape);
+    min_shape = std::min(current_shape,min_shape);
   }
   else
   {
@@ -1154,7 +1159,7 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
   {
     norm_jacobi = current_jacobian*2.0/sqrt(3.0);
     current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = VERDICT_MIN(current_shape,min_shape);
+    min_shape = std::min(current_shape,min_shape);
   }
   else
   {
@@ -1179,7 +1184,7 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
   {
     norm_jacobi = current_jacobian*2.0/sqrt(3.0);
     current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = VERDICT_MIN(current_shape,min_shape);
+    min_shape = std::min(current_shape,min_shape);
   }
   else
   {
@@ -1204,7 +1209,7 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
   {
     norm_jacobi = current_jacobian*2.0/sqrt(3.0);
     current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = VERDICT_MIN(current_shape,min_shape);
+    min_shape = std::min(current_shape,min_shape);
   }
   else
   {
@@ -1232,15 +1237,15 @@ C_FUNC_DEF double v_wedge_shape( int /*num_nodes*/, double coordinates[][3] )
  Full Range :
  q for right, unit wedge : 1
  Reference : Adapted from section 7.7
- Verdict Function : v_wedge_max_aspect_frobenius or v_wedge_condition
+ Verdict Function : wedge_max_aspect_frobenius or wedge_condition
 
  */
-C_FUNC_DEF double v_wedge_condition( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double wedge_condition( int /*num_nodes*/, double coordinates[][3] )
 {
-  return v_wedge_max_aspect_frobenius(6,coordinates);
+  return wedge_max_aspect_frobenius(6,coordinates);
 }
 
-void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
+void make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
                           double quad1[][3], double quad2[][3], double quad3[][3])
 {
 
@@ -1321,3 +1326,4 @@ void v_make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[]
   quad3[3][1] = coordinates[5][1];
   quad3[3][2] = coordinates[5][2];
 }
+} // namespace verdict

@@ -34,14 +34,20 @@ include_directories(
 set( verdict_SRCS
   V_EdgeMetric.cpp
   V_GaussIntegration.cpp
+  V_GaussIntegration.hpp
   V_HexMetric.cpp
+  V_HexMetric.hpp
   V_KnifeMetric.cpp
   V_PyramidMetric.cpp
   V_QuadMetric.cpp
   V_TetMetric.cpp
+  V_TetMetric.hpp
   V_TriMetric.cpp
-  VerdictVector.cpp
+  v_vector.h
   V_WedgeMetric.cpp
+  VerdictVector.cpp
+  VerdictVector.hpp
+  verdict_defines.hpp
   )
 
 configure_file(

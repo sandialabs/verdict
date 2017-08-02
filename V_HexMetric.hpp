@@ -33,7 +33,7 @@ namespace verdict {
   //  Compute jacobian at each of the eight hex corner nodes
   //
 template <typename T>
-void v_hex_nodal_jacobians(const T coords[24], T Jdet8x[8]) {
+void hex_nodal_jacobians(const T coords[24], T Jdet8x[8]) {
   T x0 = coords[0];
   T y0 = coords[1];
   T z0 = coords[2];
@@ -103,13 +103,13 @@ void v_hex_nodal_jacobians(const T coords[24], T Jdet8x[8]) {
   Jdet8x[7] = (-x4y6 + x4y7 - x6y7) * z3 + (x3y6 - x3y7 + x6y7) * z4 + (-x3y4 + x3y7 - x4y7) * z6 + (x3y4 - x3y6 + x4y6) * z7;
 }
 
-double v_hex_nodal_jacobian_ratio( int num_nodes, double* coordinates);
+double hex_nodal_jacobian_ratio( int num_nodes, double* coordinates);
 
 
 }
 
-extern "C" double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3]);
-extern "C" double v_hex_shape          ( int num_nodes, double coordinates[][3]);
+extern "C" double hex_scaled_jacobian( int num_nodes, double coordinates[][3]);
+extern "C" double hex_shape          ( int num_nodes, double coordinates[][3]);
 
 
 #endif

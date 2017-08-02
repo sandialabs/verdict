@@ -26,7 +26,8 @@
 
 #include "V_GaussIntegration.hpp"
 
-
+namespace verdict
+{
 void GaussIntegration::initialize(int n, int m, int dim, int tri)
 {
    numberGaussPoints = n;     
@@ -1091,3 +1092,4 @@ void GaussIntegration::get_node_local_coord_tet(int node_id, double &y1, double 
       break;
    }
 }
+} // namespace verdict

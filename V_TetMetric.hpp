@@ -63,7 +63,7 @@ namespace verdict {
 
 
 template <typename T>
-T v_tet_dimension( int num_nodes, const T* coordinates ) {
+T tet_dimension( int num_nodes, const T* coordinates ) {
 
   const T* c0 = coordinates;
   const T* c1 = coordinates+3;

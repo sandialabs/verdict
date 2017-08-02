@@ -31,13 +31,12 @@
 #include "v_vector.h"
 #include "VerdictVector.hpp"
 
+namespace verdict
+{
+
 enum VerdictBoolean { VERDICT_FALSE = 0, VERDICT_TRUE = 1} ;
 
-
-#define VERDICT_MIN(a,b)  ( (a) < (b) ? (a) : (b) )
-#define VERDICT_MAX(a,b)  ( (a) > (b) ? (a) : (b) )
-
-inline double v_determinant(double a,
+inline double determinant(double a,
     double b,
     double c,
     double d)
@@ -45,7 +44,7 @@ inline double v_determinant(double a,
   return ((a)*(d) - (b)*(c));
 }
 
-inline double v_determinant( VerdictVector v1,
+inline double determinant( VerdictVector v1,
     VerdictVector v2,
     VerdictVector v3 )
 {
@@ -67,7 +66,7 @@ inline double v_determinant( VerdictVector v1,
 	xm22= (m22*mw11-m21*mw12)/detmw;
 
 
-static const double v_sqrt_2 = sqrt(2.0);
+static const double sqrt_2 = sqrt(2.0);
 
 inline double normalize_jacobian( double jacobi,
     VerdictVector& v1,
@@ -98,7 +97,7 @@ inline double normalize_jacobian( double jacobi,
     }
     
     if( tet_flag == 1)
-      return_value = v_sqrt_2 * jacobi / length_product;
+      return_value = sqrt_2 * jacobi / length_product;
     else
       return_value = jacobi / length_product;
     
@@ -142,7 +141,7 @@ inline void inverse(VerdictVector x1,
     VerdictVector& u2,
     VerdictVector& u3 )
 { 
-  double  detx = v_determinant(x1, x2, x3);
+  double  detx = determinant(x1, x2, x3);
   VerdictVector rx1, rx2, rx3;
   
   rx1.set(x1.x(), x2.x(), x3.x());
@@ -307,5 +306,6 @@ inline double skew_x( VerdictVector& q1,
   
   return skew;
 }
+} // namespace verdict
 
 #endif

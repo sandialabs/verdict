@@ -31,6 +31,9 @@
 #pragma warn -8004 /* "assigned a value that is never used" */
 #endif
 
+namespace verdict
+{
+
 const double TWO_VERDICT_PI = 2.0 * VERDICT_PI;
 
 
@@ -98,7 +101,7 @@ double VerdictVector::interior_angle(const VerdictVector &otherVector)
 
 // Interpolate between two vectors.
 // Returns (1-param)*v1 + param*v2
-VerdictVector v_interpolate(const double param, const VerdictVector &v1,
+VerdictVector interpolate(const double param, const VerdictVector &v1,
                         const VerdictVector &v2)
 {
   VerdictVector temp = (1.0 - param) * v1;
@@ -228,7 +231,7 @@ double VerdictVector::vector_angle_quick(const VerdictVector& vec1, const Verdic
   return angle;
 }
 
-VerdictVector v_vector_rotate(
+VerdictVector vector_rotate(
   const double angle, const VerdictVector &normalAxis, const VerdictVector &referenceAxis )
 {
     // A new coordinate system is created with the xy plane corresponding
@@ -444,3 +447,5 @@ void VerdictVector::next_point( const VerdictVector &direction,
 VerdictVector::VerdictVector(const double xyz[3]) 
   : xVal(xyz[0]), yVal(xyz[1]), zVal(xyz[2])
 {}
+
+} // namespace verdict

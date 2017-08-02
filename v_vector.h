@@ -33,6 +33,8 @@
 #include <math.h>
 #include <assert.h>
 
+namespace verdict
+{
 
 // computes the dot product of 3d vectors
 //double dot_product( double vec1[], double vec2[] );
@@ -123,7 +125,5 @@ inline double interior_angle( double vec1[], double vec2[] )
   return( (angleRad * 180.) / VERDICT_PI );
 
 }
-
+} // namespace verdict
 #endif
-
-

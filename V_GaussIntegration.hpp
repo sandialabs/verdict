@@ -31,6 +31,8 @@
 
 #include "verdict.h"
 
+namespace verdict
+{
 
 #define maxTotalNumberGaussPoints 27
 #define maxNumberNodes 20
@@ -123,5 +125,6 @@ struct GaussIntegration
    double y3Volume[maxNumberGaussPointsTet];
    double y4Volume[maxNumberGaussPointsTet];
 };
+} // namespace verdict
 
 #endif 

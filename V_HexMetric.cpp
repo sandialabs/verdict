@@ -33,7 +33,10 @@
 #pragma warn -8004 /* "assigned a value that is never used" */
 #endif
 
-extern void v_quad_minimum_maximum_angle( double min_max_angles[2], double coordinates[][3] );
+namespace verdict
+{
+
+extern void quad_minimum_maximum_angle( double min_max_angles[2], double coordinates[][3] );
 
 static const double two_thirds = 2.0/3.0;
 static const double third=1.0/3.0;
@@ -41,7 +44,7 @@ static const double root_of_3 = sqrt(3.0);
 
 
 //! weights based on the average size of a hex
-static int v_hex_get_weight( VerdictVector &v1, VerdictVector &v2, VerdictVector &v3, double average_size)
+static int hex_get_weight( VerdictVector &v1, VerdictVector &v2, VerdictVector &v3, double average_size)
 {
   if ( average_size  == 0)
     return 0;
@@ -228,7 +231,7 @@ static void HEX27_gradients_of_the_shape_functions_for_RST(const double rst[3], 
   
 
 //! make VerdictVectors from coordinates
-static void v_make_hex_edges( double coordinates[][3], VerdictVector edges[12] )
+static void make_hex_edges( double coordinates[][3], VerdictVector edges[12] )
 {
   edges[0].set(
       coordinates[1][0] - coordinates[0][0],
@@ -296,7 +299,7 @@ static void v_make_hex_edges( double coordinates[][3], VerdictVector edges[12] )
 /*!
   localizes hex coordinates
 */
-static void v_localize_hex_coordinates(double coordinates[][3], VerdictVector position[8] )
+static void localize_hex_coordinates(double coordinates[][3], VerdictVector position[8] )
 {
 
   int ii;
@@ -381,7 +384,7 @@ static void v_localize_hex_coordinates(double coordinates[][3], VerdictVector po
     }
 }
 
-static double v_safe_ratio3( const double numerator, 
+static double safe_ratio3( const double numerator, 
     const double denominator,
     const double max_ratio )
 {
@@ -407,7 +410,7 @@ static double v_safe_ratio3( const double numerator,
 }
 #endif /* Not currently used and not exposed in verdict.h */
 
-static double v_safe_ratio( const double numerator, 
+static double safe_ratio( const double numerator, 
     const double denominator )
 {
 
@@ -429,7 +432,7 @@ static double v_safe_ratio( const double numerator,
 
 
 
-static double v_condition_comp(
+static double condition_comp(
   const VerdictVector &xxi, const VerdictVector &xet, const VerdictVector &xze )
 {
   double det =  xxi % (xet * xze);
@@ -445,7 +448,7 @@ static double v_condition_comp(
 
 
 
-static double v_oddy_comp( const VerdictVector &xxi, 
+static double oddy_comp( const VerdictVector &xxi, 
     const VerdictVector &xet, 
     const VerdictVector &xze )
 {
@@ -480,7 +483,7 @@ static double v_oddy_comp( const VerdictVector &xxi,
 
 
 //! calcualates edge lengths of a hex
-static double v_hex_edge_length(int max_min, double coordinates[][3])
+static double hex_edge_length(int max_min, double coordinates[][3])
 {
   double temp[3], edge[12];
   int i;
@@ -575,20 +578,19 @@ static double v_hex_edge_length(int max_min, double coordinates[][3])
   if ( max_min == 0)
   {
     for( i = 1; i<12; i++) 
-      _edge = VERDICT_MIN( _edge, edge[i] ); 
+      _edge = std::min( _edge, edge[i] ); 
     return _edge;
   }  
   else
   {
     for( i = 1; i<12; i++) 
-      _edge = VERDICT_MAX( _edge, edge[i] );
+      _edge = std::max( _edge, edge[i] );
     return _edge;
   }
   
 }
 
-
-static double v_diag_length(int max_min, double coordinates[][3]) 
+static double diag_length(int max_min, double coordinates[][3]) 
 {
   double temp[3], diag[4];
   int i;
@@ -626,20 +628,20 @@ static double v_diag_length(int max_min, double coordinates[][3])
   if ( max_min == 0 )  //Return min diagonal
   { 
     for( i = 1; i<4; i++)
-      diagonal = VERDICT_MIN( diagonal, diag[i] );
+      diagonal = std::min( diagonal, diag[i] );
     return diagonal;
   }
   else          //Return max diagonal
   {
     for( i = 1; i<4; i++)
-      diagonal = VERDICT_MAX( diagonal, diag[i] );
+      diagonal = std::max( diagonal, diag[i] );
     return diagonal;  
   }
 
 }
 
 //! calculates efg values
-static VerdictVector v_calc_hex_efg( int efg_index, VerdictVector coordinates[8])
+static VerdictVector calc_hex_efg( int efg_index, VerdictVector coordinates[8])
 {
   
   VerdictVector efg;
@@ -738,11 +740,11 @@ static VerdictVector v_calc_hex_efg( int efg_index, VerdictVector coordinates[8]
      Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
      minimum edge lengths
 */
-C_FUNC_DEF double v_hex_edge_ratio (int /*num_nodes*/, double coordinates[][3])
+C_FUNC_DEF double hex_edge_ratio (int /*num_nodes*/, double coordinates[][3])
 {
 
   VerdictVector edges[12];
-  v_make_hex_edges(coordinates, edges);
+  make_hex_edges(coordinates, edges);
   
   double a2 = edges[0].length_squared();
   double b2 = edges[1].length_squared();
@@ -845,8 +847,8 @@ C_FUNC_DEF double v_hex_edge_ratio (int /*num_nodes*/, double coordinates[][3])
   double edge_ratio = sqrt( M2 / m2 );
   
   if ( edge_ratio > 0 )
-    return (double) VERDICT_MIN( edge_ratio, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( edge_ratio, -VERDICT_DBL_MAX );
+    return (double) std::min( edge_ratio, VERDICT_DBL_MAX );
+  return (double) std::max( edge_ratio, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -854,7 +856,7 @@ C_FUNC_DEF double v_hex_edge_ratio (int /*num_nodes*/, double coordinates[][3])
 
   Maximum edge length ratio at hex center
 */
-C_FUNC_DEF double v_hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][3])
+C_FUNC_DEF double hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][3])
 {
   double aspect;
   VerdictVector node_pos[8];
@@ -862,27 +864,27 @@ C_FUNC_DEF double v_hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][
   
   double aspect_12, aspect_13, aspect_23;
   
-  VerdictVector efg1 = v_calc_hex_efg( 1, node_pos);
-  VerdictVector efg2 = v_calc_hex_efg( 2, node_pos);
-  VerdictVector efg3 = v_calc_hex_efg( 3, node_pos);
+  VerdictVector efg1 = calc_hex_efg( 1, node_pos);
+  VerdictVector efg2 = calc_hex_efg( 2, node_pos);
+  VerdictVector efg3 = calc_hex_efg( 3, node_pos);
 
   double mag_efg1 = efg1.length();
   double mag_efg2 = efg2.length();
   double mag_efg3 = efg3.length();
   
-  aspect_12 = v_safe_ratio( VERDICT_MAX( mag_efg1, mag_efg2 ) , VERDICT_MIN( mag_efg1, mag_efg2 ) );
-  aspect_13 = v_safe_ratio( VERDICT_MAX( mag_efg1, mag_efg3 ) , VERDICT_MIN( mag_efg1, mag_efg3 ) );
-  aspect_23 = v_safe_ratio( VERDICT_MAX( mag_efg2, mag_efg3 ) , VERDICT_MIN( mag_efg2, mag_efg3 ) );
+  aspect_12 = safe_ratio( std::max( mag_efg1, mag_efg2 ) , std::min( mag_efg1, mag_efg2 ) );
+  aspect_13 = safe_ratio( std::max( mag_efg1, mag_efg3 ) , std::min( mag_efg1, mag_efg3 ) );
+  aspect_23 = safe_ratio( std::max( mag_efg2, mag_efg3 ) , std::min( mag_efg2, mag_efg3 ) );
 
-  aspect = VERDICT_MAX( aspect_12, VERDICT_MAX( aspect_13, aspect_23 ) );
+  aspect = std::max( aspect_12, std::max( aspect_13, aspect_23 ) );
 
   if ( aspect > 0 )
-    return (double) VERDICT_MIN( aspect, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( aspect, -VERDICT_DBL_MAX );
+    return (double) std::min( aspect, VERDICT_DBL_MAX );
+  return (double) std::max( aspect, -VERDICT_DBL_MAX );
  
 }
 
-C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   double quad[4][3];
   double min_angle=360.0;
@@ -902,7 +904,7 @@ C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][
   quad[3][1]=coordinates[4][1];
   quad[3][2]=coordinates[4][2];
 
-  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  quad_minimum_maximum_angle(min_max_angle, quad);
   if(min_max_angle[0]<min_angle)
     min_angle=min_max_angle[0];
   if(min_max_angle[1]>max_angle)
@@ -922,7 +924,7 @@ C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][
   quad[3][1]=coordinates[5][1];
   quad[3][2]=coordinates[5][2];
 
-  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  quad_minimum_maximum_angle(min_max_angle, quad);
   if(min_max_angle[0]<min_angle)
     min_angle=min_max_angle[0];
   if(min_max_angle[1]>max_angle)
@@ -942,7 +944,7 @@ C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][
   quad[3][1]=coordinates[6][1];
   quad[3][2]=coordinates[6][2];
 
-  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  quad_minimum_maximum_angle(min_max_angle, quad);
   if(min_max_angle[0]<min_angle)
     min_angle=min_max_angle[0];
   if(min_max_angle[1]>max_angle)
@@ -962,7 +964,7 @@ C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][
   quad[3][1]=coordinates[7][1];
   quad[3][2]=coordinates[7][2];
 
-  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  quad_minimum_maximum_angle(min_max_angle, quad);
   if(min_max_angle[0]<min_angle)
     min_angle=min_max_angle[0];
   if(min_max_angle[1]>max_angle)
@@ -982,7 +984,7 @@ C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][
   quad[3][1]=coordinates[7][1];
   quad[3][2]=coordinates[7][2];
 
-  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  quad_minimum_maximum_angle(min_max_angle, quad);
   if(min_max_angle[0]<min_angle)
     min_angle=min_max_angle[0];
   if(min_max_angle[1]>max_angle)
@@ -1002,7 +1004,7 @@ C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][
   quad[3][1]=coordinates[0][1];
   quad[3][2]=coordinates[0][2];
 
-  v_quad_minimum_maximum_angle(min_max_angle, quad);
+  quad_minimum_maximum_angle(min_max_angle, quad);
   if(min_max_angle[0]<min_angle)
     min_angle=min_max_angle[0];
   if(min_max_angle[1]>max_angle)
@@ -1025,16 +1027,16 @@ C_FUNC_DEF double v_hex_equiangle_skew( int /*num_nodes*/, double coordinates[][
 
   Maximum ||cosA|| where A is the angle between edges at hex center.
 */
-C_FUNC_DEF double v_hex_skew( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector node_pos[8];
   make_hex_nodes ( coordinates, node_pos );
   
   double skew_1, skew_2, skew_3;
   
-  VerdictVector efg1 = v_calc_hex_efg( 1, node_pos);
-  VerdictVector efg2 = v_calc_hex_efg( 2, node_pos);
-  VerdictVector efg3 = v_calc_hex_efg( 3, node_pos);
+  VerdictVector efg1 = calc_hex_efg( 1, node_pos);
+  VerdictVector efg2 = calc_hex_efg( 2, node_pos);
+  VerdictVector efg3 = calc_hex_efg( 3, node_pos);
  
   if ( efg1.normalize() <= VERDICT_DBL_MIN )
     return VERDICT_DBL_MAX;
@@ -1047,11 +1049,11 @@ C_FUNC_DEF double v_hex_skew( int /*num_nodes*/, double coordinates[][3] )
   skew_2 = fabs(efg1 % efg3);
   skew_3 = fabs(efg2 % efg3);
 
-  double skew = (VERDICT_MAX( skew_1, VERDICT_MAX( skew_2, skew_3 ) ));
+  double skew = (std::max( skew_1, std::max( skew_2, skew_3 ) ));
 
   if ( skew > 0 )
-    return (double) VERDICT_MIN( skew, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( skew, -VERDICT_DBL_MAX );
+    return (double) std::min( skew, VERDICT_DBL_MAX );
+  return (double) std::max( skew, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -1059,28 +1061,28 @@ C_FUNC_DEF double v_hex_skew( int /*num_nodes*/, double coordinates[][3] )
 
   Maximum ratio of lengths derived from opposite edges.
 */
-C_FUNC_DEF double v_hex_taper( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_taper( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector node_pos[8];
   make_hex_nodes ( coordinates, node_pos );
   
-  VerdictVector efg1 = v_calc_hex_efg( 1, node_pos);
-  VerdictVector efg2 = v_calc_hex_efg( 2, node_pos);
-  VerdictVector efg3 = v_calc_hex_efg( 3, node_pos);
+  VerdictVector efg1 = calc_hex_efg( 1, node_pos);
+  VerdictVector efg2 = calc_hex_efg( 2, node_pos);
+  VerdictVector efg3 = calc_hex_efg( 3, node_pos);
 
-  VerdictVector efg12 = v_calc_hex_efg( 12, node_pos);
-  VerdictVector efg13 = v_calc_hex_efg( 13, node_pos);
-  VerdictVector efg23 = v_calc_hex_efg( 23, node_pos);
+  VerdictVector efg12 = calc_hex_efg( 12, node_pos);
+  VerdictVector efg13 = calc_hex_efg( 13, node_pos);
+  VerdictVector efg23 = calc_hex_efg( 23, node_pos);
 
-  double taper_1 = fabs( v_safe_ratio( efg12.length(), VERDICT_MIN( efg1.length(), efg2.length())));
-  double taper_2 = fabs( v_safe_ratio( efg13.length(), VERDICT_MIN( efg1.length(), efg3.length())));
-  double taper_3 = fabs( v_safe_ratio( efg23.length(), VERDICT_MIN( efg2.length(), efg3.length())));
+  double taper_1 = fabs( safe_ratio( efg12.length(), std::min( efg1.length(), efg2.length())));
+  double taper_2 = fabs( safe_ratio( efg13.length(), std::min( efg1.length(), efg3.length())));
+  double taper_3 = fabs( safe_ratio( efg23.length(), std::min( efg2.length(), efg3.length())));
 
-  double taper = (double)VERDICT_MAX(taper_1, VERDICT_MAX(taper_2, taper_3));  
+  double taper = (double)std::max(taper_1, std::max(taper_2, taper_3));  
 
   if ( taper > 0 )
-    return (double) VERDICT_MIN( taper, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( taper, -VERDICT_DBL_MAX );
+    return (double) std::min( taper, VERDICT_DBL_MAX );
+  return (double) std::max( taper, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -1088,7 +1090,7 @@ C_FUNC_DEF double v_hex_taper( int /*num_nodes*/, double coordinates[][3] )
   Split the hex into 24 tets.
   sum the volume of each tet.
 */
-C_FUNC_DEF double v_hex_volume( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_volume( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector node_pos[8];
@@ -1142,8 +1144,8 @@ C_FUNC_DEF double v_hex_volume( int /*num_nodes*/, double coordinates[][3] )
   }
 
   if ( volume > 0 )
-    return (double) VERDICT_MIN( volume, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( volume, -VERDICT_DBL_MAX );
+    return (double) std::min( volume, VERDICT_DBL_MAX );
+  return (double) std::max( volume, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -1151,16 +1153,16 @@ C_FUNC_DEF double v_hex_volume( int /*num_nodes*/, double coordinates[][3] )
 
   sqrt(3) * minimum edge length / maximum diagonal length
 */
-C_FUNC_DEF double v_hex_stretch( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_stretch( int /*num_nodes*/, double coordinates[][3] )
 {
-  double min_edge = v_hex_edge_length( 0, coordinates );
-  double max_diag = v_diag_length( 1, coordinates );  
+  double min_edge = hex_edge_length( 0, coordinates );
+  double max_diag = diag_length( 1, coordinates );  
   
-  double stretch = root_of_3 * v_safe_ratio(min_edge, max_diag);
+  double stretch = root_of_3 * safe_ratio(min_edge, max_diag);
 
   if ( stretch > 0 )
-    return (double) VERDICT_MIN( stretch, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( stretch, -VERDICT_DBL_MAX );
+    return (double) std::min( stretch, VERDICT_DBL_MAX );
+  return (double) std::max( stretch, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -1168,17 +1170,17 @@ C_FUNC_DEF double v_hex_stretch( int /*num_nodes*/, double coordinates[][3] )
   
   Minimum diagonal length / maximum diagonal length
 */
-C_FUNC_DEF double v_hex_diagonal( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_diagonal( int /*num_nodes*/, double coordinates[][3] )
 {
   
-  double min_diag = v_diag_length( 0, coordinates ); 
-  double max_diag = v_diag_length( 1, coordinates );
+  double min_diag = diag_length( 0, coordinates ); 
+  double max_diag = diag_length( 1, coordinates );
   
-  double diagonal = v_safe_ratio( min_diag, max_diag);
+  double diagonal = safe_ratio( min_diag, max_diag);
 
   if ( diagonal > 0 )
-    return (double) VERDICT_MIN( diagonal, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( diagonal, -VERDICT_DBL_MAX );
+    return (double) std::min( diagonal, VERDICT_DBL_MAX );
+  return (double) std::max( diagonal, -VERDICT_DBL_MAX );
 }
 
 #define SQR(x) ((x) * (x))
@@ -1189,7 +1191,7 @@ C_FUNC_DEF double v_hex_diagonal( int /*num_nodes*/, double coordinates[][3] )
   Pronto-specific characteristic length for stable time step calculation. 
   Char_length = Volume / 2 grad Volume
 */
-C_FUNC_DEF double v_hex_dimension( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_dimension( int /*num_nodes*/, double coordinates[][3] )
 {
   
   double gradop[9][4];
@@ -1401,7 +1403,7 @@ C_FUNC_DEF double v_hex_dimension( int /*num_nodes*/, double coordinates[][3] )
 
   General distortion measure based on left Cauchy-Green Tensor
 */
-C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_oddy( int /*num_nodes*/, double coordinates[][3] )
 {
   
   double oddy = 0.0, current_oddy;
@@ -1410,11 +1412,11 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
   VerdictVector node_pos[8];
   make_hex_nodes ( coordinates, node_pos );
   
-  xxi = v_calc_hex_efg(1, node_pos);
-  xet = v_calc_hex_efg(2, node_pos);
-  xze = v_calc_hex_efg(3, node_pos);
+  xxi = calc_hex_efg(1, node_pos);
+  xet = calc_hex_efg(2, node_pos);
+  xze = calc_hex_efg(3, node_pos);
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[1][0] - coordinates[0][0],
@@ -1430,7 +1432,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[4][2] - coordinates[0][2] );
   
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[2][0] - coordinates[1][0],
@@ -1446,7 +1448,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[5][2] - coordinates[1][2] );
   
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[3][0] - coordinates[2][0],
@@ -1462,7 +1464,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[6][2] - coordinates[2][2] );
   
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[0][0] - coordinates[3][0],
@@ -1478,7 +1480,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[7][2] - coordinates[3][2] );
  
  
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[7][0] - coordinates[4][0],
@@ -1494,7 +1496,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[0][2] - coordinates[4][2] );
   
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[4][0] - coordinates[5][0],
@@ -1510,7 +1512,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[1][2] - coordinates[5][2] );
   
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[5][0] - coordinates[6][0],
@@ -1526,7 +1528,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[2][2] - coordinates[6][2] );
   
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   xxi.set(coordinates[6][0] - coordinates[7][0],
@@ -1542,12 +1544,12 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
           coordinates[3][2] - coordinates[7][2] );
   
   
-  current_oddy = v_oddy_comp( xxi, xet, xze);
+  current_oddy = oddy_comp( xxi, xet, xze);
   if ( current_oddy > oddy ) { oddy = current_oddy; }
   
   if ( oddy > 0 )
-    return (double) VERDICT_MIN( oddy, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( oddy, -VERDICT_DBL_MAX );
+    return (double) std::min( oddy, VERDICT_DBL_MAX );
+  return (double) std::max( oddy, -VERDICT_DBL_MAX );
 
 }
 
@@ -1558,7 +1560,7 @@ C_FUNC_DEF double v_hex_oddy( int /*num_nodes*/, double coordinates[][3] )
      this function is calculated by averaging the 8 Frobenius aspects at
      each corner of the hex, when the reference corner is right isosceles.
 */
-C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_med_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector node_pos[8];
@@ -1572,7 +1574,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[3] - node_pos[0];
   xze = node_pos[4] - node_pos[0];
 
-  double med_aspect_frobenius = v_condition_comp( xxi, xet, xze );
+  double med_aspect_frobenius = condition_comp( xxi, xet, xze );
 
   // J(1,0,0):
   
@@ -1580,7 +1582,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[0] - node_pos[1];
   xze = node_pos[5] - node_pos[1];
 
-  med_aspect_frobenius += v_condition_comp( xxi, xet, xze );
+  med_aspect_frobenius += condition_comp( xxi, xet, xze );
 
   // J(1,1,0):
   
@@ -1588,7 +1590,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[1] - node_pos[2];
   xze = node_pos[6] - node_pos[2];
 
-  med_aspect_frobenius += v_condition_comp( xxi, xet, xze );
+  med_aspect_frobenius += condition_comp( xxi, xet, xze );
 
   // J(0,1,0):
   
@@ -1596,7 +1598,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[2] - node_pos[3];
   xze = node_pos[7] - node_pos[3];
 
-  med_aspect_frobenius += v_condition_comp( xxi, xet, xze );
+  med_aspect_frobenius += condition_comp( xxi, xet, xze );
 
   // J(0,0,1):
 
@@ -1604,7 +1606,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[5] - node_pos[4];
   xze = node_pos[0] - node_pos[4];
 
-  med_aspect_frobenius += v_condition_comp( xxi, xet, xze );
+  med_aspect_frobenius += condition_comp( xxi, xet, xze );
 
   // J(1,0,1):
 
@@ -1612,7 +1614,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[6] - node_pos[5];
   xze = node_pos[1] - node_pos[5];
 
-  med_aspect_frobenius += v_condition_comp( xxi, xet, xze );
+  med_aspect_frobenius += condition_comp( xxi, xet, xze );
 
   // J(1,1,1):
 
@@ -1620,7 +1622,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[7] - node_pos[6];
   xze = node_pos[2] - node_pos[6];
 
-  med_aspect_frobenius += v_condition_comp( xxi, xet, xze );
+  med_aspect_frobenius += condition_comp( xxi, xet, xze );
 
   // J(1,1,1):
 
@@ -1628,12 +1630,12 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[4] - node_pos[7];
   xze = node_pos[3] - node_pos[7];
 
-  med_aspect_frobenius += v_condition_comp( xxi, xet, xze );
+  med_aspect_frobenius += condition_comp( xxi, xet, xze );
   med_aspect_frobenius /= 24.;
 
   if ( med_aspect_frobenius > 0 )
-    return (double) VERDICT_MIN( med_aspect_frobenius, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( med_aspect_frobenius, -VERDICT_DBL_MAX );
+    return (double) std::min( med_aspect_frobenius, VERDICT_DBL_MAX );
+  return (double) std::max( med_aspect_frobenius, -VERDICT_DBL_MAX );
 
 }
 
@@ -1645,7 +1647,7 @@ C_FUNC_DEF double v_hex_med_aspect_frobenius( int /*num_nodes*/, double coordina
      this function is calculated by taking the maximum of the 8 Frobenius aspects at
      each corner of the hex, when the reference corner is right isosceles.
 */
-C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector node_pos[8];
@@ -1659,7 +1661,7 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[3] - node_pos[0];
   xze = node_pos[4] - node_pos[0];
 
-  double condition = v_condition_comp( xxi, xet, xze );
+  double condition = condition_comp( xxi, xet, xze );
 
   // J(1,0,0):
   
@@ -1667,7 +1669,7 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[0] - node_pos[1];
   xze = node_pos[5] - node_pos[1];
 
-  double current_condition = v_condition_comp( xxi, xet, xze );
+  double current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
   // J(1,1,0):
@@ -1676,7 +1678,7 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[1] - node_pos[2];
   xze = node_pos[6] - node_pos[2];
 
-  current_condition = v_condition_comp( xxi, xet, xze );
+  current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
   // J(0,1,0):
@@ -1685,7 +1687,7 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[2] - node_pos[3];
   xze = node_pos[7] - node_pos[3];
 
-  current_condition = v_condition_comp( xxi, xet, xze );
+  current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
   // J(0,0,1):
@@ -1694,7 +1696,7 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[5] - node_pos[4];
   xze = node_pos[0] - node_pos[4];
 
-  current_condition = v_condition_comp( xxi, xet, xze );
+  current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
   // J(1,0,1):
@@ -1703,7 +1705,7 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[6] - node_pos[5];
   xze = node_pos[1] - node_pos[5];
 
-  current_condition = v_condition_comp( xxi, xet, xze );
+  current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
   // J(1,1,1):
@@ -1712,7 +1714,7 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[7] - node_pos[6];
   xze = node_pos[2] - node_pos[6];
 
-  current_condition = v_condition_comp( xxi, xet, xze );
+  current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
   // J(1,1,1):
@@ -1721,14 +1723,14 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
   xet = node_pos[4] - node_pos[7];
   xze = node_pos[3] - node_pos[7];
 
-  current_condition = v_condition_comp( xxi, xet, xze );
+  current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
   condition /= 3.;
 
   if ( condition > 0 )
-    return (double) VERDICT_MIN( condition, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( condition, -VERDICT_DBL_MAX );
+    return (double) std::min( condition, VERDICT_DBL_MAX );
+  return (double) std::max( condition, -VERDICT_DBL_MAX );
 
 }
 
@@ -1739,10 +1741,10 @@ C_FUNC_DEF double v_hex_max_aspect_frobenius( int /*num_nodes*/, double coordina
      It will become deprecated at some point.
 
 */
-C_FUNC_DEF double v_hex_condition( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_condition( int /*num_nodes*/, double coordinates[][3] )
 {
 
-  return v_hex_max_aspect_frobenius(8, coordinates);
+  return hex_max_aspect_frobenius(8, coordinates);
 }
 
 /*!
@@ -1750,7 +1752,7 @@ C_FUNC_DEF double v_hex_condition( int /*num_nodes*/, double coordinates[][3] )
 
   Minimum pointwise volume of local map at 8 corners & center of hex
 */
-C_FUNC_DEF double v_hex_jacobian( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double hex_jacobian( int num_nodes, double coordinates[][3] )
 {
   if(num_nodes == 27)
   {
@@ -1777,7 +1779,7 @@ C_FUNC_DEF double v_hex_jacobian( int num_nodes, double coordinates[][3] )
         jacobian[2][2]+=coordinates[j][2]*dhdt[j];
       }
       double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
-      min_determinant = VERDICT_MIN(det, min_determinant);
+      min_determinant = std::min(det, min_determinant);
     }
     return min_determinant;
   }
@@ -1790,9 +1792,9 @@ C_FUNC_DEF double v_hex_jacobian( int num_nodes, double coordinates[][3] )
     double current_jacobian;
     VerdictVector xxi, xet, xze;
 
-    xxi = v_calc_hex_efg(1, node_pos );
-    xet = v_calc_hex_efg(2, node_pos );
-    xze = v_calc_hex_efg(3, node_pos );
+    xxi = calc_hex_efg(1, node_pos );
+    xet = calc_hex_efg(2, node_pos );
+    xze = calc_hex_efg(3, node_pos );
 
 
     current_jacobian = xxi % (xet * xze) / 64.0;
@@ -1871,8 +1873,8 @@ C_FUNC_DEF double v_hex_jacobian( int num_nodes, double coordinates[][3] )
     if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
     if ( jacobian > 0 )
-      return (double) VERDICT_MIN( jacobian, VERDICT_DBL_MAX );
-    return (double) VERDICT_MAX( jacobian, -VERDICT_DBL_MAX );
+      return (double) std::min( jacobian, VERDICT_DBL_MAX );
+    return (double) std::max( jacobian, -VERDICT_DBL_MAX );
   }
 }
 
@@ -1881,7 +1883,7 @@ C_FUNC_DEF double v_hex_jacobian( int num_nodes, double coordinates[][3] )
 
   Minimum Jacobian divided by the lengths of the 3 edge vectors
 */
-C_FUNC_DEF double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
 {
 
   double jacobi, min_norm_jac = VERDICT_DBL_MAX;
@@ -1934,9 +1936,9 @@ C_FUNC_DEF double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3] 
   VerdictVector node_pos[8];
   make_hex_nodes ( coordinates, node_pos );
 
-  xxi = v_calc_hex_efg(1, node_pos );
-  xet = v_calc_hex_efg(2, node_pos );
-  xze = v_calc_hex_efg(3, node_pos );
+  xxi = calc_hex_efg(1, node_pos );
+  xet = calc_hex_efg(2, node_pos );
+  xze = calc_hex_efg(3, node_pos );
 
   jacobi = xxi % ( xet * xze );
   if ( jacobi < min_jacobi) { min_jacobi = jacobi; }
@@ -2152,61 +2154,59 @@ C_FUNC_DEF double v_hex_scaled_jacobian( int num_nodes, double coordinates[][3] 
   }
 
   if ( min_norm_jac> 0 )
-    return (double) VERDICT_MIN( min_norm_jac, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( min_norm_jac, -VERDICT_DBL_MAX );
+    return (double) std::min( min_norm_jac, VERDICT_DBL_MAX );
+  return (double) std::max( min_norm_jac, -VERDICT_DBL_MAX );
 }
 
-namespace verdict {
-  /*!
-    Nodal jacobian ratio of a hex
+/*!
+  Nodal jacobian ratio of a hex
 
-    Minimum nodal jacobian divided by the maximum.  Detects element skewness.
-  */
+  Minimum nodal jacobian divided by the maximum.  Detects element skewness.
+*/
 
-  inline std::pair<double, double> minMaxVal(const double a1, const double a2) {
-    if (a1 < a2) {
-      return std::pair<double, double>(a1, a2);
-    } else {
-      return std::pair<double, double>(a2, a1);
-    }
+inline std::pair<double, double> minMaxVal(const double a1, const double a2) {
+  if (a1 < a2) {
+    return std::pair<double, double>(a1, a2);
+  } else {
+    return std::pair<double, double>(a2, a1);
   }
+}
 
-  inline std::pair<double, double> minMaxValPair(const std::pair<double, double>& a1, const std::pair<double, double>& a2) {
-    return std::pair<double, double>(std::min(a1.first, a2.first), std::max(a1.second, a2.second));
-  }
+inline std::pair<double, double> minMaxValPair(const std::pair<double, double>& a1, const std::pair<double, double>& a2) {
+  return std::pair<double, double>(std::min(a1.first, a2.first), std::max(a1.second, a2.second));
+}
 
-  double v_hex_nodal_jacobian_ratio( int num_nodes, double* coordinates) {
-    double Jdet8x[8];
-    verdict::v_hex_nodal_jacobians(coordinates, Jdet8x);
-    //
-    //  Compute the minimum and maximum nodal determinates, use an optimal algorithm
-    //
-    // std::pair<double, double> minMaxResult = std::minmax_element(Jdet8x, Jdet8x+8);
+double hex_nodal_jacobian_ratio( int num_nodes, double* coordinates) {
+  double Jdet8x[8];
+  verdict::hex_nodal_jacobians(coordinates, Jdet8x);
+  //
+  //  Compute the minimum and maximum nodal determinates, use an optimal algorithm
+  //
+  // std::pair<double, double> minMaxResult = std::minmax_element(Jdet8x, Jdet8x+8);
  
-    std::pair<double, double> m01(minMaxVal(Jdet8x[0], Jdet8x[1]));
-    std::pair<double, double> m23(minMaxVal(Jdet8x[2], Jdet8x[3]));
-    std::pair<double, double> m45(minMaxVal(Jdet8x[4], Jdet8x[5]));
-    std::pair<double, double> m67(minMaxVal(Jdet8x[6], Jdet8x[7]));
+  std::pair<double, double> m01(minMaxVal(Jdet8x[0], Jdet8x[1]));
+  std::pair<double, double> m23(minMaxVal(Jdet8x[2], Jdet8x[3]));
+  std::pair<double, double> m45(minMaxVal(Jdet8x[4], Jdet8x[5]));
+  std::pair<double, double> m67(minMaxVal(Jdet8x[6], Jdet8x[7]));
 
-    std::pair<double, double> m0123(minMaxValPair(m01, m23));
-    std::pair<double, double> m4567(minMaxValPair(m45, m67));
+  std::pair<double, double> m0123(minMaxValPair(m01, m23));
+  std::pair<double, double> m4567(minMaxValPair(m45, m67));
 
-    std::pair<double, double> m01234567(minMaxValPair(m0123, m4567));
+  std::pair<double, double> m01234567(minMaxValPair(m0123, m4567));
 
 
-    //
-    //  Turn the determinates into a normalized quality ratio.
-    //  If the maximum nodal jacobian is negative the element is fully inverted, return huge negative number
-    //  Otherwise return ratio of the maximum nodal determinate to the minimum
-    //
+  //
+  //  Turn the determinates into a normalized quality ratio.
+  //  If the maximum nodal jacobian is negative the element is fully inverted, return huge negative number
+  //  Otherwise return ratio of the maximum nodal determinate to the minimum
+  //
 
-    if (m01234567.second <= VERDICT_DBL_MIN) {
-      return -100000;
-    } else {
-      return m01234567.first / m01234567.second;
-    }
-
+  if (m01234567.second <= VERDICT_DBL_MIN) {
+    return -100000;
+  } else {
+    return m01234567.first / m01234567.second;
   }
+
 }
 
 /*!
@@ -2214,7 +2214,7 @@ namespace verdict {
   
   3/Condition number of Jacobian Skew matrix
 */
-C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_shear( int /*num_nodes*/, double coordinates[][3] )
 {
 
   double shear;
@@ -2245,7 +2245,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths;
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
 
   // J(1,0,0):
@@ -2267,7 +2267,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
 
   // J(1,1,0):
@@ -2289,7 +2289,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
 
   // J(0,1,0):
@@ -2311,7 +2311,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
 
   // J(0,0,1):
@@ -2333,7 +2333,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
 
   // J(1,0,1):
@@ -2355,7 +2355,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
 
   // J(1,1,1):
@@ -2377,7 +2377,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
 
   // J(0,1,1):
@@ -2399,14 +2399,14 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
-  min_shear = VERDICT_MIN( shear, min_shear );
+  min_shear = std::min( shear, min_shear );
 
   if ( min_shear <= VERDICT_DBL_MIN )
     min_shear = 0;
   
   if ( min_shear > 0 )
-    return (double) VERDICT_MIN( min_shear, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( min_shear, -VERDICT_DBL_MAX );
+    return (double) std::min( min_shear, VERDICT_DBL_MAX );
+  return (double) std::max( min_shear, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -2414,7 +2414,7 @@ C_FUNC_DEF double v_hex_shear( int /*num_nodes*/, double coordinates[][3] )
 
   3/Condition number of weighted Jacobian matrix
 */
-C_FUNC_DEF double v_hex_shape( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double hex_shape( int /*num_nodes*/, double coordinates[][3] )
 {
 
 
@@ -2550,8 +2550,8 @@ C_FUNC_DEF double v_hex_shape( int /*num_nodes*/, double coordinates[][3] )
     min_shape = 0;
 
   if ( min_shape > 0 )
-    return (double) VERDICT_MIN( min_shape, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( min_shape, -VERDICT_DBL_MAX );
+    return (double) std::min( min_shape, VERDICT_DBL_MAX );
+  return (double) std::max( min_shape, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -2559,7 +2559,7 @@ C_FUNC_DEF double v_hex_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_hex_volume )
+C_FUNC_DEF double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_hex_volume )
 {
   double size = 0;
   double tau; 
@@ -2567,7 +2567,7 @@ C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordin
   VerdictVector xxi, xet, xze;
   double det, det_sum = 0;
 
-  v_hex_get_weight( xxi, xet, xze, average_hex_volume );
+  hex_get_weight( xxi, xet, xze, average_hex_volume );
  
   //This is the average relative size 
   double detw = xxi % (xet * xze);
@@ -2661,14 +2661,14 @@ C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordin
   {
     tau = det_sum / ( 8*detw);
 
-    tau = VERDICT_MIN( tau, 1.0/tau); 
+    tau = std::min( tau, 1.0/tau); 
 
     size = tau*tau; 
   }
 
   if ( size > 0 )
-    return (double) VERDICT_MIN( size, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( size, -VERDICT_DBL_MAX );
+    return (double) std::min( size, VERDICT_DBL_MAX );
+  return (double) std::max( size, -VERDICT_DBL_MAX );
 }
 
 /*!
@@ -2676,16 +2676,16 @@ C_FUNC_DEF double v_hex_relative_size_squared( int /*num_nodes*/, double coordin
 
   Product of Shape and Relative Size
 */
-C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
+C_FUNC_DEF double hex_shape_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
 {
-  double size = v_hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
-  double shape = v_hex_shape( num_nodes, coordinates );
+  double size = hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
+  double shape = hex_shape( num_nodes, coordinates );
 
   double shape_size = size * shape;
 
   if ( shape_size > 0 )
-    return (double) VERDICT_MIN( shape_size, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( shape_size, -VERDICT_DBL_MAX );
+    return (double) std::min( shape_size, VERDICT_DBL_MAX );
+  return (double) std::max( shape_size, -VERDICT_DBL_MAX );
 
 }
 
@@ -2694,23 +2694,23 @@ C_FUNC_DEF double v_hex_shape_and_size( int num_nodes, double coordinates[][3], 
 
   Product of Shear and Relative Size
 */
-C_FUNC_DEF double v_hex_shear_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
+C_FUNC_DEF double hex_shear_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
 {
-  double size = v_hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
-  double shear = v_hex_shear( num_nodes, coordinates );
+  double size = hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
+  double shear = hex_shear( num_nodes, coordinates );
 
   double shear_size = shear * size; 
 
   if ( shear_size > 0 )
-    return (double) VERDICT_MIN( shear_size, VERDICT_DBL_MAX );
-  return (double) VERDICT_MAX( shear_size, -VERDICT_DBL_MAX );
+    return (double) std::min( shear_size, VERDICT_DBL_MAX );
+  return (double) std::max( shear_size, -VERDICT_DBL_MAX );
 
 }
 
 /*!
   distortion of a hex
 */
-C_FUNC_DEF double v_hex_distortion( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double hex_distortion( int num_nodes, double coordinates[][3] )
 {
 
    //use 2x2 gauss points for linear hex and 3x3 for 2nd order hex
@@ -2834,11 +2834,11 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
 
 
         for( i=0; i<3; i++)
-          xxi[i] = v_calc_hex_efg( 2, i, coordinates );
+          xxi[i] = calc_hex_efg( 2, i, coordinates );
         for( i=0; i<3; i++)
-          xet[i] = v_calc_hex_efg( 3, i, coordinates );
+          xet[i] = calc_hex_efg( 3, i, coordinates );
         for( i=0; i<3; i++)
-          xze[i] = v_calc_hex_efg( 6, i, coordinates );
+          xze[i] = calc_hex_efg( 6, i, coordinates );
 
   // norm jacobian and jacobian
   if ( choices[0] || choices[1] )
@@ -2856,14 +2856,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -2889,14 +2889,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -2922,14 +2922,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -2955,14 +2955,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -2989,14 +2989,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -3022,14 +3022,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -3056,14 +3056,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -3090,14 +3090,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
   }
 
@@ -3123,14 +3123,14 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
   // oddy 
   if ( choices[2] )
   {
-    current_oddy = v_oddy_comp( xxi, xet, xze );
+    current_oddy = oddy_comp( xxi, xet, xze );
       if ( current_oddy > oddy ) { oddy = current_oddy; }
   }
 
   // condition
   if ( choices[3] )
   {
-    current_condition = v_condition_comp( xxi, xet, xze );
+    current_condition = condition_comp( xxi, xet, xze );
     if ( current_condition > condition ) { condition = current_condition; }
 
     condition /= 3.0;
@@ -3146,4 +3146,6 @@ C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[],
 
 }
 */
+
+} // namespace verdict
 

@@ -32,6 +32,9 @@
 #include <assert.h>
 #include <math.h>
 
+namespace verdict
+{
+
 class VerdictVector;
 typedef void ( VerdictVector::*transform_function )( double gamma,
                                                    double gamma2);
@@ -229,7 +232,7 @@ public:
   friend int operator!=(const VerdictVector &v1, const VerdictVector &v2);
     //- Inequality operator
   
-  friend VerdictVector v_interpolate(const double param, const VerdictVector &v1,
+  friend VerdictVector interpolate(const double param, const VerdictVector &v1,
                                  const VerdictVector &v2);
     //- Interpolate between two vectors. Returns (1-param)*v1 + param*v2
 
@@ -243,7 +246,7 @@ private:
   double zVal;  //- z component of vector.
 };
 
-VerdictVector v_vector_rotate(
+VerdictVector vector_rotate(
   const double angle, const VerdictVector &normalAxis, const VerdictVector &referenceAxis );
   //- A new coordinate system is created with the xy plane corresponding
   //- to the plane normal to {normalAxis}, and the x axis corresponding to
@@ -512,5 +515,6 @@ inline double operator%(const VerdictVector &vector1,
           vector1.y() * vector2.y() +
           vector1.z() * vector2.z() );
 }
+} // namespace verdict
 
 #endif

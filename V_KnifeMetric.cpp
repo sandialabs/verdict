@@ -26,6 +26,8 @@
 #include "VerdictVector.hpp"
 #include <memory.h> 
 
+namespace verdict 
+{
 
 /*  a knife element
 
@@ -59,7 +61,7 @@
   and summing the volumes of each.
 */
 
-C_FUNC_DEF double v_knife_volume( int num_nodes, double coordinates[][3] )
+C_FUNC_DEF double knife_volume( int num_nodes, double coordinates[][3] )
 {
   double volume = 0;
   VerdictVector side1, side2, side3;
@@ -150,3 +152,4 @@ C_FUNC_DEF double v_knife_volume( int num_nodes, double coordinates[][3] )
     
 }
 
+} // namespace verdict

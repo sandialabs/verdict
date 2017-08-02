@@ -24,10 +24,12 @@
 #include "verdict.h"
 #include <math.h>
 
+namespace verdict
+{
 /*!\brief Length of and edge.
  * Length is calculated by taking the distance between the end nodes.
  */
-C_FUNC_DEF double v_edge_length( int /*num_nodes*/, double coordinates[][3] )
+C_FUNC_DEF double edge_length( int /*num_nodes*/, double coordinates[][3] )
 {
 
   double x = coordinates[1][0] - coordinates[0][0];
@@ -36,3 +38,4 @@ C_FUNC_DEF double v_edge_length( int /*num_nodes*/, double coordinates[][3] )
   return (double)( sqrt (x*x + y*y + z*z) );
 }
 
+} // namespace verdict
