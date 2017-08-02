@@ -36,42 +36,7 @@
 #ifdef BUILD_SHARED_LIBS
 # define VERDICT_SHARED_LIB
 #endif
-
-/*!\page VerdictAsASubProject Verdict as a Subproject
- *
- * Should a project wish to include a private version of verdict, it may
- * turn on the CMake \c VERDICT_MANGLE option and define \c VERDICT_MANGLE_PREFIX.
- * This will use the \c verdict_mangle.h file to define macros that rename all
- * verdict library symbols using the given prefix.
- *
- * This allows programs using the parent project to link to the parent project
- * as well as other versions of verdict than the one used by the parent project.
- * If you are using mangling, you should consider setting \c VERDICT_NO_LIBRARY_VERSION
- * to 1 and \c VERDICT_LIBRARY_PROPERTIES to include your parent project's shared
- * library version number.
- *
- * Here is an example. Assume we have a library named XXX which we would like to use
- * a private copy of the verdict library (instead of the version installed in a system
- * directory). The XXX project source directory would contain a copy of the verdict
- * source and the CMake file for XXX would include:\code
- *   set( VERDICT_MANGLE "ON" CACHE BOOL "XXX requires Verdict to be mangled" FORCE )
- *   set( VERDICT_MANGLE_PREFIX "xxx" CACHE STRING "Verdict routines prefixed with xxx_" FORCE )
- *   set( VERDICT_NO_LIBRARY_VERSION 1 )
- *   set( VERDICT_LIBRARY_PROPERTIES
- *     ${VERDICT_LIBRARY_PROPERTIES}
- *     VERSION "xxx${XXX_VERSION}"
- *   )
- *   add_subdirectory( verdict )
- * \endcode
- * By setting these variables before descending into the verdict directory,
- * we force all the symbol names in the library to be prefaced with \c xxx_
- * and the resulting library will be named \a xxxverdict instead of simply \a verdict.
- */
-#cmakedefine VERDICT_MANGLE
-#ifdef VERDICT_MANGLE
-#  include "verdict_mangle.h"
-#endif
-
+                     
 #if defined(_WIN32) || defined (__CYGWIN__)
 # define VERDICT_ABI_IMPORT __declspec(dllimport)
 # define VERDICT_ABI_EXPORT __declspec(dllexport)

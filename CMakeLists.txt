@@ -13,16 +13,6 @@ set( verdict_VERSION "${verdict_MAJOR_VERSION}.${verdict_MINOR_VERSION}.${verdic
 
 option(BUILD_SHARED_LIBS "Build Verdict with shared libraries." OFF)
 option(VERDICT_BUILD_DOC "Build the 2007 Verdict User Manual" OFF)
-option(VERDICT_MANGLE "Mangle verdict names for inclusion in a larger library?" OFF)
-if ( VERDICT_MANGLE )
-  set( VERDICT_MANGLE_PREFIX "" CACHE STRING "A string to prepend to all verdict function names and classes." )
-  mark_as_advanced( VERDICT_MANGLE_PREFIX )
-  configure_file(
-    ${verdict_SOURCE_DIR}/verdict_mangle.h.in
-    ${verdict_BINARY_DIR}/verdict_mangle.h
-  )
-endif ( VERDICT_MANGLE )
-mark_as_advanced( VERDICT_MANGLE )
 
 option( VERDICT_ENABLE_TESTING "Should tests of the VERDICT library be built?" ON )
 
@@ -56,11 +46,7 @@ configure_file(
   @ONLY
 )
 
-if ( VERDICT_MANGLE )
-  set( verdict_LIBRARY "${VERDICT_MANGLE_PREFIX}verdict" )
-else ( VERDICT_MANGLE )
-  set( verdict_LIBRARY "verdict" )
-endif ( VERDICT_MANGLE )
+set( verdict_LIBRARY "verdict" )
 
 # Setting the VERSION and SOVERSION of a library will include
 # version information either in the library, or in the library
@@ -141,14 +127,6 @@ install(
   DESTINATION ${verdict_INSTALL_INCLUDE_DIR}
   COMPONENT Development
 )
-
-if ( VERDICT_MANGLE )
-  install(
-    FILES ${verdict_BINARY_DIR}/verdict_mangle.h
-    DESTINATION ${verdict_INSTALL_INCLUDE_DIR}
-    COMPONENT Development
-  )
-endif ( VERDICT_MANGLE )
 endif()
 
 if(BUILD_SHARED_LIBS)
