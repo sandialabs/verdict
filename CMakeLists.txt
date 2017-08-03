@@ -1,9 +1,7 @@
 # Copyright (c) 2003,2006 Sandia National Laboratories <cubit@sandia.gov>
 project(verdict)
 
-cmake_minimum_required( VERSION 2.8 )
-
-set(CMAKE_MACOSX_RPATH 1)
+cmake_minimum_required( VERSION 3.1 )
 
 set( verdict_MAJOR_VERSION "1")
 set( verdict_MINOR_VERSION "2")
@@ -35,14 +33,15 @@ set( verdict_SRCS
   V_TriMetric.cpp
   v_vector.h
   V_WedgeMetric.cpp
+  verdict.h
   VerdictVector.cpp
   VerdictVector.hpp
   verdict_defines.hpp
   )
 
 configure_file(
-  ${verdict_SOURCE_DIR}/verdict.h.in
-  ${verdict_BINARY_DIR}/verdict.h
+  ${verdict_SOURCE_DIR}/verdict_config.h.in
+  ${verdict_BINARY_DIR}/verdict_config.h
   @ONLY
 )
 
@@ -123,7 +122,7 @@ install(FILES
 )
 
 install(
-  FILES ${verdict_BINARY_DIR}/verdict.h
+  FILES ${verdict_BINARY_DIR}/verdict_config.h
   DESTINATION ${verdict_INSTALL_INCLUDE_DIR}
   COMPONENT Development
 )

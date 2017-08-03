@@ -30,13 +30,8 @@
 #ifndef __verdict_h
 #define __verdict_h
 
-#define VERDICT_VERSION @verdict_VERSION_FLAT@
+#include <verdict_config.h>
 
-#cmakedefine BUILD_SHARED_LIBS
-#ifdef BUILD_SHARED_LIBS
-# define VERDICT_SHARED_LIB
-#endif
-                     
 #if defined(_WIN32) || defined (__CYGWIN__)
 # define VERDICT_ABI_IMPORT __declspec(dllimport)
 # define VERDICT_ABI_EXPORT __declspec(dllexport)
