@@ -45,6 +45,11 @@ configure_file(
   @ONLY
 )
 
+# temporary - remove old configured verdict.h file from build directory
+if(EXISTS ${verdict_BINARY_DIR}/verdict.h)
+  file(REMOVE ${verdict_BINARY_DIR}/verdict.h)
+endif()
+
 set( verdict_LIBRARY "verdict" )
 
 # Setting the VERSION and SOVERSION of a library will include
