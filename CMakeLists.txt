@@ -20,11 +20,6 @@ mark_as_advanced( VERDICT_MANGLE )
 
 option( VERDICT_ENABLE_TESTING "Should tests of the VERDICT library be built?" ON )
 
-include_directories(
-  ${verdict_BINARY_DIR}
-  ${verdict_SOURCE_DIR}
-)
-
 set( verdict_SRCS
   V_EdgeMetric.cpp
   V_GaussIntegration.cpp
@@ -56,31 +51,20 @@ if(EXISTS ${verdict_BINARY_DIR}/verdict.h)
   file(REMOVE ${verdict_BINARY_DIR}/verdict.h)
 endif()
 
-set( verdict_LIBRARY "verdict" )
+add_library( verdict ${verdict_SRCS} )
+target_include_directories(verdict PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+
 
 # Setting the VERSION and SOVERSION of a library will include
 # version information either in the library, or in the library
 # name (depending on the platform). You may choose to exclude
 # this information.
 if ( NOT VERDICT_NO_LIBRARY_VERSION )
-  set( VERDICT_LIBRARY_PROPERTIES
-    ${VERDICT_LIBRARY_PROPERTIES}
+  set_target_properties( verdict PROPERTIES
     VERSION "${verdict_VERSION}"
     SOVERSION "${verdict_MAJOR_VERSION}.${verdict_MINOR_VERSION}"
   )
 endif ( NOT VERDICT_NO_LIBRARY_VERSION )
-
-add_library( ${verdict_LIBRARY} ${verdict_SRCS} )
-set_target_properties( ${verdict_LIBRARY} PROPERTIES DEFINE_SYMBOL verdict_EXPORTS)
-set_target_properties( ${verdict_LIBRARY} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}>")
-
-# Apply user-defined properties to the library targets.
-if ( VERDICT_LIBRARY_PROPERTIES )
-  set_target_properties( ${verdict_LIBRARY}
-    PROPERTIES ${VERDICT_LIBRARY_PROPERTIES}
-  )
-endif ( VERDICT_LIBRARY_PROPERTIES )
 
 if ( VERDICT_ENABLE_TESTING )
   enable_testing()
@@ -122,7 +106,7 @@ endif ( VERDICT_BUILD_DOC )
 #
 # Installation stuff
 #
-if(0)
+IF(NOT verdict_INSTALL_NO_DEVELOPMENT)
 install(FILES 
   README
   Verdict.htm
@@ -137,15 +121,18 @@ install(
   DESTINATION ${verdict_INSTALL_INCLUDE_DIR}
   COMPONENT Development
 )
+
+
+install(TARGETS verdict ${VERDICT_EXPORT_GROUP}
+      ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Development      # .a, .lib
+)
+
 endif()
 
-if(BUILD_SHARED_LIBS)
-install(TARGETS ${verdict_LIBRARY} ${VERDICT_EXPORT_GROUP}
+install(TARGETS verdict ${VERDICT_EXPORT_GROUP}
       RUNTIME DESTINATION ${verdict_INSTALL_BIN_DIR} COMPONENT Runtime # .exe, .dll
-      LIBRARY DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Runtime # .so, mod.dll
-      #ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Development      # .a, .lib
+      LIBRARY DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Runtime # .so, .dll
 )
-endif(BUILD_SHARED_LIBS)
 
 #
 # Packing stuff
