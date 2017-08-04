@@ -60,9 +60,6 @@ namespace VERDICT_NAMESPACE {}
 namespace verdict { using namespace VERDICT_NAMESPACE; }
 #endif
 
-/* typedef for computing normals */
-typedef int(*ComputeNormal)(double point[3], double normal[3]);
-                                     
 /*! \mainpage
   Verdict is a library used to calculate metrics on the following type of elements:
 
@@ -171,6 +168,9 @@ namespace VERDICT_NAMESPACE
   const double VERDICT_DBL_MIN = 1.0E-30;
   const double VERDICT_DBL_MAX = 1.0E+30;
   const double VERDICT_PI = 3.1415926535897932384626;
+
+  /* typedef for computing normals */
+  typedef int(*ComputeNormal)(double point[3], double normal[3]);
 
 /* quality functions for hex elements */
 

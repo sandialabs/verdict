@@ -30,8 +30,6 @@
 #include <stddef.h>
 #include <algorithm>
 
-static ComputeNormal compute_normal = NULL;
-
 namespace VERDICT_NAMESPACE
 {
 static const double root_of_3 = sqrt(3.0);
@@ -39,6 +37,7 @@ static const double aspect_ratio_normal_coeff = sqrt( 3. ) / 6.;
 static const double two_times_root_of_3 = 2*sqrt(3.0);
 static const double two_over_root_of_3 = 2./sqrt(3.0);
 
+static ComputeNormal compute_normal = NULL;
 
 /*! 
   get weights based on the average area of a set of
