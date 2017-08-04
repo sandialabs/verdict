@@ -31,7 +31,7 @@
 
 #include "verdict.h"
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 #define maxTotalNumberGaussPoints 27

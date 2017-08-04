@@ -32,7 +32,7 @@
 
 static ComputeNormal compute_normal = NULL;
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 static const double root_of_3 = sqrt(3.0);
 static const double aspect_ratio_normal_coeff = sqrt( 3. ) / 6.;
@@ -70,7 +70,7 @@ static int tri_get_weight ( double &m11, double &m21,
      minimum edge lengths
 
 */
-C_FUNC_DEF double tri_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
+double tri_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
 
   // three vectors for each side 
@@ -159,7 +159,7 @@ C_FUNC_DEF double tri_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
      what is now called "v_tri_aspect_frobenius"
    
 */
-C_FUNC_DEF double tri_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
+double tri_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
   // three vectors for each side 
   VerdictVector a( coordinates[1][0] - coordinates[0][0],
@@ -208,7 +208,7 @@ C_FUNC_DEF double tri_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
      as the "aspect beta".
    
 */
-C_FUNC_DEF double tri_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
+double tri_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
 
   // three vectors for each side 
@@ -253,7 +253,7 @@ C_FUNC_DEF double tri_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
    
 */
 
-C_FUNC_DEF double tri_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double tri_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   // three vectors for each side 
@@ -290,7 +290,7 @@ C_FUNC_DEF double tri_aspect_frobenius( int /*num_nodes*/, double coordinates[][
 
   0.5 * jacobian at a node
 */
-C_FUNC_DEF double tri_area( int /*num_nodes*/, double coordinates[][3] )
+double tri_area( int /*num_nodes*/, double coordinates[][3] )
 {
   // two vectors for two sides
   VerdictVector side1( coordinates[1][0] - coordinates[0][0],
@@ -320,7 +320,7 @@ C_FUNC_DEF double tri_area( int /*num_nodes*/, double coordinates[][3] )
   The minimum angle of a tri is the minimum angle between 
   two adjacents sides out of all three corners of the triangle.
 */
-C_FUNC_DEF double tri_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
+double tri_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
 {
 
   // vectors for all the sides
@@ -393,7 +393,7 @@ C_FUNC_DEF double tri_minimum_angle( int /*num_nodes*/, double coordinates[][3] 
   The maximum angle of a tri is the maximum angle between 
   two adjacents sides out of all three corners of the triangle.
 */
-C_FUNC_DEF double tri_maximum_angle( int /*num_nodes*/, double coordinates[][3] )
+double tri_maximum_angle( int /*num_nodes*/, double coordinates[][3] )
 {
 
   // vectors for all the sides
@@ -487,7 +487,7 @@ double tri_equiangle_skew( int num_nodes, double coordinates[][3] )
 
   Condition number of the jacobian matrix at any corner
 */
-C_FUNC_DEF double tri_condition( int /*num_nodes*/, double coordinates[][3] )
+double tri_condition( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector v1(coordinates[1][0] - coordinates[0][0],
                    coordinates[1][1] - coordinates[0][1],
@@ -529,7 +529,7 @@ C_FUNC_DEF double tri_condition( int /*num_nodes*/, double coordinates[][3] )
 
   minimum of the jacobian divided by the lengths of 2 edge vectors
 */
-C_FUNC_DEF double tri_scaled_jacobian( int /*num_nodes*/, double coordinates[][3])
+double tri_scaled_jacobian( int /*num_nodes*/, double coordinates[][3])
 {
   VerdictVector first, second;
   double jacobian; 
@@ -591,7 +591,7 @@ C_FUNC_DEF double tri_scaled_jacobian( int /*num_nodes*/, double coordinates[][3
 
   2 / condition number of weighted jacobian matrix
 */
-C_FUNC_DEF double tri_shape( int num_nodes, double coordinates[][3] )
+double tri_shape( int num_nodes, double coordinates[][3] )
 {
   double condition = tri_condition( num_nodes, coordinates );
 
@@ -611,7 +611,7 @@ C_FUNC_DEF double tri_shape( int num_nodes, double coordinates[][3] )
 
   Min(J,1/J) where J is the determinant of the weighted jacobian matrix.
 */
-C_FUNC_DEF double tri_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_tri_area )
+double tri_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_tri_area )
 {
   double w11, w21, w12, w22;
 
@@ -653,7 +653,7 @@ C_FUNC_DEF double tri_relative_size_squared( int /*num_nodes*/, double coordinat
   
   Product of the Shape and Relative Size
 */
-C_FUNC_DEF double tri_shape_and_size( int num_nodes, double coordinates[][3], double average_tri_area )
+double tri_shape_and_size( int num_nodes, double coordinates[][3], double average_tri_area )
 {
   double size, shape;  
 
@@ -674,7 +674,7 @@ C_FUNC_DEF double tri_shape_and_size( int num_nodes, double coordinates[][3], do
 
 TODO:  make a short definition of the distortion and comment below
 */
-C_FUNC_DEF double tri_distortion( int num_nodes, double coordinates[][3] )
+double tri_distortion( int num_nodes, double coordinates[][3] )
 {
 
    double distortion;

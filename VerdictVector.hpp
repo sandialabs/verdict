@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <math.h>
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 class VerdictVector;

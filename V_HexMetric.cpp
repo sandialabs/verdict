@@ -33,7 +33,7 @@
 #pragma warn -8004 /* "assigned a value that is never used" */
 #endif
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 extern void quad_minimum_maximum_angle( double min_max_angles[2], double coordinates[][3] );
@@ -740,7 +740,7 @@ static VerdictVector calc_hex_efg( int efg_index, VerdictVector coordinates[8])
      Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
      minimum edge lengths
 */
-C_FUNC_DEF double hex_edge_ratio (int /*num_nodes*/, double coordinates[][3])
+double hex_edge_ratio (int /*num_nodes*/, double coordinates[][3])
 {
 
   VerdictVector edges[12];
@@ -856,7 +856,7 @@ C_FUNC_DEF double hex_edge_ratio (int /*num_nodes*/, double coordinates[][3])
 
   Maximum edge length ratio at hex center
 */
-C_FUNC_DEF double hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][3])
+double hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][3])
 {
   double aspect;
   VerdictVector node_pos[8];
@@ -884,7 +884,7 @@ C_FUNC_DEF double hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][3]
  
 }
 
-C_FUNC_DEF double hex_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
+double hex_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   double quad[4][3];
   double min_angle=360.0;
@@ -1027,7 +1027,7 @@ C_FUNC_DEF double hex_equiangle_skew( int /*num_nodes*/, double coordinates[][3]
 
   Maximum ||cosA|| where A is the angle between edges at hex center.
 */
-C_FUNC_DEF double hex_skew( int /*num_nodes*/, double coordinates[][3] )
+double hex_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector node_pos[8];
   make_hex_nodes ( coordinates, node_pos );
@@ -1061,7 +1061,7 @@ C_FUNC_DEF double hex_skew( int /*num_nodes*/, double coordinates[][3] )
 
   Maximum ratio of lengths derived from opposite edges.
 */
-C_FUNC_DEF double hex_taper( int /*num_nodes*/, double coordinates[][3] )
+double hex_taper( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector node_pos[8];
   make_hex_nodes ( coordinates, node_pos );
@@ -1090,7 +1090,7 @@ C_FUNC_DEF double hex_taper( int /*num_nodes*/, double coordinates[][3] )
   Split the hex into 24 tets.
   sum the volume of each tet.
 */
-C_FUNC_DEF double hex_volume( int /*num_nodes*/, double coordinates[][3] )
+double hex_volume( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector node_pos[8];
@@ -1153,7 +1153,7 @@ C_FUNC_DEF double hex_volume( int /*num_nodes*/, double coordinates[][3] )
 
   sqrt(3) * minimum edge length / maximum diagonal length
 */
-C_FUNC_DEF double hex_stretch( int /*num_nodes*/, double coordinates[][3] )
+double hex_stretch( int /*num_nodes*/, double coordinates[][3] )
 {
   double min_edge = hex_edge_length( 0, coordinates );
   double max_diag = diag_length( 1, coordinates );  
@@ -1170,7 +1170,7 @@ C_FUNC_DEF double hex_stretch( int /*num_nodes*/, double coordinates[][3] )
   
   Minimum diagonal length / maximum diagonal length
 */
-C_FUNC_DEF double hex_diagonal( int /*num_nodes*/, double coordinates[][3] )
+double hex_diagonal( int /*num_nodes*/, double coordinates[][3] )
 {
   
   double min_diag = diag_length( 0, coordinates ); 
@@ -1191,7 +1191,7 @@ C_FUNC_DEF double hex_diagonal( int /*num_nodes*/, double coordinates[][3] )
   Pronto-specific characteristic length for stable time step calculation. 
   Char_length = Volume / 2 grad Volume
 */
-C_FUNC_DEF double hex_dimension( int /*num_nodes*/, double coordinates[][3] )
+double hex_dimension( int /*num_nodes*/, double coordinates[][3] )
 {
   
   double gradop[9][4];
@@ -1403,7 +1403,7 @@ C_FUNC_DEF double hex_dimension( int /*num_nodes*/, double coordinates[][3] )
 
   General distortion measure based on left Cauchy-Green Tensor
 */
-C_FUNC_DEF double hex_oddy( int /*num_nodes*/, double coordinates[][3] )
+double hex_oddy( int /*num_nodes*/, double coordinates[][3] )
 {
   
   double oddy = 0.0, current_oddy;
@@ -1560,7 +1560,7 @@ C_FUNC_DEF double hex_oddy( int /*num_nodes*/, double coordinates[][3] )
      this function is calculated by averaging the 8 Frobenius aspects at
      each corner of the hex, when the reference corner is right isosceles.
 */
-C_FUNC_DEF double hex_med_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double hex_med_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector node_pos[8];
@@ -1647,7 +1647,7 @@ C_FUNC_DEF double hex_med_aspect_frobenius( int /*num_nodes*/, double coordinate
      this function is calculated by taking the maximum of the 8 Frobenius aspects at
      each corner of the hex, when the reference corner is right isosceles.
 */
-C_FUNC_DEF double hex_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double hex_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector node_pos[8];
@@ -1741,7 +1741,7 @@ C_FUNC_DEF double hex_max_aspect_frobenius( int /*num_nodes*/, double coordinate
      It will become deprecated at some point.
 
 */
-C_FUNC_DEF double hex_condition( int /*num_nodes*/, double coordinates[][3] )
+double hex_condition( int /*num_nodes*/, double coordinates[][3] )
 {
 
   return hex_max_aspect_frobenius(8, coordinates);
@@ -1752,7 +1752,7 @@ C_FUNC_DEF double hex_condition( int /*num_nodes*/, double coordinates[][3] )
 
   Minimum pointwise volume of local map at 8 corners & center of hex
 */
-C_FUNC_DEF double hex_jacobian( int num_nodes, double coordinates[][3] )
+double hex_jacobian( int num_nodes, double coordinates[][3] )
 {
   if(num_nodes == 27)
   {
@@ -1883,7 +1883,7 @@ C_FUNC_DEF double hex_jacobian( int num_nodes, double coordinates[][3] )
 
   Minimum Jacobian divided by the lengths of the 3 edge vectors
 */
-C_FUNC_DEF double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
+double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
 {
 
   double jacobi, min_norm_jac = VERDICT_DBL_MAX;
@@ -2214,7 +2214,7 @@ double hex_nodal_jacobian_ratio( int num_nodes, double* coordinates) {
   
   3/Condition number of Jacobian Skew matrix
 */
-C_FUNC_DEF double hex_shear( int /*num_nodes*/, double coordinates[][3] )
+double hex_shear( int /*num_nodes*/, double coordinates[][3] )
 {
 
   double shear;
@@ -2414,7 +2414,7 @@ C_FUNC_DEF double hex_shear( int /*num_nodes*/, double coordinates[][3] )
 
   3/Condition number of weighted Jacobian matrix
 */
-C_FUNC_DEF double hex_shape( int /*num_nodes*/, double coordinates[][3] )
+double hex_shape( int /*num_nodes*/, double coordinates[][3] )
 {
 
 
@@ -2559,7 +2559,7 @@ C_FUNC_DEF double hex_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-C_FUNC_DEF double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_hex_volume )
+double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_hex_volume )
 {
   double size = 0;
   double tau; 
@@ -2676,7 +2676,7 @@ C_FUNC_DEF double hex_relative_size_squared( int /*num_nodes*/, double coordinat
 
   Product of Shape and Relative Size
 */
-C_FUNC_DEF double hex_shape_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
+double hex_shape_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
 {
   double size = hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
   double shape = hex_shape( num_nodes, coordinates );
@@ -2694,7 +2694,7 @@ C_FUNC_DEF double hex_shape_and_size( int num_nodes, double coordinates[][3], do
 
   Product of Shear and Relative Size
 */
-C_FUNC_DEF double hex_shear_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
+double hex_shear_and_size( int num_nodes, double coordinates[][3], double average_hex_volume )
 {
   double size = hex_relative_size_squared( num_nodes, coordinates, average_hex_volume );
   double shear = hex_shear( num_nodes, coordinates );
@@ -2710,7 +2710,7 @@ C_FUNC_DEF double hex_shear_and_size( int num_nodes, double coordinates[][3], do
 /*!
   distortion of a hex
 */
-C_FUNC_DEF double hex_distortion( int num_nodes, double coordinates[][3] )
+double hex_distortion( int num_nodes, double coordinates[][3] )
 {
 
    //use 2x2 gauss points for linear hex and 3x3 for 2nd order hex
@@ -2818,7 +2818,7 @@ C_FUNC_DEF double hex_distortion( int num_nodes, double coordinates[][3] )
 
 
 /*
-C_FUNC_DEF double hex_jac_normjac_oddy_cond( int choices[], 
+double hex_jac_normjac_oddy_cond( int choices[],
                       double coordinates[][3],
                       double answers[4]  )
 {

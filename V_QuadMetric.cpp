@@ -30,7 +30,7 @@
 #include <stddef.h>
 #include <algorithm>
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 static ComputeNormal compute_normal = NULL;
@@ -400,7 +400,7 @@ void quad_minimum_maximum_angle( double min_max_angles[2], double coordinates[][
      Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
      minimum edge lengths
 */
-C_FUNC_DEF double quad_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
+double quad_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector edges[4];
   make_quad_edges( edges, coordinates );
@@ -451,7 +451,7 @@ C_FUNC_DEF double quad_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 
   maximum edge length ratio at quad center
 */
-C_FUNC_DEF double quad_max_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
+double quad_max_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector quad_nodes[4];
   quad_nodes[0].set( coordinates[0][0], coordinates[0][1], coordinates[0][2] );
@@ -483,7 +483,7 @@ C_FUNC_DEF double quad_max_edge_ratio( int /*num_nodes*/, double coordinates[][3
      this is a generalization of the triangle aspect ratio
      using Heron's formula.
 */
-C_FUNC_DEF double quad_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
+double quad_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector edges[4];
@@ -520,7 +520,7 @@ C_FUNC_DEF double quad_aspect_ratio( int /*num_nodes*/, double coordinates[][3] 
      not exist in general with quads -- although a different name should probably
      be used in the future.
 */
-C_FUNC_DEF double quad_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
+double quad_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector edges[4];
   make_quad_edges( edges, coordinates );
@@ -578,7 +578,7 @@ C_FUNC_DEF double quad_radius_ratio( int /*num_nodes*/, double coordinates[][3] 
      this function is calculated by averaging the 4 Frobenius aspects at
      each corner of the quad, when the reference triangle is right isosceles.
 */
-C_FUNC_DEF double quad_med_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double quad_med_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector edges[4];
@@ -624,7 +624,7 @@ C_FUNC_DEF double quad_med_aspect_frobenius( int /*num_nodes*/, double coordinat
      this function is calculated by taking the maximum of the 4 Frobenius aspects at
      each corner of the quad, when the reference triangle is right isosceles.
 */
-C_FUNC_DEF double quad_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double quad_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector edges[4];
@@ -674,7 +674,7 @@ C_FUNC_DEF double quad_max_aspect_frobenius( int /*num_nodes*/, double coordinat
 
   maximum ||cos A|| where A is the angle between edges at quad center
 */
-C_FUNC_DEF double quad_skew( int /*num_nodes*/, double coordinates[][3] )
+double quad_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector node_pos[4];
   for(int i = 0; i < 4; i++ )
@@ -699,7 +699,7 @@ C_FUNC_DEF double quad_skew( int /*num_nodes*/, double coordinates[][3] )
 
   maximum ratio of lengths derived from opposite edges
 */
-C_FUNC_DEF double quad_taper( int /*num_nodes*/, double coordinates[][3] )
+double quad_taper( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector node_pos[4];
   for(int i = 0; i < 4; i++ )
@@ -731,7 +731,7 @@ C_FUNC_DEF double quad_taper( int /*num_nodes*/, double coordinates[][3] )
 
   deviation of element from planarity
 */
-C_FUNC_DEF double quad_warpage( int /*num_nodes*/, double coordinates[][3] )
+double quad_warpage( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector edges[4];
@@ -764,7 +764,7 @@ C_FUNC_DEF double quad_warpage( int /*num_nodes*/, double coordinates[][3] )
 
   jacobian at quad center
 */
-C_FUNC_DEF double quad_area( int /*num_nodes*/, double coordinates[][3] )
+double quad_area( int /*num_nodes*/, double coordinates[][3] )
 {    
 
   double corner_areas[4];
@@ -783,7 +783,7 @@ C_FUNC_DEF double quad_area( int /*num_nodes*/, double coordinates[][3] )
 
   sqrt(2) * minimum edge length / maximum diagonal length
 */
-C_FUNC_DEF double quad_stretch( int /*num_nodes*/, double coordinates[][3] )
+double quad_stretch( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector edges[4], temp;
   make_quad_edges( edges, coordinates );
@@ -826,7 +826,7 @@ C_FUNC_DEF double quad_stretch( int /*num_nodes*/, double coordinates[][3] )
 
   largest included quad area (degrees)
 */
-C_FUNC_DEF double quad_maximum_angle( int /*num_nodes*/, double coordinates[][3] )
+double quad_maximum_angle( int /*num_nodes*/, double coordinates[][3] )
 {
 
   // if this is a collapsed quad, just pass it on to 
@@ -907,7 +907,7 @@ C_FUNC_DEF double quad_maximum_angle( int /*num_nodes*/, double coordinates[][3]
 
   smallest included quad angle (degrees)
 */
-C_FUNC_DEF double quad_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
+double quad_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
 {
   // if this quad is a collapsed quad, then just
   // send it to the tri_smallest_angle routine 
@@ -992,7 +992,7 @@ double quad_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 
   general distortion measure based on left Cauchy-Green Tensor
 */
-C_FUNC_DEF double quad_oddy( int /*num_nodes*/, double coordinates[][3] )
+double quad_oddy( int /*num_nodes*/, double coordinates[][3] )
 {
   
   double max_oddy = 0.;
@@ -1035,7 +1035,7 @@ C_FUNC_DEF double quad_oddy( int /*num_nodes*/, double coordinates[][3] )
 
   maximum condition number of the Jacobian matrix at 4 corners
 */
-C_FUNC_DEF double quad_condition( int /*num_nodes*/, double coordinates[][3] )
+double quad_condition( int /*num_nodes*/, double coordinates[][3] )
 {
   if ( is_collapsed_quad( coordinates ) == VERDICT_TRUE ) 
     return tri_condition(3,coordinates);
@@ -1100,7 +1100,7 @@ C_FUNC_DEF double quad_condition( int /*num_nodes*/, double coordinates[][3] )
 
   minimum pointwise volume of local map at 4 corners and center of quad
 */
-C_FUNC_DEF double quad_jacobian( int /*num_nodes*/, double coordinates[][3] )
+double quad_jacobian( int /*num_nodes*/, double coordinates[][3] )
 {
    
   if ( is_collapsed_quad( coordinates ) == VERDICT_TRUE )
@@ -1123,7 +1123,7 @@ C_FUNC_DEF double quad_jacobian( int /*num_nodes*/, double coordinates[][3] )
 
   Minimum Jacobian divided by the lengths of the 2 edge vector
 */
-C_FUNC_DEF double quad_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
+double quad_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
 {
   if ( is_collapsed_quad( coordinates ) == VERDICT_TRUE ) 
     return tri_scaled_jacobian(3, coordinates);
@@ -1188,7 +1188,7 @@ C_FUNC_DEF double quad_scaled_jacobian( int /*num_nodes*/, double coordinates[][
 
   2/Condition number of Jacobian Skew matrix
 */
-C_FUNC_DEF double quad_shear( int /*num_nodes*/, double coordinates[][3] )
+double quad_shear( int /*num_nodes*/, double coordinates[][3] )
 {
   double scaled_jacobian = quad_scaled_jacobian( 4, coordinates );
 
@@ -1203,7 +1203,7 @@ C_FUNC_DEF double quad_shear( int /*num_nodes*/, double coordinates[][3] )
 
    2/Condition number of weighted Jacobian matrix
 */
-C_FUNC_DEF double quad_shape( int /*num_nodes*/, double coordinates[][3] )
+double quad_shape( int /*num_nodes*/, double coordinates[][3] )
 {
 
   double corner_areas[4], min_shape = VERDICT_DBL_MAX, shape; 
@@ -1253,7 +1253,7 @@ C_FUNC_DEF double quad_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-C_FUNC_DEF double quad_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_quad_area )
+double quad_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_quad_area )
 {
  
   double the_quad_area = quad_area (4, coordinates); 
@@ -1286,7 +1286,7 @@ C_FUNC_DEF double quad_relative_size_squared( int /*num_nodes*/, double coordina
 
   Product of Shape and Relative Size
 */
-C_FUNC_DEF double quad_shape_and_size( int num_nodes, double coordinates[][3], double average_quad_area )
+double quad_shape_and_size( int num_nodes, double coordinates[][3], double average_quad_area )
 {
   double shape, size;
   size = quad_relative_size_squared( num_nodes, coordinates, average_quad_area );
@@ -1305,7 +1305,7 @@ C_FUNC_DEF double quad_shape_and_size( int num_nodes, double coordinates[][3], d
 
   product of shear and relative size
 */
-C_FUNC_DEF double quad_shear_and_size( int num_nodes, double coordinates[][3], double average_quad_area )
+double quad_shear_and_size( int num_nodes, double coordinates[][3], double average_quad_area )
 {
   double shear, size;
   shear = quad_shear( num_nodes, coordinates );
@@ -1322,7 +1322,7 @@ C_FUNC_DEF double quad_shear_and_size( int num_nodes, double coordinates[][3], d
 /*!
   the distortion of a quad
 */
-C_FUNC_DEF double quad_distortion( int num_nodes, double coordinates[][3] )
+double quad_distortion( int num_nodes, double coordinates[][3] )
 {
   // To calculate distortion for linear and 2nd order quads
   // distortion = {min(|J|)/actual area}*{parent area}

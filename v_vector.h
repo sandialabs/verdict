@@ -33,7 +33,7 @@
 #include <math.h>
 #include <assert.h>
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 // computes the dot product of 3d vectors

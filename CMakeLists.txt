@@ -11,6 +11,12 @@ set( verdict_VERSION "${verdict_MAJOR_VERSION}.${verdict_MINOR_VERSION}.${verdic
 
 option(BUILD_SHARED_LIBS "Build Verdict with shared libraries." OFF)
 option(VERDICT_BUILD_DOC "Build the 2007 Verdict User Manual" OFF)
+option(VERDICT_MANGLE "Mangle verdict names for inclusion in a larger library?" OFF)
+if ( VERDICT_MANGLE )
+  set( VERDICT_MANGLE_PREFIX "verdict" CACHE STRING "The namespace enclosing verdict function names and classes." )
+  mark_as_advanced( VERDICT_MANGLE_PREFIX )
+endif ( VERDICT_MANGLE )
+mark_as_advanced( VERDICT_MANGLE )
 
 option( VERDICT_ENABLE_TESTING "Should tests of the VERDICT library be built?" ON )
 

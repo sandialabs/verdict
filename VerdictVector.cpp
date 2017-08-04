@@ -31,7 +31,7 @@
 #pragma warn -8004 /* "assigned a value that is never used" */
 #endif
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 const double TWO_VERDICT_PI = 2.0 * VERDICT_PI;

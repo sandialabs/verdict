@@ -29,7 +29,7 @@
 #include <memory.h>
 #include <algorithm>
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 static const double one_third = 1.0/3.0;
@@ -41,7 +41,7 @@ static const double normal_coeff = 180. * .3183098861837906715377675267450287;
 static const double aspect_ratio_normal_coeff = sqrt(6.) / 12.;
 static const double two_thirds = 2.0/3.0;
 
-C_FUNC_DEF double tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
+double tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector ab,ac,bc,bd, ad, cd;
 
@@ -176,7 +176,7 @@ static int tet_get_weight (VerdictVector &w1, VerdictVector &w2, VerdictVector &
      Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
      minimum edge lengths
 */
-C_FUNC_DEF double tet_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
+double tet_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector a, b, c, d, e, f;
 
@@ -266,7 +266,7 @@ C_FUNC_DEF double tet_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
   minimum of the jacobian divided by the lengths of 3 edge vectors
 
 */
-C_FUNC_DEF double tet_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
+double tet_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector side0, side1, side2, side3, side4, side5;
@@ -334,7 +334,7 @@ C_FUNC_DEF double tet_scaled_jacobian( int /*num_nodes*/, double coordinates[][3
     Note that this function is similar to the aspect beta of a tet, except that
     it does not return VERDICT_DBL_MAX if the element has negative orientation.
 */
-C_FUNC_DEF double tet_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
+double tet_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
 
   //Determine side vectors
@@ -402,7 +402,7 @@ C_FUNC_DEF double tet_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
     and positive, but now ill-conditioned inverted tetrahedra are also included.
 
 */
-C_FUNC_DEF double tet_aspect_beta( int /*num_nodes*/, double coordinates[][3] )
+double tet_aspect_beta( int /*num_nodes*/, double coordinates[][3] )
 {
 
   //Determine side vectors
@@ -467,7 +467,7 @@ C_FUNC_DEF double tet_aspect_beta( int /*num_nodes*/, double coordinates[][3] )
     conditioned. Previously, this would only happen when the volume was small
     and positive, but now ill-conditioned inverted tetrahedra are also included.
 */
-C_FUNC_DEF double tet_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
+double tet_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
 
   //Determine side vectors
@@ -537,7 +537,7 @@ C_FUNC_DEF double tet_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
 
   srms^3 / (8.48528137423857*V) where srms = sqrt(sum(Si^2)/6), where Si is the edge length
 */
-C_FUNC_DEF double tet_aspect_gamma( int /*num_nodes*/, double coordinates[][3] )
+double tet_aspect_gamma( int /*num_nodes*/, double coordinates[][3] )
 {
 
   //Determine side vectors
@@ -589,7 +589,7 @@ C_FUNC_DEF double tet_aspect_gamma( int /*num_nodes*/, double coordinates[][3] )
   NB (P. Pebay 01/22/07):
     Frobenius condition number when the reference element is regular
 */
-C_FUNC_DEF double tet_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double tet_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 {
 
   VerdictVector ab, ac, ad;
@@ -642,7 +642,7 @@ C_FUNC_DEF double tet_aspect_frobenius( int /*num_nodes*/, double coordinates[][
   NB (P. Pebay 01/22/07):
     minimum nonoriented dihedral angle
 */
-C_FUNC_DEF double tet_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
+double tet_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
 {
 
   //Determine side vectors
@@ -703,7 +703,7 @@ C_FUNC_DEF double tet_minimum_angle( int /*num_nodes*/, double coordinates[][3] 
     conditioned. Previously, this would only happen when the volume was small
     and positive, but now ill-conditioned inverted tetrahedra are also included.
 */
-C_FUNC_DEF double tet_collapse_ratio( int /*num_nodes*/, double coordinates[][3] )
+double tet_collapse_ratio( int /*num_nodes*/, double coordinates[][3] )
 {
   //Determine side vectors
   VerdictVector e01, e02, e03, e12, e13, e23;
@@ -782,7 +782,7 @@ C_FUNC_DEF double tet_collapse_ratio( int /*num_nodes*/, double coordinates[][3]
   return (double) std::max( crMin, -VERDICT_DBL_MAX );
 }
 
-C_FUNC_DEF double tet_equivolume_skew( int num_nodes, double coordinates[][3] )
+double tet_equivolume_skew( int num_nodes, double coordinates[][3] )
 {
 
     //- Find the vectors from the origin to each of the nodes on the tet.
@@ -819,7 +819,7 @@ C_FUNC_DEF double tet_equivolume_skew( int num_nodes, double coordinates[][3] )
   return (optimal_volume-volume)/optimal_volume;
 }
 
-C_FUNC_DEF double tet_squish_index( int /*num_nodes*/, double coordinates[][3] )
+double tet_squish_index( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector vectA(coordinates[0][0],coordinates[0][1],coordinates[0][2]);
  VerdictVector vectB(coordinates[1][0],coordinates[1][1],coordinates[1][2]);
@@ -1037,7 +1037,7 @@ static void TET15_gradients_of_the_shape_functions_for_R_S_T(const double rst[3]
 
   1/6 * jacobian at a corner node
 */
-C_FUNC_DEF double tet_volume( int /*num_nodes*/, double coordinates[][3] )
+double tet_volume( int /*num_nodes*/, double coordinates[][3] )
 {
 
   //Determine side vectors
@@ -1069,7 +1069,7 @@ C_FUNC_DEF double tet_volume( int /*num_nodes*/, double coordinates[][3] )
     conditioned. Previously, this would only happen when the volume was small
     and positive, but now ill-conditioned inverted tetrahedra are also included.
 */
-C_FUNC_DEF double tet_condition( int /*num_nodes*/, double coordinates[][3] )
+double tet_condition( int /*num_nodes*/, double coordinates[][3] )
 {
 
   double condition, term1, term2, det;
@@ -1116,7 +1116,7 @@ C_FUNC_DEF double tet_condition( int /*num_nodes*/, double coordinates[][3] )
 
   TODO
 */
-C_FUNC_DEF double tet_jacobian( int num_nodes, double coordinates[][3] )
+double tet_jacobian( int num_nodes, double coordinates[][3] )
 {
   if(num_nodes == 15)
   {
@@ -1174,7 +1174,7 @@ C_FUNC_DEF double tet_jacobian( int num_nodes, double coordinates[][3] )
 
   3/ condition number of weighted jacobian matrix
 */
-C_FUNC_DEF double tet_shape( int /*num_nodes*/, double coordinates[][3] )
+double tet_shape( int /*num_nodes*/, double coordinates[][3] )
 {
 
    VerdictVector edge0, edge2, edge3;
@@ -1210,7 +1210,7 @@ C_FUNC_DEF double tet_shape( int /*num_nodes*/, double coordinates[][3] )
 
   Min(J,1/J), where J is the determinant of the weighted Jacobian matrix
 */
-C_FUNC_DEF double tet_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_tet_volume )
+double tet_relative_size_squared( int /*num_nodes*/, double coordinates[][3], double average_tet_volume )
 {
   double size;
   VerdictVector w1, w2, w3;
@@ -1238,7 +1238,7 @@ C_FUNC_DEF double tet_relative_size_squared( int /*num_nodes*/, double coordinat
 
   Product of the shape and relative size
 */
-C_FUNC_DEF double tet_shape_and_size( int num_nodes, double coordinates[][3], double average_tet_volume )
+double tet_shape_and_size( int num_nodes, double coordinates[][3], double average_tet_volume )
 {
 
   double shape, size;
@@ -1254,7 +1254,7 @@ C_FUNC_DEF double tet_shape_and_size( int num_nodes, double coordinates[][3], do
 /*!
   the distortion of a tet
 */
-C_FUNC_DEF double tet_distortion( int num_nodes, double coordinates[][3] )
+double tet_distortion( int num_nodes, double coordinates[][3] )
 {
 
    double distortion = VERDICT_DBL_MAX;

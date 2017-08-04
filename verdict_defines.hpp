@@ -31,7 +31,7 @@
 #include "v_vector.h"
 #include "VerdictVector.hpp"
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 
 enum VerdictBoolean { VERDICT_FALSE = 0, VERDICT_TRUE = 1} ;

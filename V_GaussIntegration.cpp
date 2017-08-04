@@ -26,7 +26,7 @@
 
 #include "V_GaussIntegration.hpp"
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 void GaussIntegration::initialize(int n, int m, int dim, int tri)
 {

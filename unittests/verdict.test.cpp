@@ -12,15 +12,17 @@
 #include <fstream>
 #include <vector>
 #include <array>
+#include <functional>
 
 #include <verdict.h>
 
 #define MAX_NODES_PER_ELEMENT 27
 #define VERDICT_SIGNIFICANT_FIG 5    // 7 significant figures for doubles
 
+
 struct metric_and_answer
 {
-  VerdictFunction mFunction;
+  std::function<double(int, double[][3])> mFunction;
   double mAnswer;
 };
 

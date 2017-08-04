@@ -34,7 +34,7 @@ static const double SQRT2_HALVES = sqrt(2.0)/2.0;
 extern double quad_equiangle_skew( int num_nodes, double coordinates[][3] );
 extern double tri_equiangle_skew( int num_nodes, double coordinates[][3] );
 
-namespace verdict
+namespace VERDICT_NAMESPACE
 {
 // local methods
 void make_pyramid_tets(double coordinates[][3], double tet1_coords[][3], double tet2_coords[][3],
@@ -67,7 +67,7 @@ double largest_pyramid_edge( double coordinates[][3] );
           
 */
 
-C_FUNC_DEF double pyramid_equiangle_skew( int num_nodes, double coordinates[][3] )
+double pyramid_equiangle_skew( int num_nodes, double coordinates[][3] )
 {
   double base[4][3];
   double tri1[3][3];
@@ -99,7 +99,7 @@ C_FUNC_DEF double pyramid_equiangle_skew( int num_nodes, double coordinates[][3]
   2 tets and summing the volumes of the 2 tets.
 */
 
-C_FUNC_DEF double pyramid_volume( int num_nodes, double coordinates[][3] )
+double pyramid_volume( int num_nodes, double coordinates[][3] )
 {
     
   double center_coords[3];
@@ -178,7 +178,7 @@ C_FUNC_DEF double pyramid_volume( int num_nodes, double coordinates[][3] )
     
 }
 
-C_FUNC_DEF double pyramid_jacobian( int num_nodes, double coordinates[][3] )
+double pyramid_jacobian( int num_nodes, double coordinates[][3] )
 {
   // break the pyramid into four tets return the minimum jacobian of the two tets
   double tet1_coords[4][3];
@@ -199,7 +199,7 @@ C_FUNC_DEF double pyramid_jacobian( int num_nodes, double coordinates[][3] )
   return p1 < p2 ? p1 : p2;
 }
 
-C_FUNC_DEF double pyramid_scaled_jacobian( int num_nodes, double coordinates[][3] )
+double pyramid_scaled_jacobian( int num_nodes, double coordinates[][3] )
 {
   // break the pyramid into four tets return the minimum scaled jacobian of the tets
   double tet1_coords[4][3];
@@ -226,7 +226,7 @@ C_FUNC_DEF double pyramid_scaled_jacobian( int num_nodes, double coordinates[][3
   return min_jac < 1.0 ? min_jac : 1.0 - (min_jac - 1.0);
 }
 
-C_FUNC_DEF double pyramid_shape( int num_nodes, double coordinates[][3] )
+double pyramid_shape( int num_nodes, double coordinates[][3] )
 {
   // ideally there will be four equilateral triangles and one square.
   // Test each face

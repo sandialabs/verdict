@@ -36,6 +36,7 @@
 
 #cmakedefine VERDICT_MANGLE
 #ifdef VERDICT_MANGLE
+# define VERDICT_NAMESPACE @VERDICT_MANGLE_PREFIX@
 #endif
                      
 #endif  /* __verdict_config_h */
