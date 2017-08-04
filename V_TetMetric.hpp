@@ -64,28 +64,43 @@ namespace verdict {
 
 
 double tet_dimension( int num_nodes, double coordinates[][3] ) {
+ 
+    VerdictVector c0(coordinates[0][0], coordinates[0][1], coordinates[0][2]);
+    VerdictVector c1(coordinates[1][0], coordinates[1][1], coordinates[1][2]);
+    VerdictVector c2(coordinates[2][0], coordinates[2][1], coordinates[2][2]);
+    VerdictVector c3(coordinates[3][0], coordinates[3][1], coordinates[3][2]);
 
-  VerdictVector c0( coordinates[0][0], coordinates[0][1], coordinates[0][2] ); 
-  VerdictVector c1( coordinates[1][0], coordinates[1][1], coordinates[1][2] ); 
-  VerdictVector c2( coordinates[2][0], coordinates[2][1], coordinates[2][2] ); 
-  VerdictVector c3( coordinates[3][0], coordinates[3][1], coordinates[3][2] );     
+    VerdictVector centroid = 0.25 * (c0 + c1 + c2 + c3);    
     
-  VerdictVector centroid = 0.25 * (c0 + c1 + c2 + c3);
-    
-  //
-  //  Most simplified calculation, distance from centroid to each face should be identical, so just calculate one
-  //
+    VerdictVector edge0 = c1 - c0;
+    VerdictVector edge1 = c2 - c0;
+    VerdictVector normal = edge0*edge1;
+    normal.normalize();
+    VerdictVector p = centroid - c0;
+    double radius0 = normal%p; 
 
-  VerdictVector edge0 = c1-c0;
-  
-  VerdictVector edge1 = c2-c0;
-                       
-  VerdictVector normal = edge0*edge1;    
-  normal.normalize();
+    edge0 = c3 - c0;
+    edge1 = c1 - c0;
+    normal = edge0*edge1;
+    normal.normalize();
+    p = centroid - c0;    
+    double radius1 = normal%p; 
 
-  VerdictVector p = centroid - c0;
+    edge0 = c2 - c0;
+    edge1 = c3 - c0;
+    normal = edge0*edge1;
+    normal.normalize();
+    p = centroid - c0;    
+    double radius2 = normal%p; 
 
-  return 2.0*normal%p;   
+    edge0 = c3 - c1;
+    edge1 = c2 - c1;
+    normal = edge0*edge1;
+    normal.normalize();
+    p = centroid - c1;
+    double radius3 = normal%p; 
+
+    return 0.5*(radius0 + radius1 + radius2 + radius3 );
 }
 
 
