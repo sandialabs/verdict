@@ -30,7 +30,7 @@
 namespace verdict {
 
 
-  double tet_dimension( int num_nodes, double coordinates[][3] ) { 
+  double tet_inradius( int num_nodes, double coordinates[][3] ) { 
     
     //area1 (0,1,2)
     double a1 = verdict::tri_area(3, coordinates);
