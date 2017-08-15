@@ -37,8 +37,6 @@ static const double aspect_ratio_normal_coeff = sqrt( 3. ) / 6.;
 static const double two_times_root_of_3 = 2*sqrt(3.0);
 static const double two_over_root_of_3 = 2./sqrt(3.0);
 
-static ComputeNormal compute_normal = NULL;
-
 /*! 
   get weights based on the average area of a set of
   tris
@@ -504,22 +502,6 @@ double tri_condition( int /*num_nodes*/, double coordinates[][3] )
 
   double condition = (double)( ((v1%v1) + (v2%v2) - (v1%v2)) / (areax2*root_of_3) );
 
-    //check for inverted if we have access to the normal
-  if( compute_normal )
-  {
-    //center of tri
-    double point[3], surf_normal[3];
-    point[0] =  (coordinates[0][0] + coordinates[1][0] + coordinates[2][0]) / 3;
-    point[1] =  (coordinates[0][1] + coordinates[1][1] + coordinates[2][1]) / 3;
-    point[2] =  (coordinates[0][2] + coordinates[1][2] + coordinates[2][2]) / 3;
-
-    //dot product
-    compute_normal( point, surf_normal ); 
-    if( (tri_normal.x()*surf_normal[0] + 
-         tri_normal.y()*surf_normal[1] +
-         tri_normal.z()*surf_normal[2] ) < 0 )
-      return (double)VERDICT_DBL_MAX;
-  }
   return (double)std::min( condition, VERDICT_DBL_MAX );
 }
 
@@ -562,26 +544,9 @@ double tri_scaled_jacobian( int /*num_nodes*/, double coordinates[][3])
   jacobian *= two_over_root_of_3;
   jacobian /= max_edge_length_product; 
 
-  if( compute_normal )
-  {
-    //center of tri
-    double point[3], surf_normal[3];
-    point[0] =  (coordinates[0][0] + coordinates[1][0] + coordinates[2][0]) / 3;
-    point[1] =  (coordinates[0][1] + coordinates[1][1] + coordinates[2][1]) / 3;
-    point[2] =  (coordinates[0][2] + coordinates[1][2] + coordinates[2][2]) / 3;
-
-    //dot product
-    compute_normal( point, surf_normal ); 
-    if( (cross.x()*surf_normal[0] + 
-         cross.y()*surf_normal[1] +
-         cross.z()*surf_normal[2] ) < 0 )
-      jacobian *= -1; 
-  }
-
   if( jacobian > 0 )
     return (double) std::min( jacobian, VERDICT_DBL_MAX );
   return (double) std::max( jacobian, -VERDICT_DBL_MAX );
-
 }
 
 

@@ -169,9 +169,6 @@ namespace VERDICT_NAMESPACE
   const double VERDICT_DBL_MAX = 1.0E+30;
   const double VERDICT_PI = 3.1415926535897932384626;
 
-  /* typedef for computing normals */
-  typedef int(*ComputeNormal)(double point[3], double normal[3]);
-
 /* quality functions for hex elements */
 
     //! Calculates hex edge ratio metric.

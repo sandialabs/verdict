@@ -33,8 +33,6 @@
 namespace VERDICT_NAMESPACE
 {
 
-static ComputeNormal compute_normal = NULL;
-
 static const double radius_ratio_normal_coeff = 1. / ( 2. * sqrt( 2. ) );
 static const double root_of_2 = sqrt(2.0);
 
@@ -1068,27 +1066,6 @@ double quad_condition( int /*num_nodes*/, double coordinates[][3] )
   }
   
   max_condition /= 2;
-  
-  if( compute_normal )
-  {
-    VerdictVector face_normal = quad_normal( coordinates );
-
-    //center of quad
-    double point[3], surf_normal[3];
-    point[0] =  (coordinates[0][0] + coordinates[1][0] + 
-                 coordinates[2][0] + coordinates[3][0]) / 4;
-    point[1] =  (coordinates[0][1] + coordinates[1][1] + 
-                 coordinates[2][1] + coordinates[3][1] ) / 4;
-    point[2] =  (coordinates[0][2] + coordinates[1][2] + 
-                 coordinates[2][2] + coordinates[3][2] ) / 4;
-
-    //dot product
-    compute_normal( point, surf_normal ); 
-    if( (face_normal.x()*surf_normal[0] + 
-         face_normal.y()*surf_normal[1] +
-         face_normal.z()*surf_normal[2] ) < 0 )
-      return (double)VERDICT_DBL_MAX;
-  }
 
   if( max_condition > 0 )
     return (double) std::min( max_condition, VERDICT_DBL_MAX );
@@ -1158,24 +1135,6 @@ double quad_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
 
   scaled_jac = corner_areas[3] / (length[3] * length[2]);
   min_scaled_jac = std::min( scaled_jac, min_scaled_jac );
-  
-  if( compute_normal )
-  {
-     VerdictVector face_normal = quad_normal( coordinates );
-
-    //center of tri
-    double point[3], surf_normal[3];
-    point[0] =  (coordinates[0][0] + coordinates[1][0] + coordinates[2][0]) / 3;
-    point[1] =  (coordinates[0][1] + coordinates[1][1] + coordinates[2][1]) / 3;
-    point[2] =  (coordinates[0][2] + coordinates[1][2] + coordinates[2][2]) / 3;
-
-    //dot product
-    compute_normal( point, surf_normal ); 
-    if( (face_normal.x()*surf_normal[0] + 
-         face_normal.y()*surf_normal[1] +
-         face_normal.z()*surf_normal[2] ) < 0 )
-      min_scaled_jac *= -1; 
-  }
 
   if( min_scaled_jac > 0 )
     return (double) std::min( min_scaled_jac, VERDICT_DBL_MAX );
