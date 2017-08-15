@@ -35,12 +35,6 @@
 namespace VERDICT_NAMESPACE
 {
 
-class VerdictVector;
-typedef void ( VerdictVector::*transform_function )( double gamma,
-                                                   double gamma2);
-// a pointer to some function that transforms the point,
-// taking a double parameter.  e.g. blow_out, rotate, and scale_angle
-
 class VerdictVector
 {
 public:
@@ -96,29 +90,6 @@ public:
   
   void theta( const double yv ); //- Set theta component of vector, if (r,theta) format
   
-  void xy_to_rtheta();
-    //- convert from cartesian to polar coordinates, just 2d for now
-    //- theta is in [0,2 PI)
-  
-  void rtheta_to_xy();
-    //- convert from  polar to cartesian coordinates, just 2d for now
-  
-  void scale_angle(double gamma, double );
-    //- tranform_function.
-    //- transform  (x,y) to (r,theta) to (r,gamma*theta) to (x',y')
-    //- plus some additional scaling so long chords won't cross short ones
-  
-  void blow_out(double gamma, double gamma2 = 0.0);
-    //- transform_function
-    //- blow points radially away from the origin, 
-  
-  void rotate(double angle, double );
-    //- transform function.
-    //- transform  (x,y) to (r,theta) to (r,theta+angle) to (x',y')
-  
-  void reflect_about_xaxis(double dummy, double );
-    //- dummy argument to make it a transform function
-  
   double normalize();
     //- Normalize (set magnitude equal to 1) vector - return the magnitude
 
@@ -131,10 +102,6 @@ public:
     //- Calculate the length of the vector.
     //- Use {length_squared()} if only comparing lengths, not adding.
   
-  double distance_between(const VerdictVector& test_vector);
-    //- Calculate the distance from the head of one vector
-    //  to the head of the test_vector.
-  
   double length_squared() const;
     //- Calculate the squared length of the vector.
     //- Faster than {length()} since it eliminates the square root if
@@ -144,40 +111,10 @@ public:
     //- Calculate the interior angle: acos((a%b)/(|a||b|))
     //- Returns angle in degrees.
   
-  double vector_angle_quick(const VerdictVector& vec1, const VerdictVector& vec2);
-    //- Calculate the interior angle between the projections of
-    //- {vec1} and {vec2} onto the plane defined by the {this} vector.
-    //- The angle returned is the right-handed angle around the {this}
-    //- vector from {vec1} to {vec2}. Angle is in radians.
-  
-  double vector_angle( const VerdictVector &vector1,
-                       const VerdictVector &vector2) const;
-    //- Compute the angle between the projections of {vector1} and {vector2}
-    //- onto the plane defined by *this. The angle is the
-    //- right-hand angle, in radians, about *this from {vector1} to {vector2}.
-  
   void perpendicular_z();
     //- Transform this vector to a perpendicular one, leaving
     //- z-component alone. Rotates clockwise about the z-axis by pi/2.
 
-  void print_me();
-    //- Prints out the coordinates of this vector.
-  
-  void orthogonal_vectors( VerdictVector &vector2, VerdictVector &vector3 );
-    //- Finds 2 (arbitrary) vectors that are orthogonal to this one
-  
-  void next_point( const VerdictVector &direction, double distance, 
-                   VerdictVector& out_point );
-    //- Finds the next point in space based on *this* point (starting point), 
-    //- a direction and the distance to extend in the direction. The
-    //- direction vector need not be a unit vector.  The out_point can be
-    //- "*this" (i.e., modify point in place).
-  
-  bool within_tolerance( const VerdictVector &vectorPtr2,
-                                double tolerance) const;
-    //- Compare two vectors to see if they are spatially equal.  They
-    //- compare if x, y, and z are all within tolerance.
-  
     //- Heading: Operator Overloads  *****************************
   VerdictVector&  operator+=(const VerdictVector &vec);
     //- Compound Assignment: addition: {this = this + vec}
@@ -232,11 +169,6 @@ public:
   friend int operator!=(const VerdictVector &v1, const VerdictVector &v2);
     //- Inequality operator
   
-  friend VerdictVector interpolate(const double param, const VerdictVector &v1,
-                                 const VerdictVector &v2);
-    //- Interpolate between two vectors. Returns (1-param)*v1 + param*v2
-
-
   VerdictVector &operator=(const VerdictVector& from);
   
 private:
@@ -245,17 +177,6 @@ private:
   double yVal;  //- y component of vector.
   double zVal;  //- z component of vector.
 };
-
-VerdictVector vector_rotate(
-  const double angle, const VerdictVector &normalAxis, const VerdictVector &referenceAxis );
-  //- A new coordinate system is created with the xy plane corresponding
-  //- to the plane normal to {normalAxis}, and the x axis corresponding to
-  //- the projection of {referenceAxis} onto the normal plane.  The normal
-  //- plane is the tangent plane at the root point.  A unit vector is
-  //- constructed along the local x axis and then rotated by the given
-  //- ccw angle to form the new point.  The new point, then is a unit
-  //- distance from the global origin in the tangent plane.
-  //- {angle} is in radians.
 
 inline double VerdictVector::x() const
 { return xVal; }
