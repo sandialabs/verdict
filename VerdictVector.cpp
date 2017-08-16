@@ -34,8 +34,6 @@
 namespace VERDICT_NAMESPACE
 {
 
-const double TWO_VERDICT_PI = 2.0 * VERDICT_PI;
-
 VerdictVector &VerdictVector::length(const double new_length)
 {
   double len = this->length();
