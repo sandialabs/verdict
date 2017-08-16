@@ -160,6 +160,9 @@ public:
   friend double operator%(const VerdictVector &v1, const VerdictVector &v2);
     //- dot product
   
+  static double Dot(const VerdictVector &v1, const VerdictVector &v2);
+  //- dot product
+
   friend VerdictVector operator/(const VerdictVector &v1, const double sclr);
     //- vector / scalar
   
@@ -427,14 +430,18 @@ inline double VerdictVector::normalize()
   return mag;
 }
 
-
 // Dot Product.
 inline double operator%(const VerdictVector &vector1,
                         const VerdictVector &vector2)
 {
-  return( vector1.x() * vector2.x() +
-          vector1.y() * vector2.y() +
-          vector1.z() * vector2.z() );
+  return VerdictVector::Dot(vector1, vector2);
+}
+inline double VerdictVector::Dot(const VerdictVector &vector1,
+                                 const VerdictVector &vector2)
+{
+  return( vector1.xVal * vector2.xVal +
+          vector1.yVal * vector2.yVal +
+          vector1.zVal * vector2.zVal );
 }
 } // namespace verdict
 

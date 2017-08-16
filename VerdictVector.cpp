@@ -50,7 +50,7 @@ double VerdictVector::interior_angle(const VerdictVector &otherVector)
   double cosAngle=0., angleRad=0., len1, len2=0.;
   
   if (((len1 = this->length()) > 0) && ((len2 = otherVector.length()) > 0))
-    cosAngle = (*this % otherVector)/(len1 * len2);
+    cosAngle = VerdictVector::Dot(*this , otherVector)/(len1 * len2);
   else
   {
     assert(len1 > 0);

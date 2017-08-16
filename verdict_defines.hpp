@@ -48,7 +48,7 @@ inline double determinant( VerdictVector v1,
     VerdictVector v2,
     VerdictVector v3 )
 {
-  return v1 % (v2 * v3);
+  return VerdictVector::Dot(v1, (v2 * v3));
 }
 
 #define jacobian_matrix(a,b,c,d,e,f,g) \
@@ -211,12 +211,12 @@ inline void form_Q( const VerdictVector& v1,
   
   double g11, g12, g13, g22, g23, g33;
   
-  g11 = v1 % v1;
-  g12 = v1 % v2;
-  g13 = v1 % v3;
-  g22 = v2 % v2;
-  g23 = v2 % v3;
-  g33 = v3 % v3;
+  g11 = VerdictVector::Dot(v1, v1);
+  g12 = VerdictVector::Dot(v1, v2);
+  g13 = VerdictVector::Dot(v1, v3);
+  g22 = VerdictVector::Dot(v2, v2);
+  g23 = VerdictVector::Dot(v2, v3);
+  g33 = VerdictVector::Dot(v3, v3);
   
   double rtg11 = sqrt(g11);
   double rtg22 = sqrt(g22);
@@ -225,7 +225,7 @@ inline void form_Q( const VerdictVector& v1,
   
   temp1 = v1 * v2;
   
-  double cross = sqrt( temp1 % temp1 );
+  double cross = sqrt( VerdictVector::Dot(temp1, temp1) );
   
   double q11,q21,q31;
   double q12,q22,q32;
@@ -242,7 +242,7 @@ inline void form_Q( const VerdictVector& v1,
   q13 = g13 / rtg11 / rtg33;
   q23 = ( g11*g23-g12*g13 )/ rtg11 / rtg33 / cross;
   temp1 = v2 * v3;
-  q33 = ( v1 % temp1  ) / rtg33 / cross;
+  q33 = VerdictVector::Dot( v1, temp1  ) / rtg33 / cross;
   
   q1.set( q11, q21, q31 );
   q2.set( q12, q22, q32 );
@@ -250,26 +250,26 @@ inline void form_Q( const VerdictVector& v1,
   
 }
 
-inline void product( VerdictVector& a1,
-    VerdictVector& a2,
-    VerdictVector& a3,
-    VerdictVector& b1,
-    VerdictVector& b2,
-    VerdictVector& b3,
-    VerdictVector& c1,
-    VerdictVector& c2,
-    VerdictVector& c3 )
+inline void product(VerdictVector& a1,
+  VerdictVector& a2,
+  VerdictVector& a3,
+  VerdictVector& b1,
+  VerdictVector& b2,
+  VerdictVector& b3,
+  VerdictVector& c1,
+  VerdictVector& c2,
+  VerdictVector& c3)
 {
-  
+
   VerdictVector x1, x2, x3;
-  
-  x1.set( a1.x(), a2.x(), a3.x() );
-  x2.set( a1.y(), a2.y(), a3.y() );
-  x3.set( a1.z(), a2.z(), a3.z() );
-  
-  c1.set( x1 % b1, x2 % b1, x3 % b1 );
-  c2.set( x1 % b2, x2 % b2, x3 % b2 );
-  c3.set( x1 % b3, x2 % b3, x3 % b3 );
+
+  x1.set(a1.x(), a2.x(), a3.x());
+  x2.set(a1.y(), a2.y(), a3.y());
+  x3.set(a1.z(), a2.z(), a3.z());
+
+  c1.set(VerdictVector::Dot(x1, b1), VerdictVector::Dot(x2, b1), VerdictVector::Dot(x3, b1));
+  c2.set(VerdictVector::Dot(x1, b2), VerdictVector::Dot(x2, b2), VerdictVector::Dot(x3, b2));
+  c3.set(VerdictVector::Dot(x1, b3), VerdictVector::Dot(x2, b3), VerdictVector::Dot(x3, b3));
 }
 
 
@@ -278,7 +278,7 @@ inline double norm_squared( VerdictVector& x1,
     VerdictVector& x3 )
 
 {
-  return  (x1 % x1) + (x2 % x2) + (x3 % x3);
+  return  VerdictVector::Dot(x1, x1) + VerdictVector::Dot(x2, x2) + VerdictVector::Dot(x3, x3);
 }
 
 

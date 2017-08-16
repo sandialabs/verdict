@@ -53,7 +53,7 @@ static int hex_get_weight( VerdictVector &v1, VerdictVector &v2, VerdictVector &
   v2.set(0,1,0);
   v3.set(0,0,1);
 
-  double scale = pow(average_size/ (v1 % (v2 * v3 )), 0.33333333333);
+  double scale = pow(average_size / (VerdictVector::Dot(v1, (v2 * v3))), 0.33333333333);
   v1 *= scale;
   v2 *= scale;
   v3 *= scale;
@@ -435,13 +435,15 @@ static double safe_ratio( const double numerator,
 static double condition_comp(
   const VerdictVector &xxi, const VerdictVector &xet, const VerdictVector &xze )
 {
-  double det =  xxi % (xet * xze);
+  double det = VerdictVector::Dot(xxi, (xet * xze));
   
   if ( det <= VERDICT_DBL_MIN) { return VERDICT_DBL_MAX; }
   
   
-  double term1 = xxi % xxi + xet % xet + xze % xze;
-  double term2 = (( xxi*xet ) % ( xxi*xet )) + (( xet*xze ) % ( xet*xze )) + (( xze*xxi ) % ( xze*xxi ));
+  double term1 = VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze);
+  double term2 = VerdictVector::Dot((xxi*xet), (xxi*xet)) +
+                 VerdictVector::Dot((xet*xze), (xet*xze)) +
+                 VerdictVector::Dot((xze*xxi), (xze*xxi));
   
   return sqrt( term1 * term2 ) / det;
 }
@@ -455,13 +457,13 @@ static double oddy_comp( const VerdictVector &xxi,
   
   double g11, g12, g13, g22, g23, g33, rt_g;
   
-  g11 = xxi % xxi;
-  g12 = xxi % xet;
-  g13 = xxi % xze;
-  g22 = xet % xet;
-  g23 = xet % xze;
-  g33 = xze % xze;
-  rt_g = xxi % (xet * xze);
+  g11 = VerdictVector::Dot(xxi, xxi);
+  g12 = VerdictVector::Dot(xxi, xet);
+  g13 = VerdictVector::Dot(xxi, xze);
+  g22 = VerdictVector::Dot(xet, xet);
+  g23 = VerdictVector::Dot(xet, xze);
+  g33 = VerdictVector::Dot(xze, xze);
+  rt_g = VerdictVector::Dot(xxi, (xet * xze));
   
   double oddy_metric;
   if ( rt_g > VERDICT_DBL_MIN ) 
@@ -1045,9 +1047,9 @@ double hex_skew( int /*num_nodes*/, double coordinates[][3] )
   if ( efg3.normalize() <= VERDICT_DBL_MIN )
     return VERDICT_DBL_MAX;
 
-  skew_1 = fabs(efg1 % efg2);
-  skew_2 = fabs(efg1 % efg3);
-  skew_3 = fabs(efg2 % efg3);
+  skew_1 = fabs(VerdictVector::Dot(efg1, efg2));
+  skew_2 = fabs(VerdictVector::Dot(efg1, efg3));
+  skew_3 = fabs(VerdictVector::Dot(efg2, efg3));
 
   double skew = (std::max( skew_1, std::max( skew_2, skew_3 ) ));
 
@@ -1138,9 +1140,9 @@ double hex_volume( int /*num_nodes*/, double coordinates[][3] )
     //The volume is 1/6 of jacobian at a corner node.
     for(int j=0;j<3;j++)//first three tets
     {
-      volume += (double)((side[4] % (side[j+1] * side[j])) / 6.0);
+      volume += (double)(VerdictVector::Dot(side[4], (side[j + 1] * side[j])) / 6.0);
     }
-    volume += (double)((side[4] % (side[0] * side[3])) / 6.0);//fourth tet.
+    volume += (double)(VerdictVector::Dot(side[4], (side[0] * side[3])) / 6.0);//fourth tet.
   }
 
   if ( volume > 0 )
@@ -1778,7 +1780,7 @@ double hex_jacobian( int num_nodes, double coordinates[][3] )
         jacobian[2][1]+=coordinates[j][2]*dhds[j];
         jacobian[2][2]+=coordinates[j][2]*dhdt[j];
       }
-      double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
+      double det = VerdictVector::Dot((VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])), VerdictVector(jacobian[2]));
       min_determinant = std::min(det, min_determinant);
     }
     return min_determinant;
@@ -1797,7 +1799,7 @@ double hex_jacobian( int num_nodes, double coordinates[][3] )
     xze = calc_hex_efg(3, node_pos );
 
 
-    current_jacobian = xxi % (xet * xze) / 64.0;
+    current_jacobian = VerdictVector::Dot(xxi, (xet * xze)) / 64.0;
     if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
     // J(0,0,0):
@@ -1806,7 +1808,7 @@ double hex_jacobian( int num_nodes, double coordinates[][3] )
     xet = node_pos[3] - node_pos[0];
     xze = node_pos[4] - node_pos[0];
 
-    current_jacobian = xxi % (xet * xze);
+    current_jacobian = VerdictVector::Dot(xxi, (xet * xze));
     if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
     // J(1,0,0):
@@ -1815,7 +1817,7 @@ double hex_jacobian( int num_nodes, double coordinates[][3] )
     xet = node_pos[0] - node_pos[1];
     xze = node_pos[5] - node_pos[1];
 
-    current_jacobian = xxi % (xet * xze);
+    current_jacobian = VerdictVector::Dot(xxi, (xet * xze));
     if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
     // J(1,1,0):
@@ -1824,7 +1826,7 @@ double hex_jacobian( int num_nodes, double coordinates[][3] )
     xet = node_pos[1] - node_pos[2];
     xze = node_pos[6] - node_pos[2];
 
-    current_jacobian = xxi % (xet * xze);
+    current_jacobian = VerdictVector::Dot(xxi, (xet * xze));
     if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
     // J(0,1,0):
@@ -1833,7 +1835,7 @@ double hex_jacobian( int num_nodes, double coordinates[][3] )
     xet = node_pos[2] - node_pos[3];
     xze = node_pos[7] - node_pos[3];
 
-    current_jacobian = xxi % (xet * xze);
+    current_jacobian = VerdictVector::Dot(xxi, (xet * xze));
     if ( current_jacobian < jacobian ) { jacobian = current_jacobian; }
 
     // J(0,0,1):
@@ -1940,7 +1942,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = calc_hex_efg(2, node_pos );
   xze = calc_hex_efg(3, node_pos );
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi) { min_jacobi = jacobi; }
 
   len1_sq = xxi.length_squared();
@@ -1965,7 +1967,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[3] - node_pos[0];
   xze = node_pos[4] - node_pos[0];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
 
   len1_sq = xxi.length_squared();
@@ -1990,7 +1992,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[0] - node_pos[1];
   xze = node_pos[5] - node_pos[1];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
   
   len1_sq = xxi.length_squared();
@@ -2014,7 +2016,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[1] - node_pos[2];
   xze = node_pos[6] - node_pos[2];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
   
   len1_sq = xxi.length_squared();
@@ -2038,7 +2040,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[2] - node_pos[3];
   xze = node_pos[7] - node_pos[3];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
   
   len1_sq = xxi.length_squared();
@@ -2062,7 +2064,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[5] - node_pos[4];
   xze = node_pos[0] - node_pos[4];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
   
   len1_sq = xxi.length_squared();
@@ -2086,7 +2088,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[6] - node_pos[5];
   xze = node_pos[1] - node_pos[5];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
   
   len1_sq = xxi.length_squared();
@@ -2110,7 +2112,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[7] - node_pos[6];
   xze = node_pos[2] - node_pos[6];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
   
   len1_sq = xxi.length_squared();
@@ -2134,7 +2136,7 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
   xet = node_pos[4] - node_pos[7];
   xze = node_pos[3] - node_pos[7];
 
-  jacobi = xxi % ( xet * xze );
+  jacobi = VerdictVector::Dot(xxi, (xet * xze));
   if ( jacobi < min_jacobi ) { min_jacobi = jacobi; }
   
   len1_sq = xxi.length_squared();
@@ -2241,7 +2243,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths;
@@ -2263,7 +2265,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
@@ -2285,7 +2287,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
@@ -2307,7 +2309,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
@@ -2329,7 +2331,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
@@ -2351,7 +2353,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
@@ -2373,7 +2375,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
@@ -2395,7 +2397,7 @@ double hex_shear( int /*num_nodes*/, double coordinates[][3] )
     return 0;
 
   lengths = sqrt( len1_sq * len2_sq * len3_sq );
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det < VERDICT_DBL_MIN ) { return 0; }
 
   shear = det / lengths; 
@@ -2433,9 +2435,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[3] - node_pos[0];
   xze = node_pos[4] - node_pos[0];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi,xxi) + VerdictVector::Dot(xet,xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2448,9 +2450,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[0] - node_pos[1];
   xze = node_pos[5] - node_pos[1];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi,xxi) + VerdictVector::Dot(xet,xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2463,9 +2465,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[1] - node_pos[2];
   xze = node_pos[6] - node_pos[2];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi,xxi) + VerdictVector::Dot(xet,xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2478,9 +2480,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[2] - node_pos[3];
   xze = node_pos[7] - node_pos[3];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2493,9 +2495,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[5] - node_pos[4];
   xze = node_pos[0] - node_pos[4];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi,xxi) + VerdictVector::Dot(xet,xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2508,9 +2510,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[6] - node_pos[5];
   xze = node_pos[1] - node_pos[5];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi,xxi) + VerdictVector::Dot(xet,xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2523,9 +2525,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[7] - node_pos[6];
   xze = node_pos[2] - node_pos[6];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2538,9 +2540,9 @@ double hex_shape( int /*num_nodes*/, double coordinates[][3] )
   xet = node_pos[4] - node_pos[7];
   xze = node_pos[3] - node_pos[7];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   if ( det > VERDICT_DBL_MIN ) 
-    shape = 3 * pow( det, two_thirds) / (xxi%xxi + xet%xet + xze%xze);
+    shape = 3 * pow(det, two_thirds) / (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze,xze));
   else
     return 0;
   
@@ -2570,7 +2572,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   hex_get_weight( xxi, xet, xze, average_hex_volume );
  
   //This is the average relative size 
-  double detw = xxi % (xet * xze);
+  double detw = VerdictVector::Dot(xxi, (xet * xze));
 
   if ( detw < VERDICT_DBL_MIN ) 
     return 0; 
@@ -2584,7 +2586,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[3] - node_pos[0];
   xze = node_pos[4] - node_pos[0];
   
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
 
@@ -2594,7 +2596,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[0] - node_pos[1];
   xze = node_pos[5] - node_pos[1];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
 
@@ -2604,7 +2606,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[1] - node_pos[2];
   xze = node_pos[6] - node_pos[2];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
   // J(1,1,0):
@@ -2613,7 +2615,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[2] - node_pos[3];
   xze = node_pos[7] - node_pos[3];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
 
@@ -2623,7 +2625,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[5] - node_pos[4];
   xze = node_pos[0] - node_pos[4];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
 
@@ -2633,7 +2635,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[6] - node_pos[5];
   xze = node_pos[1] - node_pos[5];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
 
@@ -2643,7 +2645,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[7] - node_pos[6];
   xze = node_pos[2] - node_pos[6];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
 
@@ -2653,7 +2655,7 @@ double hex_relative_size_squared( int /*num_nodes*/, double coordinates[][3], do
   xet = node_pos[4] - node_pos[7];
   xze = node_pos[3] - node_pos[7];
 
-  det = xxi % (xet * xze);
+  det = VerdictVector::Dot(xxi, (xet * xze));
   det_sum += det;  
 
 
@@ -2775,7 +2777,7 @@ double hex_distortion( int num_nodes, double coordinates[][3] )
          xze += dndy3[ife][ja]*xin;
       }
 
-      jacobian = xxi % (xet * xze);
+      jacobian = VerdictVector::Dot(xxi, (xet * xze));
       if (minimum_jacobian > jacobian)
          minimum_jacobian = jacobian;
 
@@ -2804,7 +2806,7 @@ double hex_distortion( int num_nodes, double coordinates[][3] )
          xze += dndy3_at_node[node_id][ja]*xin;
       }
 
-      jacobian = xxi % (xet * xze);
+      jacobian = VerdictVector::Dot(xxi, (xet * xze));
       if (minimum_jacobian > jacobian)
          minimum_jacobian = jacobian;
 
