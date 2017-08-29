@@ -15,6 +15,7 @@
 #include <functional>
 
 #include <verdict.h>
+#include "V_TetMetric.hpp"
 
 #define MAX_NODES_PER_ELEMENT 27
 #define VERDICT_SIGNIFICANT_FIG 5    // 7 significant figures for doubles
@@ -77,6 +78,43 @@ void runtest(test_case &this_testcase)
     }
   }
 }
+
+
+TEST(verdict, incircle_1)
+{
+  test_case testcase = {
+    "incircle_1",
+    { { verdict::tet_inradius, 0.5 - 1. / sqrt(12) } },
+    4,
+    {
+      { 0, 0, 0 },
+      { 1, 0, 0 },
+      { 0, 1, 0 },
+      { 0, 0, 1 }
+    }
+  };
+  
+  runtest(testcase);
+}
+
+TEST(verdict, tet_equiangle_skew_1)
+{
+  test_case testcase = {
+    "tet_equiangle_skew_1",
+    { { verdict::tet_equiangle_skew, 0.25 } },
+    4,
+    {
+      { 0, 0, 0 },
+      { 1, 0, 0 },
+      { 0, 1, 0 },
+      { 0, 0, 1 }
+    }
+  };
+  
+  runtest(testcase);
+}
+
+
 
 TEST(verdict, edge_calc_1)
 {
