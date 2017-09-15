@@ -108,8 +108,4 @@ double hex_nodal_jacobian_ratio( int num_nodes, double* coordinates);
 
 }
 
-extern "C" double hex_scaled_jacobian( int num_nodes, double coordinates[][3]);
-extern "C" double hex_shape          ( int num_nodes, double coordinates[][3]);
-
-
 #endif
