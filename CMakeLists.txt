@@ -66,6 +66,10 @@ if ( NOT VERDICT_NO_LIBRARY_VERSION )
   )
 endif ( NOT VERDICT_NO_LIBRARY_VERSION )
 
+if ( NOT VERDICT_EXPORT_GROUP )
+  set(VERDICT_EXPORT_GROUP VerdictExport)
+endif ( )
+
 if ( VERDICT_ENABLE_TESTING )
   enable_testing()
 
@@ -106,32 +110,31 @@ endif ( VERDICT_BUILD_DOC )
 #
 # Installation stuff
 #
-IF(NOT verdict_INSTALL_NO_DEVELOPMENT)
 install(FILES 
   README
   Verdict.htm
   Verdict.doc
   verdict_test.cpp
   DESTINATION ${verdict_INSTALL_DOC_DIR}/verdict/${verdict_VERSION}/
-  COMPONENT Development
+  COMPONENT VerdictDevelopment
 )
 
 install(
   FILES ${verdict_BINARY_DIR}/verdict_config.h
   DESTINATION ${verdict_INSTALL_INCLUDE_DIR}
-  COMPONENT Development
+  COMPONENT VerdictDevelopment
 )
 
-
-install(TARGETS verdict ${VERDICT_EXPORT_GROUP}
-      ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Development      # .a, .lib
-)
-
-endif()
-
-install(TARGETS verdict ${VERDICT_EXPORT_GROUP}
+install(TARGETS verdict EXPORT ${VERDICT_EXPORT_GROUP}
       RUNTIME DESTINATION ${verdict_INSTALL_BIN_DIR} COMPONENT Runtime # .exe, .dll
       LIBRARY DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Runtime # .so, .dll
+      ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT VerdictDevelopment      # .a, .lib
+)
+
+export(EXPORT ${VERDICT_EXPORT_GROUP} FILE VerdictConfig.cmake)
+
+install(EXPORT ${VERDICT_EXPORT_GROUP} FILE VerdictConfig.cmake
+      DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT VerdictDevelopment
 )
 
 #
