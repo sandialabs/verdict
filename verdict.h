@@ -247,6 +247,13 @@ namespace VERDICT_NAMESPACE
        Intl. J. Numer. Meth. Engng. 2000, 48:1165-1185. */ 
     VERDICT_EXPORT double hex_scaled_jacobian( int num_nodes, double coordinates[][3] );
 
+    //! Return min(Jacobian) / max(Jacobian) over all nodes
+    /** Turn the Jacobian determinates into a normalized quality ratio. Detects element skewness.
+        If the maximum nodal jacobian is negative the element is fully inverted, and return a huge 
+        negative number, -VERDICT_DBL_MAX.
+        Currently only the first 8 nodes are supported. */
+    VERDICT_EXPORT double hex_nodal_jacobian_ratio( int num_nodes, double coordinates[][3]);
+  
     //! Calculates hex shear metric   
     /** 3/Mean Ratio of Jacobian Skew matrix.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for

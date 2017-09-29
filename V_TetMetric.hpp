@@ -32,6 +32,10 @@ namespace verdict {
 
   double tet_inradius( int num_nodes, double coordinates[][3] ) { 
     
+    // avoid access beyond the end of the array
+    if (num_nodes < 4)
+      return 0.;
+    
     //area1 (0,1,2)
     double a1 = verdict::tri_area(3, coordinates);
     

@@ -1633,12 +1633,11 @@ double hex_med_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
   xze = node_pos[3] - node_pos[7];
 
   med_aspect_frobenius += condition_comp( xxi, xet, xze );
-  med_aspect_frobenius /= 24.;
+  
+  if (med_aspect_frobenius >=  VERDICT_DBL_MAX)  return  VERDICT_DBL_MAX;
+  if (med_aspect_frobenius <= -VERDICT_DBL_MAX)  return -VERDICT_DBL_MAX;
 
-  if ( med_aspect_frobenius > 0 )
-    return (double) std::min( med_aspect_frobenius, VERDICT_DBL_MAX );
-  return (double) std::max( med_aspect_frobenius, -VERDICT_DBL_MAX );
-
+  return med_aspect_frobenius / 24.;
 }
 
 /*!
@@ -1728,12 +1727,10 @@ double hex_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
   current_condition = condition_comp( xxi, xet, xze );
   if ( current_condition > condition ) { condition = current_condition; }
 
-  condition /= 3.;
-
-  if ( condition > 0 )
-    return (double) std::min( condition, VERDICT_DBL_MAX );
-  return (double) std::max( condition, -VERDICT_DBL_MAX );
-
+  if (condition >=  VERDICT_DBL_MAX)  return  VERDICT_DBL_MAX;
+  if (condition <= -VERDICT_DBL_MAX)  return -VERDICT_DBL_MAX;
+  
+  return condition / 3.;
 }
 
 /*!
@@ -2162,23 +2159,98 @@ double hex_scaled_jacobian( int num_nodes, double coordinates[][3] )
 
 /*!
   Nodal jacobian ratio of a hex
-
   Minimum nodal jacobian divided by the maximum.  Detects element skewness.
 */
 
-inline std::pair<double, double> minMaxVal(const double a1, const double a2) {
-  if (a1 < a2) {
-    return std::pair<double, double>(a1, a2);
-  } else {
-    return std::pair<double, double>(a2, a1);
-  }
+inline std::pair<double /*min*/, double /*max*/> minMaxVal(const double a1, const double a2)
+{
+  return (a1 < a2) ? std::pair<double, double>(a1, a2) : std::pair<double, double>(a2, a1);
 }
 
-inline std::pair<double, double> minMaxValPair(const std::pair<double, double>& a1, const std::pair<double, double>& a2) {
+inline std::pair<double, double> minMaxValPair(const std::pair<double, double>& a1, const std::pair<double, double>& a2)
+{
   return std::pair<double, double>(std::min(a1.first, a2.first), std::max(a1.second, a2.second));
 }
 
-double hex_nodal_jacobian_ratio( int num_nodes, double* coordinates) {
+#include <math.h>
+  
+//  Compute jacobian at each of the eight hex corner nodes
+//
+typedef double T; //     template <typename T> --> replaced with double
+inline void hex_nodal_jacobians(const double coords[8][3], double Jdet8x[8])
+{
+  const T& x0 = coords[0][0];
+  const T& y0 = coords[0][1];
+  const T& z0 = coords[0][2];
+  const T& x1 = coords[1][0];
+  const T& y1 = coords[1][1];
+  const T& z1 = coords[1][2];
+  const T& x2 = coords[2][0];
+  const T& y2 = coords[2][1];
+  const T& z2 = coords[2][2];
+  const T& x3 = coords[3][0];
+  const T& y3 = coords[3][1];
+  const T& z3 = coords[3][2];
+  const T& x4 = coords[4][0];
+  const T& y4 = coords[4][1];
+  const T& z4 = coords[4][2];
+  const T& x5 = coords[5][0];
+  const T& y5 = coords[5][1];
+  const T& z5 = coords[5][2];
+  const T& x6 = coords[6][0];
+  const T& y6 = coords[6][1];
+  const T& z6 = coords[6][2];
+  const T& x7 = coords[7][0];
+  const T& y7 = coords[7][1];
+  const T& z7 = coords[7][2];
+  
+  //
+  //  Compute the jacobian at each node location
+  //
+  const T x0y1 = x0 * y1 - x1 * y0;
+  const T x0y2 = x0 * y2 - x2 * y0;
+  const T x0y3 = x0 * y3 - x3 * y0;
+  const T x0y4 = x0 * y4 - x4 * y0;
+  const T x0y5 = x0 * y5 - x5 * y0;
+  const T x0y7 = x0 * y7 - x7 * y0;
+  
+  const T x1y2 = x1 * y2 - x2 * y1;
+  const T x1y3 = x1 * y3 - x3 * y1;
+  const T x1y4 = x1 * y4 - x4 * y1;
+  const T x1y5 = x1 * y5 - x5 * y1;
+  const T x1y6 = x1 * y6 - x6 * y1;
+  
+  const T x2y3 = x2 * y3 - x3 * y2;
+  const T x2y5 = x2 * y5 - x5 * y2;
+  const T x2y6 = x2 * y6 - x6 * y2;
+  const T x2y7 = x2 * y7 - x7 * y2;
+  
+  const T x3y4 = x3 * y4 - x4 * y3;
+  const T x3y6 = x3 * y6 - x6 * y3;
+  const T x3y7 = x3 * y7 - x7 * y3;
+  
+  const T x4y5 = x4 * y5 - x5 * y4;
+  const T x4y6 = x4 * y6 - x6 * y4;
+  const T x4y7 = x4 * y7 - x7 * y4;
+  
+  const T x5y6 = x5 * y6 - x6 * y5;
+  const T x5y7 = x5 * y7 - x7 * y5;
+  
+  const T x6y7 = x6 * y7 - x7 * y6;
+  
+  Jdet8x[0] = (-x1y3 + x1y4 - x3y4) * z0 + (x0y3 - x0y4 + x3y4) * z1 + (-x0y1 + x0y4 - x1y4) * z3 + (x0y1 - x0y3 + x1y3) * z4;
+  Jdet8x[1] = (-x1y2 + x1y5 - x2y5) * z0 + (x0y2 - x0y5 + x2y5) * z1 + (-x0y1 + x0y5 - x1y5) * z2 + (x0y1 - x0y2 + x1y2) * z5;
+  Jdet8x[2] = (-x2y3 + x2y6 - x3y6) * z1 + (x1y3 - x1y6 + x3y6) * z2 + (-x1y2 + x1y6 - x2y6) * z3 + (x1y2 - x1y3 + x2y3) * z6;
+  Jdet8x[3] = (-x2y3 + x2y7 - x3y7) * z0 + (x0y3 - x0y7 + x3y7) * z2 + (-x0y2 + x0y7 - x2y7) * z3 + (x0y2 - x0y3 + x2y3) * z7;
+  Jdet8x[4] = (-x4y5 + x4y7 - x5y7) * z0 + (x0y5 - x0y7 + x5y7) * z4 + (-x0y4 + x0y7 - x4y7) * z5 + (x0y4 - x0y5 + x4y5) * z7;
+  Jdet8x[5] = (-x4y5 + x4y6 - x5y6) * z1 + (x1y5 - x1y6 + x5y6) * z4 + (-x1y4 + x1y6 - x4y6) * z5 + (x1y4 - x1y5 + x4y5) * z6;
+  Jdet8x[6] = (-x5y6 + x5y7 - x6y7) * z2 + (x2y6 - x2y7 + x6y7) * z5 + (-x2y5 + x2y7 - x5y7) * z6 + (x2y5 - x2y6 + x5y6) * z7;
+  Jdet8x[7] = (-x4y6 + x4y7 - x6y7) * z3 + (x3y6 - x3y7 + x6y7) * z4 + (-x3y4 + x3y7 - x4y7) * z6 + (x3y4 - x3y6 + x4y6) * z7;
+}
+
+  
+double hex_nodal_jacobian_ratio( int /*num_nodes*/, double coordinates[][3])
+{
   double Jdet8x[8];
   verdict::hex_nodal_jacobians(coordinates, Jdet8x);
   //
@@ -2200,11 +2272,11 @@ double hex_nodal_jacobian_ratio( int num_nodes, double* coordinates) {
   //
   //  Turn the determinates into a normalized quality ratio.
   //  If the maximum nodal jacobian is negative the element is fully inverted, return huge negative number
-  //  Otherwise return ratio of the maximum nodal determinate to the minimum
+  //  Otherwise return ratio of the minimal nodal determinate to the maximum
   //
 
   if (m01234567.second <= VERDICT_DBL_MIN) {
-    return -100000;
+    return -VERDICT_DBL_MAX;
   } else {
     return m01234567.first / m01234567.second;
   }
@@ -2714,107 +2786,111 @@ double hex_shear_and_size( int num_nodes, double coordinates[][3], double averag
 */
 double hex_distortion( int num_nodes, double coordinates[][3] )
 {
-
-   //use 2x2 gauss points for linear hex and 3x3 for 2nd order hex
-   int number_of_gauss_points=0;
-   if (num_nodes < 20)
-   {
-      //2x2 quadrature rule
-      number_of_gauss_points = 2;
-      num_nodes = 8;
-   }
-   else if (num_nodes >= 20)
-   {
-      //3x3 quadrature rule
-      number_of_gauss_points = 3;
-      num_nodes = 20;
-   }
-
-   int number_dimension = 3;
-   int total_number_of_gauss_points = number_of_gauss_points
-      *number_of_gauss_points*number_of_gauss_points;
-   double distortion = VERDICT_DBL_MAX;
-
-   // maxTotalNumberGaussPoints =27, maxNumberNodes = 20
-   // they are defined in GaussIntegration.hpp
-   // This is used to make these arrays static.
-   // I tried dynamically allocated arrays but the new and delete
-   // was very expensive
-
-   double shape_function[maxTotalNumberGaussPoints][maxNumberNodes];
-   double dndy1[maxTotalNumberGaussPoints][maxNumberNodes];
-   double dndy2[maxTotalNumberGaussPoints][maxNumberNodes];
-   double dndy3[maxTotalNumberGaussPoints][maxNumberNodes];
-   double weight[maxTotalNumberGaussPoints];
-
-
-   //create an object of GaussIntegration
-   GaussIntegration gint;
-   gint.initialize(number_of_gauss_points,num_nodes,number_dimension );
-   gint.calculate_shape_function_3d_hex();
-   gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], dndy3[0],weight);
-
-
-   VerdictVector xxi, xet, xze, xin;
-
-   double jacobian, minimum_jacobian;
-   double element_volume =0.0;
-   minimum_jacobian = VERDICT_DBL_MAX;
-   // calculate element volume
-   int ife, ja;
-   for (ife=0;ife<total_number_of_gauss_points; ife++)
-   {
-
-      xxi.set(0.0,0.0,0.0);
-      xet.set(0.0,0.0,0.0);
-      xze.set(0.0,0.0,0.0);
-
-      for (ja=0;ja<num_nodes;ja++)
-      {
-   xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
-         xxi += dndy1[ife][ja]*xin;
-         xet += dndy2[ife][ja]*xin;
-         xze += dndy3[ife][ja]*xin;
-      }
-
-      jacobian = VerdictVector::Dot(xxi, (xet * xze));
-      if (minimum_jacobian > jacobian)
-         minimum_jacobian = jacobian;
-
-      element_volume += weight[ife]*jacobian;
-      }
-
-   // loop through all nodes
-   double dndy1_at_node[maxNumberNodes][maxNumberNodes];
-   double dndy2_at_node[maxNumberNodes][maxNumberNodes];
-   double dndy3_at_node[maxNumberNodes][maxNumberNodes];
-
-   gint.calculate_derivative_at_nodes_3d( dndy1_at_node, dndy2_at_node, dndy3_at_node);
-   int node_id;
-   for (node_id=0;node_id<num_nodes; node_id++)
-   {
-
-      xxi.set(0.0,0.0,0.0);
-      xet.set(0.0,0.0,0.0);
-      xze.set(0.0,0.0,0.0);
-
-      for (ja=0;ja<num_nodes;ja++)
-      {
-   xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
-         xxi += dndy1_at_node[node_id][ja]*xin;
-         xet += dndy2_at_node[node_id][ja]*xin;
-         xze += dndy3_at_node[node_id][ja]*xin;
-      }
-
-      jacobian = VerdictVector::Dot(xxi, (xet * xze));
-      if (minimum_jacobian > jacobian)
-         minimum_jacobian = jacobian;
-
-      }
-   distortion = minimum_jacobian/element_volume*8.;
-   return (double)distortion;
+  
+  //use 2x2 gauss points for linear hex and 3x3 for 2nd order hex
+  int number_of_gauss_points=0;
+  if (num_nodes < 20)
+  {
+    //2x2 quadrature rule
+    number_of_gauss_points = 2;
+    num_nodes = 8;
+  }
+  else if (num_nodes >= 20)
+  {
+    //3x3 quadrature rule
+    number_of_gauss_points = 3;
+    num_nodes = 20;
+  }
+  
+  int number_dimension = 3;
+  int total_number_of_gauss_points = number_of_gauss_points
+  *number_of_gauss_points*number_of_gauss_points;
+  double distortion = VERDICT_DBL_MAX;
+  
+  // maxTotalNumberGaussPoints =27, maxNumberNodes = 20
+  // they are defined in GaussIntegration.hpp
+  // This is used to make these arrays static.
+  // I tried dynamically allocated arrays but the new and delete
+  // was very expensive
+  
+  double shape_function[maxTotalNumberGaussPoints][maxNumberNodes];
+  double dndy1[maxTotalNumberGaussPoints][maxNumberNodes];
+  double dndy2[maxTotalNumberGaussPoints][maxNumberNodes];
+  double dndy3[maxTotalNumberGaussPoints][maxNumberNodes];
+  double weight[maxTotalNumberGaussPoints];
+  
+  
+  //create an object of GaussIntegration
+  GaussIntegration gint;
+  gint.initialize(number_of_gauss_points,num_nodes,number_dimension );
+  gint.calculate_shape_function_3d_hex();
+  gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], dndy3[0],weight);
+  
+  
+  VerdictVector xxi, xet, xze, xin;
+  
+  double jacobian, minimum_jacobian;
+  double element_volume =0.0;
+  minimum_jacobian = VERDICT_DBL_MAX;
+  // calculate element volume
+  int ife, ja;
+  for (ife=0;ife<total_number_of_gauss_points; ife++)
+  {
+    
+    xxi.set(0.0,0.0,0.0);
+    xet.set(0.0,0.0,0.0);
+    xze.set(0.0,0.0,0.0);
+    
+    for (ja=0;ja<num_nodes;ja++)
+    {
+      xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
+      xxi += dndy1[ife][ja]*xin;
+      xet += dndy2[ife][ja]*xin;
+      xze += dndy3[ife][ja]*xin;
+    }
+    
+    jacobian = VerdictVector::Dot(xxi, (xet * xze));
+    if (minimum_jacobian > jacobian)
+      minimum_jacobian = jacobian;
+    
+    element_volume += weight[ife]*jacobian;
+  }
+  
+  // loop through all nodes
+  double dndy1_at_node[maxNumberNodes][maxNumberNodes];
+  double dndy2_at_node[maxNumberNodes][maxNumberNodes];
+  double dndy3_at_node[maxNumberNodes][maxNumberNodes];
+  
+  gint.calculate_derivative_at_nodes_3d( dndy1_at_node, dndy2_at_node, dndy3_at_node);
+  int node_id;
+  for (node_id=0;node_id<num_nodes; node_id++)
+  {
+    
+    xxi.set(0.0,0.0,0.0);
+    xet.set(0.0,0.0,0.0);
+    xze.set(0.0,0.0,0.0);
+    
+    for (ja=0;ja<num_nodes;ja++)
+    {
+      xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
+      xxi += dndy1_at_node[node_id][ja]*xin;
+      xet += dndy2_at_node[node_id][ja]*xin;
+      xze += dndy3_at_node[node_id][ja]*xin;
+    }
+    
+    jacobian = VerdictVector::Dot(xxi, (xet * xze));
+    if (minimum_jacobian > jacobian)
+      minimum_jacobian = jacobian;
+    
+  }
+  distortion = minimum_jacobian/element_volume*8.;
+  if      (distortion> VERDICT_DBL_MAX) distortion = VERDICT_DBL_MAX;
+  else if (distortion<-VERDICT_DBL_MAX) distortion = -VERDICT_DBL_MAX;
+  else if (isnan(distortion))           distortion = VERDICT_DBL_MAX; // 0/0, or should we return some other value?
+  
+  return (double)distortion;
 }
-
+  
 
 
 
@@ -2826,8 +2902,8 @@ double hex_jac_normjac_oddy_cond( int choices[],
 {
 
   //Define variables
-  int i; 
-  
+  int i;
+ 
   double xxi[3], xet[3], xze[3];
   double norm_jacobian = 0.0, current_norm_jac = 0.0; 
         double jacobian = 0.0, current_jacobian = 0.0;
