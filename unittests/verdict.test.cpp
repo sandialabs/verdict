@@ -19,7 +19,11 @@
 #include "V_HexMetric.hpp"
 
 #define MAX_NODES_PER_ELEMENT 27
-#define VERDICT_SIGNIFICANT_FIG 5    // 7 significant figures for doubles, use 5 to make tests less sensitive
+// 7 significant figures for doubles, use 5 to make tests less sensitive
+// #define VERDICT_SIGNIFICANT_FIG 5
+// absolute and relative tolerances for comparing floating point answers
+#define VERDICT_ABSOLUTE_TOL 1e-05
+#define VERDICT_RELATIVE_TOL 1e-05
 
 
 
@@ -44,9 +48,18 @@ void runtest(test_case &this_testcase)
   for (metric_and_answer & data : this_testcase.mTestData)
   {
     itest++;
+    
+    // list the current subcase, otherwise there is no way to tell which metric failed
+    std::cout << "Test case \"" << testname << "\" #" << itest << std::endl;
+    
     // Compute the answer from the verdict library
-    double answer_from_lib = data.mFunction(num_nodes, this_testcase.mCoords);
+    const double calculated_answer = data.mFunction(num_nodes, this_testcase.mCoords);
+    const double expected_answer = data.mAnswer;
+    
+    EXPECT_NEAR( calculated_answer, expected_answer, fabs(expected_answer) * VERDICT_RELATIVE_TOL + VERDICT_ABSOLUTE_TOL );
 
+    // old test using strings
+    /*
     std::stringstream expected;
     expected.setf(std::ios::scientific, std::ios::floatfield);
     expected.precision(VERDICT_SIGNIFICANT_FIG);
@@ -57,17 +70,37 @@ void runtest(test_case &this_testcase)
     answer.precision(VERDICT_SIGNIFICANT_FIG);
     answer << answer_from_lib;
 
-    EXPECT_EQ(expected.str(), answer.str());
-    if (expected.str() != answer.str())
+    // for expected values of zero, we only care about absolute tolerance, not relative tolerance,
+    std::string expected_v_str = expected.str();
+    std::string answer_v_str = answer.str();
+    if ( fabs(answer_from_lib) < VERDICT_ABSOLUTE_TOL )
+    {
+      std::stringstream expected_abs;
+      expected_abs.setf(std::ios::scientific, std::ios::floatfield);
+      expected_abs.precision(VERDICT_SIGNIFICANT_FIG);
+      expected_abs << 1. + data.mAnswer;
+      expected_v_str = expected_abs.str();
+      
+      std::stringstream answer_abs;
+      answer_abs.setf(std::ios::scientific, std::ios::floatfield);
+      answer_abs.precision(VERDICT_SIGNIFICANT_FIG);
+      answer_abs << 1. + answer_from_lib;
+      answer_v_str = answer_abs.str();
+    }
+
+    
+
+    EXPECT_EQ(expected_v_str, answer_v_str);
+    if (expected_v_str!= answer_v_str)
     {
       std::cout << std::endl;
       std::cout << "Test case \"" << testname
         << "\" #" << itest << " FAILED" << std::endl;
 
       std::cout << "answer calculated was    "
-        << answer.str() << std::endl
+        << answer.str() << " ( " << answer_v_str << " ) " << std::endl
         << "answer expected was      "
-        << expected.str()
+        << expected.str() << " ( " << expected_v_str << " ) "
         << std::endl << std::endl;
       EXPECT_TRUE(false);
     }
@@ -76,14 +109,16 @@ void runtest(test_case &this_testcase)
       std::cout << "Test case \"" << testname
         << "\" #" << itest << " passed" << std::endl;
     }
+     */
+    
   }
 }
 
 
-TEST(verdict, incircle_right)
+TEST(verdict, tet_incircle_right)
 {
   test_case testcase = {
-    "incircle_right",
+    "tet_incircle_right",
     { { verdict::tet_inradius, 0.5 - 1. / sqrt(12) } },
     4,
     {
@@ -98,10 +133,10 @@ TEST(verdict, incircle_right)
 }
 
 
-TEST(verdict, incircle_right2)
+TEST(verdict, tet_incircle_right2)
 {
   test_case testcase = {
-    "incircle_right2",
+    "tet_incircle_right2",
     { { verdict::tet_inradius, 2.0 * (0.5 - 1. / sqrt(12)) } },
     4,
     {
@@ -118,7 +153,7 @@ TEST(verdict, incircle_right2)
 
 
 
-TEST(verdict, incircle_equilateral)
+TEST(verdict, tet_incircle_equilateral)
 {
   const double pi = verdict::VERDICT_PI;
   
@@ -127,7 +162,7 @@ TEST(verdict, incircle_equilateral)
   double h = sqrt( 1 - l2*l2 );
   
   test_case testcase = {
-    "incircle_equilateral",
+    "tet_incircle_equilateral",
     { { verdict::tet_inradius, sqrt(6.)/12. } },
     4,
     {
@@ -141,7 +176,7 @@ TEST(verdict, incircle_equilateral)
   runtest(testcase);
 }
 
-TEST(verdict, incircle_equilateral2)
+TEST(verdict, tet_incircle_equilateral2)
 {
   const double pi = 2. * asin(1.);
   
@@ -150,7 +185,7 @@ TEST(verdict, incircle_equilateral2)
   double h =  sqrt( 4. - l2*l2 );
   
   test_case testcase = {
-    "incircle_equilateral2",
+    "tet_incircle_equilateral2",
     { { verdict::tet_inradius, 2 * sqrt(6.)/12. } },
     4,
     {
@@ -165,10 +200,10 @@ TEST(verdict, incircle_equilateral2)
 }
 
 
-TEST(verdict, incircle_flat)
+TEST(verdict, tet_incircle_flat)
 {
   test_case testcase = {
-    "incircle_flat",
+    "tet_incircle_flat",
     { { verdict::tet_inradius, 0.0 } },
     4,
     {
@@ -183,10 +218,10 @@ TEST(verdict, incircle_flat)
 }
 
 
-TEST(verdict, incircle_inverted)
+TEST(verdict, tet_incircle_inverted)
 {
   test_case testcase = {
-    "incircle_inverted",
+    "tet_incircle_inverted",
     { { verdict::tet_inradius, - 0.5 + 1. / sqrt(12)} },
     4,
     {
@@ -202,10 +237,10 @@ TEST(verdict, incircle_inverted)
 
 
 
-TEST(verdict, incircle_too_few_nodes)
+TEST(verdict, tet_incircle_too_few_nodes)
 {
   test_case testcase = {
-    "incircle_too_few_nodes",
+    "tet_incircle_too_few_nodes",
     { { verdict::tet_inradius, 0.} },
     3, // not enough nodes
     {
@@ -219,10 +254,10 @@ TEST(verdict, incircle_too_few_nodes)
 }
 
 
-TEST(verdict, incircle_regression)
+TEST(verdict, tet_incircle_regression)
 {
   test_case testcase = {
-    "incircle_regression",
+    "tet_incircle_regression",
     { { verdict::tet_inradius, 3.2723844167} },
     4,
     {
@@ -237,10 +272,10 @@ TEST(verdict, incircle_regression)
   runtest(testcase);
 }
 
-TEST(verdict, incircle_regression2)
+TEST(verdict, tet_incircle_regression2)
 {
   test_case testcase = {
-    "incircle_regression2",
+    "tet_incircle_regression2",
     { { verdict::tet_inradius, 2 * 3.27238441675} },
     4,
     {
@@ -260,7 +295,10 @@ TEST(verdict, tet_equiangle_skew_1)
 {
   test_case testcase = {
     "tet_equiangle_skew_1",
-    { { verdict::tet_equiangle_skew, 0.25 } },
+    {
+      { verdict::tet_equiangle_skew, 0.25 },
+      { verdict::tet_equivolume_skew, 0.5 }
+    },
     4,
     {
       { 0, 0, 0 },
@@ -321,11 +359,19 @@ TEST(verdict, edge_calc_3)
   runtest(testcase);
 }
 
-TEST(verdict, simple_wedge_volume)
+TEST(verdict, wedge_simple)
 {
   test_case testcase = {
-    "simple_wedge_volume",
-    { { verdict::wedge_volume, 0.5 } },
+    "wedge_simple",
+    {
+      { verdict::wedge_volume, 0.5 },
+      { verdict::wedge_equiangle_skew, 0.25 },
+      { verdict::wedge_edge_ratio, sqrt(2.) },
+      { verdict::wedge_max_aspect_frobenius, 1.1357042248 },
+      { verdict::wedge_mean_aspect_frobenius, 1.0978474174 },
+      { verdict::wedge_distortion, 1 },
+      { verdict::wedge_max_stretch, 1 }
+    },
     6,
     {
       { 0, 0, 0 },
@@ -340,11 +386,19 @@ TEST(verdict, simple_wedge_volume)
   runtest(testcase);
 }
 
-TEST(verdict, singularity_wedge)
+TEST(verdict, wedge_singularity)
 {
   test_case testcase = {
-    "singularity wedge",
-    { { verdict::wedge_volume, 0.0 } },
+    "wedge_singularity",
+    {
+      { verdict::wedge_volume, 0.0 },
+      { verdict::wedge_equiangle_skew, 1 },
+      /*  3 */ { verdict::wedge_edge_ratio, verdict::VERDICT_DBL_MAX  },
+      /*  4 */ { verdict::wedge_max_aspect_frobenius, verdict::VERDICT_DBL_MAX  },
+      /*  5 */ { verdict::wedge_mean_aspect_frobenius, verdict::VERDICT_DBL_MAX },
+      /*  6 */ { verdict::wedge_distortion, verdict::VERDICT_DBL_MAX },
+      /*  7 */ { verdict::wedge_max_stretch, verdict::VERDICT_DBL_MAX }
+    },
     6,
     {
       { 0, 0, 0 },
@@ -358,10 +412,10 @@ TEST(verdict, singularity_wedge)
   runtest(testcase);
 }
 
-TEST(verdict, simple_tri)
+TEST(verdict, tri_simple)
 {
   test_case testcase = {
-    "simple_tri",
+    "tri_simple",
     {
       { verdict::tri_area, 10.8253175 },
       { verdict::tri_aspect_ratio, 1 },
@@ -385,10 +439,10 @@ TEST(verdict, simple_tri)
   runtest(testcase);
 }
 
-TEST(verdict, singular_tri)
+TEST(verdict, tri_singular)
 {
   test_case testcase = {
-    "singular_tri",
+    "tri_singular",
     {
       { verdict::tri_area, 0.43301270185 },
       { verdict::tri_aspect_ratio, 1 },
@@ -443,10 +497,10 @@ TEST(verdict, tri_six_nodes)
 }
 
 
-TEST(verdict, simple_quad1)
+TEST(verdict, quad_simple1)
 {
   test_case testcase = {
-    "simple_quad1",
+    "quad_simple1",
     { { verdict::quad_skew, 0 } },
     4,
     {
@@ -460,10 +514,10 @@ TEST(verdict, simple_quad1)
   runtest(testcase);
 }
 
-TEST(verdict, simple_quad2)
+TEST(verdict, quad_simple2)
 {
   test_case testcase = {
-    "simple_quad2",
+    "quad_simple2",
     {
       /*  1 */ { verdict::quad_aspect_ratio, 1.4299641718 },
       /*  2 */ { verdict::quad_skew, 0.092450032704 },
@@ -496,6 +550,119 @@ TEST(verdict, simple_quad2)
   runtest(testcase);
 }
 
+
+TEST(verdict, quad_chevron)
+{
+  test_case testcase = {
+    "quad_chevron",
+    {
+      /*  1 */ { verdict::quad_aspect_ratio, 1.5317000291 },
+      /*  2 */ { verdict::quad_skew, 6.5193481489e-01 },
+      /*  3 */ { verdict::quad_taper, 9.8606743061e-01 },
+      /*  4 */ { verdict::quad_warpage, -9.9459686559e-01 },
+      /*  5 */ { verdict::quad_area, 3.5562234182 },
+      /*  6 */ { verdict::quad_stretch, 7.4945733623e-01 },
+      /*  7 */ { verdict::quad_minimum_angle,  19.319495622 },
+      /*  8 */ { verdict::quad_maximum_angle, 226.10065328 },
+      /*  9 */ { verdict::quad_condition, verdict::VERDICT_DBL_MAX },
+      /* 10 */ { verdict::quad_jacobian,  -3.4157021569},
+      /* 11 */ { verdict::quad_shear, 0 },
+      /* 12 */ { verdict::quad_shape, 0 },
+      /* 13 */ { verdict::quad_distortion, -9.0249845339e-01 },
+      /* 14 */ { verdict::quad_equiangle_skew, 1.5122294809 },
+      /* 15 */ { verdict::quad_radius_ratio, 2.9914983186 },
+      /* 16 */ { verdict::quad_med_aspect_frobenius, 1.8922421445 },
+      /* 17 */ { verdict::quad_max_aspect_frobenius, 3.5710779160 },
+      /* 18 */ { verdict::quad_oddy, 23.505194964 }
+    },
+    4,
+    {
+      // reflex angle at node 2
+      { 1, 1, 1 },   //1
+      { 3, 1, 2 },   //2
+      { 5, 0.8, 1.3 },   //3
+      { 2, 1.1, 3.7 },   //0
+    }
+  };
+  
+  runtest(testcase);
+}
+
+
+TEST(verdict, quad_collapsed)
+{
+  test_case testcase = {
+    "quad_collapsed",
+    {
+      /*  1 */ { verdict::quad_aspect_ratio, verdict::VERDICT_DBL_MAX  },
+      /*  2 */ { verdict::quad_skew,   1 },
+      /*  3 */ { verdict::quad_taper,  0 },
+      /*  4 */ { verdict::quad_warpage, 0 },
+      /*  5 */ { verdict::quad_area, 0 },
+      /*  6 */ { verdict::quad_stretch, 4.7140452079e-01 },
+      /*  7 */ { verdict::quad_minimum_angle, 0 },
+      /*  8 */ { verdict::quad_maximum_angle, 180 },
+      /*  9 */ { verdict::quad_condition, verdict::VERDICT_DBL_MAX  },
+      /* 10 */ { verdict::quad_jacobian, 0 },
+      /* 11 */ { verdict::quad_shear, 0 },
+      /* 12 */ { verdict::quad_shape, 0 },
+      /* 13 */ { verdict::quad_distortion, 0 },
+      /* 14 */ { verdict::quad_equiangle_skew, 1 },
+      /* 15 */ { verdict::quad_radius_ratio, verdict::VERDICT_DBL_MAX  },
+      /* 16 */ { verdict::quad_med_aspect_frobenius, verdict::VERDICT_DBL_MAX },
+      /* 17 */ { verdict::quad_max_aspect_frobenius, verdict::VERDICT_DBL_MAX },
+      /* 18 */ { verdict::quad_oddy, verdict::VERDICT_DBL_MAX }
+    },
+    4,
+    {
+      // colinear nodes
+      { 3,  1, 1 },   //1
+      { 6,  1, 2 },   //2
+      { 12, 1, 4 },   //3
+      { 9,  1, 3 },   //0
+    }
+  };
+  
+  runtest(testcase);
+}
+
+TEST(verdict, quad_bowtie)
+{
+  test_case testcase = {
+    "quad_bowtie",
+    {
+      /*  1 */ { verdict::quad_aspect_ratio, 2.0295276589 },
+      /*  2 */ { verdict::quad_skew,  6.0840291338e-01 },
+      /*  3 */ { verdict::quad_taper, 4.9416251426e+00 },
+      /*  4 */ { verdict::quad_warpage, -9.9972444493e-01 },
+      /*  5 */ { verdict::quad_area, 3.4869452964e+00 },
+      /*  6 */ { verdict::quad_stretch, 1.7893591011e+00 },
+      /*  7 */ { verdict::quad_minimum_angle, 2.0794246576e+01 },
+      /*  8 */ { verdict::quad_maximum_angle, 3.2636439841e+02 },
+      /*  9 */ { verdict::quad_condition, verdict::VERDICT_DBL_MAX  },
+      /* 10 */ { verdict::quad_jacobian,   -2.2480385649e+01 },
+      /* 11 */ { verdict::quad_shear, 0 },
+      /* 12 */ { verdict::quad_shape, 0 },
+      /* 13 */ { verdict::quad_distortion, -2.3654968475e+00 },
+      /* 14 */ { verdict::quad_equiangle_skew, 2.6262710934e+00 },
+      /* 15 */ { verdict::quad_radius_ratio,  2.7490501584e+00 },
+      /* 16 */ { verdict::quad_med_aspect_frobenius, 2.3523244623e+00 },
+      /* 17 */ { verdict::quad_max_aspect_frobenius,  2.8418376590e+00 },
+      /* 18 */ { verdict::quad_oddy, 1.4152082560e+01 }
+    },
+    4,
+    {
+      { -1, -1, -1 },   //1
+      { 6, 2, -1.1 },   //2
+      { 3, -2.5, -1.15 },   //3
+      { 4.5, 4.3, -0.9 },   //0
+    }
+  };
+  
+  runtest(testcase);
+}
+
+
 TEST(verdict, tet_test1)
 {
   test_case testcase = {
@@ -512,6 +679,7 @@ TEST(verdict, tet_test1)
       /*  9 */ { verdict::tet_aspect_frobenius, 1.1905507890},
       /* 10 */ { verdict::tet_minimum_angle, 54.735610317 },
       /* 11 */ { verdict::tet_collapse_ratio, 0.40824829046 },
+      /* 12 */ { verdict::tet_equivolume_skew, 0.5 }
     },
     4,
     {
@@ -565,7 +733,7 @@ TEST(verdict, hex_test1)
 }
 
 
-TEST(verdict, hex_test2)
+TEST(verdict, hex_test2_perfect_cube)
 {
 
   test_case testcase = {
@@ -601,7 +769,7 @@ TEST(verdict, hex_test2)
 }
 
 
-TEST(verdict, hex_test3)
+TEST(verdict, hex_test3_flat)
 {
   
   test_case testcase = {
@@ -637,7 +805,7 @@ TEST(verdict, hex_test3)
 }
 
 
-TEST(verdict, hex_test4)
+TEST(verdict, hex_test4_inside_out)
 {
   
   test_case testcase = {
@@ -710,7 +878,43 @@ TEST(verdict, hex27_test1)
       { 0.000338, 0.60863, -0.017854 }
     }
   };
+  
+  runtest(testcase);
+}
 
+TEST(verdict, hex20_test1)
+{
+  test_case testcase = {
+    "hex20_test1",
+    {
+      { verdict::hex_jacobian, 1 },
+      { verdict::hex_distortion, 3.4668482987e-01 },
+    },
+    20,
+    {
+      { -0.5, -0.5, 0.5 },
+      { -0.5, -0.5, -0.5 },
+      { -0.5, 0.5, -0.5 },
+      { -0.5, 0.5, 0.5 },
+      { 0.5, -0.5, 0.5 },
+      { 0.5, -0.5, -0.5 },
+      { 0.5, 0.5, -0.5 },
+      { 0.5, 0.5, 0.5 },
+      { -0.59093, -0.554599, 0.031478 },
+      { -0.551216, -0.052901, -0.59258 },
+      { -0.589451, 0.534972, -0.00525 },
+      { -0.575503, -0.008395, 0.604191 },
+      { 0.035399, -0.527937, 0.582587 },
+      { -0.015396, -0.537798, -0.606826 },
+      { -0.027222, 0.51188, -0.576597 },
+      { -0.006207, 0.565371, 0.585294 },
+      { 0.562112, -0.548542, -0.000139 },
+      { 0.570746, 0.008609, -0.595057 },
+      { 0.563111, 0.550215, -0.024469 },
+      { 0.537894, 0.050161, 0.606614 }
+    }
+  };
+  
   runtest(testcase);
 }
 
@@ -772,7 +976,27 @@ TEST(verdict, tet15_test1)
       { 2.04107799857892e-17, 1, -0.333333333333333 }
     }
   };
+  
+  runtest(testcase);
+}
 
+TEST(verdict, knife_test1)
+{
+  test_case testcase = {
+    "knife_test1",
+    { { verdict::knife_volume, 2. / 3. } },
+    7,
+    {
+      { 0, 0, 0 },
+      { 1, 0, 0 },
+      { 1, 1, 0 },
+      { 0, 1, 0 },
+      { 0, 0, 1},
+      { 0.5, 0.5, 1},
+      { 1, 1, 1}
+    }
+  };
+  
   runtest(testcase);
 }
 

@@ -878,7 +878,7 @@ double hex_max_edge_ratio (int /*num_nodes*/, double coordinates[][3])
   aspect_13 = safe_ratio( std::max( mag_efg1, mag_efg3 ) , std::min( mag_efg1, mag_efg3 ) );
   aspect_23 = safe_ratio( std::max( mag_efg2, mag_efg3 ) , std::min( mag_efg2, mag_efg3 ) );
 
-  aspect = std::max( aspect_12, std::max( aspect_13, aspect_23 ) );
+  aspect = std::max( {aspect_12, aspect_13, aspect_23 } );
 
   if ( aspect > 0 )
     return (double) std::min( aspect, VERDICT_DBL_MAX );
@@ -1051,7 +1051,7 @@ double hex_skew( int /*num_nodes*/, double coordinates[][3] )
   skew_2 = fabs(VerdictVector::Dot(efg1, efg3));
   skew_3 = fabs(VerdictVector::Dot(efg2, efg3));
 
-  double skew = (std::max( skew_1, std::max( skew_2, skew_3 ) ));
+  double skew = std::max( {skew_1, skew_2, skew_3} );
 
   if ( skew > 0 )
     return (double) std::min( skew, VERDICT_DBL_MAX );
@@ -1080,7 +1080,7 @@ double hex_taper( int /*num_nodes*/, double coordinates[][3] )
   double taper_2 = fabs( safe_ratio( efg13.length(), std::min( efg1.length(), efg3.length())));
   double taper_3 = fabs( safe_ratio( efg23.length(), std::min( efg2.length(), efg3.length())));
 
-  double taper = (double)std::max(taper_1, std::max(taper_2, taper_3));  
+  double taper = std::max( {taper_1, taper_2, taper_3} );
 
   if ( taper > 0 )
     return (double) std::min( taper, VERDICT_DBL_MAX );

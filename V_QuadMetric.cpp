@@ -1064,12 +1064,11 @@ double quad_condition( int /*num_nodes*/, double coordinates[][3] )
     
     max_condition = std::max(max_condition, condition);
   }
-  
-  max_condition /= 2;
 
-  if( max_condition > 0 )
-    return (double) std::min( max_condition, VERDICT_DBL_MAX );
-  return (double) std::max( max_condition, -VERDICT_DBL_MAX );
+  if (max_condition >=  VERDICT_DBL_MAX)  return  VERDICT_DBL_MAX;
+  if (max_condition <= -VERDICT_DBL_MAX)  return -VERDICT_DBL_MAX;
+
+  return max_condition / 2.;
 }
 
 /*!

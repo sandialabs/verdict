@@ -33,15 +33,17 @@
 
 namespace VERDICT_NAMESPACE
 {
-
-VerdictVector &VerdictVector::length(const double new_length)
-{
-  double len = this->length();
-  xVal *= new_length / len;
-  yVal *= new_length / len;
-  zVal *= new_length / len;
-  return *this;
-}
+  
+// scale the length of the vector to be the new_length
+// unused
+//VerdictVector &VerdictVector::length(const double new_length)
+//{
+//  double len = this->length();
+//  xVal *= new_length / len;
+//  yVal *= new_length / len;
+//  zVal *= new_length / len;
+//  return *this;
+//}
 
 double VerdictVector::interior_angle(const VerdictVector &otherVector)
 {

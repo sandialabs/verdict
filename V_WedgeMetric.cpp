@@ -492,12 +492,81 @@ double wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 
   double edge_ratio = sqrt( max / min );
 
-  if( edge_ratio > 0 )
-    return (double) std::min( edge_ratio, VERDICT_DBL_MAX );
-  return (double) std::max( edge_ratio, -VERDICT_DBL_MAX );
+  if (isnan(edge_ratio))
+    return VERDICT_DBL_MAX;
+  if (edge_ratio < 1.)
+    return 1.;
+  return  (double) std::min( edge_ratio, VERDICT_DBL_MAX );
 
 }
 
+static void aspects( int num_nodes, double coordinates[][3],
+                    double &aspect1, double &aspect2, double &aspect3, double &aspect4, double &aspect5, double &aspect6)
+{
+  if ( num_nodes < 6 )
+  {
+    aspect1 = 0;
+    aspect2 = 0;
+    aspect3 = 0;
+    aspect4 = 0;
+    aspect5 = 0;
+    aspect6 = 0;
+    return;
+  }
+  
+  double mini_tris[4][3];
+  int i = 0;
+  // Take first tetrahedron
+  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[0][i];}
+  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[1][i];}
+  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[2][i];}
+  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[3][i];}
+  
+  aspect1 = tet_aspect_frobenius(4,mini_tris);
+  
+  //Take second tet
+  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[1][i];}
+  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[2][i];}
+  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[0][i];}
+  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[4][i];}
+  
+  aspect2 = tet_aspect_frobenius(4,mini_tris);
+  
+  //3rd tet
+  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[2][i];}
+  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[0][i];}
+  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[1][i];}
+  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[5][i];}
+  
+  aspect3 = tet_aspect_frobenius(4,mini_tris);
+  
+  //4th tet
+  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[3][i];}
+  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[5][i];}
+  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[4][i];}
+  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[0][i];}
+  
+  aspect4 = tet_aspect_frobenius(4,mini_tris);
+  
+  //5th tet
+  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[4][i];}
+  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[3][i];}
+  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[5][i];}
+  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[1][i];}
+  
+  aspect5 = tet_aspect_frobenius(4,mini_tris);
+  
+  //6th tet
+  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[5][i];}
+  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[4][i];}
+  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[3][i];}
+  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[2][i];}
+  
+  aspect6 = tet_aspect_frobenius(4,mini_tris);
+  
+}
+  
+  
 /* For wedges, there is not a unique definition of the aspect Frobenius. Rather,
  * this metric uses the aspect Frobenius defined for tetrahedral (see section
  * 6.4) and is comparable in methodology to the maximum aspect Frobenius defined
@@ -517,69 +586,17 @@ double wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 
  */
 
-double wedge_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double wedge_max_aspect_frobenius( int num_nodes, double coordinates[][3] )
 {
-  double mini_tris[4][3];
-  double aspect1 = 0, aspect2 = 0, aspect3 = 0, aspect4 = 0, aspect5 = 0, aspect6 = 0;
-  int i = 0;
-  // Take first tetrahedron
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[3][i];}
+  double aspect1, aspect2, aspect3, aspect4, aspect5, aspect6;
+  aspects( num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6 );
 
-  aspect1 = tet_aspect_frobenius(4,mini_tris);
-
-  //Take second tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[4][i];}
-
-  aspect2 = tet_aspect_frobenius(4,mini_tris);
-
-  //3rd tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[5][i];}
-
-  aspect3 = tet_aspect_frobenius(4,mini_tris);
-
-  //4th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[0][i];}
-
-  aspect4 = tet_aspect_frobenius(4,mini_tris);
-
-  //5th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[1][i];}
-
-  aspect5 = tet_aspect_frobenius(4,mini_tris);
-
-  //6th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[2][i];}
-
-  aspect6 = tet_aspect_frobenius(4,mini_tris);
-
-  double max_aspect = std::max(aspect1,aspect2);
-  max_aspect = std::max(max_aspect,aspect3);
-  max_aspect = std::max(max_aspect,aspect4);
-  max_aspect = std::max(max_aspect,aspect5);
-  max_aspect = std::max(max_aspect,aspect6);
-  max_aspect = max_aspect/1.16477;
-
-  if ( max_aspect > 0 )
-    return (double) std::min( max_aspect, VERDICT_DBL_MAX );
-  return (double) std::max( max_aspect, -VERDICT_DBL_MAX );
+  double max_aspect = std::max( {aspect1,aspect2,aspect3,aspect4,aspect5,aspect6} );
+  
+  if (max_aspect >= VERDICT_DBL_MAX )
+    return VERDICT_DBL_MAX;
+  max_aspect /= 1.16477;
+  return std::max(max_aspect, 1.);
 
 }
 /*
@@ -600,66 +617,17 @@ double wedge_max_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 
    */
 
-double wedge_mean_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
+double wedge_mean_aspect_frobenius( int num_nodes, double coordinates[][3] )
 {
-  double mini_tris[4][3];
-  double aspect1 = 0, aspect2 = 0, aspect3 = 0, aspect4 = 0, aspect5 = 0, aspect6 = 0;
-  int i = 0;
-  // Take first tetrahedron
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[3][i];}
+  double aspect1, aspect2, aspect3, aspect4, aspect5, aspect6;
+  aspects( num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6 );
 
-  aspect1 = tet_aspect_frobenius(4,mini_tris);
-
-  //Take second tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[4][i];}
-
-  aspect2 = tet_aspect_frobenius(4,mini_tris);
-
-  //3rd tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[5][i];}
-
-  aspect3 = tet_aspect_frobenius(4,mini_tris);
-
-  //4th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[0][i];}
-
-  aspect4 = tet_aspect_frobenius(4,mini_tris);
-
-  //5th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[1][i];}
-
-  aspect5 = tet_aspect_frobenius(4,mini_tris);
-
-  //6th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[2][i];}
-
-  aspect6 = tet_aspect_frobenius(4,mini_tris);
-
-  double mean_aspect = (aspect1 + aspect2 + aspect3 + aspect4 + aspect5 + aspect6)/6;
-  mean_aspect = mean_aspect/1.16477;
-
-  if ( mean_aspect > 0 )
-    return (double) std::min( mean_aspect, VERDICT_DBL_MAX );
-  return (double) std::max( mean_aspect, -VERDICT_DBL_MAX );
-
+  double mean_aspect = (aspect1 + aspect2 + aspect3 + aspect4 + aspect5 + aspect6);
+  if (mean_aspect >= VERDICT_DBL_MAX)
+    return VERDICT_DBL_MAX;
+  
+  mean_aspect /= (6. * 1.16477);
+  return std::max(mean_aspect, 1.);
 }
 
 /* This is the minimum determinant of the Jacobian matrix evaluated at each
@@ -841,17 +809,15 @@ double wedge_jacobian( int num_nodes, double coordinates[][3] )
 
 double wedge_distortion( int num_nodes, double coordinates[][3] )
 {
+  const double jacobian = wedge_jacobian( num_nodes, coordinates );
+  const double current_volume = wedge_volume( num_nodes, coordinates);
+  const double master_volume = 0.433013;
+  const double distortion = jacobian*master_volume/current_volume/0.866025;
 
-  double jacobian = 0, distortion = 45, current_volume = 0, master_volume = 0.433013;
-
-  jacobian = wedge_jacobian( num_nodes, coordinates );
-  current_volume = wedge_volume( num_nodes, coordinates);
-  distortion = jacobian*master_volume/current_volume/0.866025;
-
-  if ( distortion > 0 )
-    return (double) std::min( distortion, VERDICT_DBL_MAX );
-  return (double) std::max( distortion, -VERDICT_DBL_MAX );
-
+  if (isnan(distortion)) return VERDICT_DBL_MAX;
+  if ( distortion >= VERDICT_DBL_MAX ) return VERDICT_DBL_MAX;
+  if ( distortion <= -VERDICT_DBL_MAX ) return -VERDICT_DBL_MAX;
+  return distortion;
 }
 
 /*
@@ -896,8 +862,7 @@ double wedge_max_stretch( int /*num_nodes*/, double coordinates[][3] )
   for (i = 0; i < 3; i++){quad_face[3][i] = coordinates[5][i];}
   stretch3 = quad_stretch(4,quad_face);
 
-  stretch = std::max(stretch1,stretch2);
-  stretch = std::max(stretch,stretch3);
+  stretch = std::max( {stretch1,stretch2,stretch3} );
 
   if ( stretch > 0 )
     return (double) std::min( stretch, VERDICT_DBL_MAX );
