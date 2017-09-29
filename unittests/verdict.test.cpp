@@ -687,12 +687,43 @@ TEST(verdict, tet_test1)
       { -5, 5, -5 },
       { -5, -5, 5 },
       { 5, -5, -5 },
-      }
+    }
   };
-
+  
   runtest(testcase);
 }
 
+
+TEST(verdict, tet_test2_singular)
+{
+  test_case testcase = {
+    "tet_test2_singular",
+    {
+      { verdict::tet_volume, 0 },
+      { verdict::tet_condition, verdict::VERDICT_DBL_MAX  },
+      { verdict::tet_jacobian, 0  },
+      { verdict::tet_shape, 0 },
+      { verdict::tet_distortion, 1 },
+      /*  6 */ { verdict::tet_edge_ratio, verdict::VERDICT_DBL_MAX },
+      /*  7 */ { verdict::tet_radius_ratio, verdict::VERDICT_DBL_MAX },
+      /*  8 */ { verdict::tet_aspect_ratio, verdict::VERDICT_DBL_MAX },
+      /*  9 */ { verdict::tet_aspect_frobenius, verdict::VERDICT_DBL_MAX },
+      /* 10 */ { verdict::tet_minimum_angle, verdict::VERDICT_DBL_MAX },
+      /* 11 */ { verdict::tet_collapse_ratio, verdict::VERDICT_DBL_MAX  },
+      /* 12 */ { verdict::tet_equivolume_skew, verdict::VERDICT_DBL_MAX }
+    },
+    4,
+    {
+      // all points are 0, so the tet has zero edge length, volume, etc.
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 }
+    }
+  };
+  
+  runtest(testcase);
+}
 TEST(verdict, hex_test1)
 {
   test_case testcase = {
@@ -725,8 +756,7 @@ TEST(verdict, hex_test1)
       { .4, .4, -.6 },    //6
       { .2, .5, .2 },   //7 
       { .5, -.3, .8 }  //4
-      }
-
+    }
   };
 
   runtest(testcase);

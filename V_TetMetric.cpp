@@ -41,6 +41,14 @@ static const double normal_coeff = 180. * .3183098861837906715377675267450287;
 static const double aspect_ratio_normal_coeff = sqrt(6.) / 12.;
 static const double two_thirds = 2.0/3.0;
 
+static double fix_range( double v )
+{
+  if ( isnan(v)) return VERDICT_DBL_MAX;
+  if ( v >=  VERDICT_DBL_MAX ) return  VERDICT_DBL_MAX;
+  if ( v <= -VERDICT_DBL_MAX ) return -VERDICT_DBL_MAX;
+  return v;
+}
+
 double tet_equiangle_skew( int /*num_nodes*/, double coordinates[][3] )
 {
   VerdictVector ab,ac,bc,bd, ad, cd;
@@ -253,11 +261,9 @@ double tet_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
   M2 = Mab > Mcd ? Mab : Mcd;
   M2 = M2  > Mef ? M2  : Mef;
 
-  double edge_ratio = sqrt( M2 / m2 );
+  const double edge_ratio = sqrt( M2 / m2 );
 
-  if( edge_ratio > 0 )
-    return (double) std::min( edge_ratio, VERDICT_DBL_MAX );
-  return (double) std::max( edge_ratio, -VERDICT_DBL_MAX );
+  return fix_range(edge_ratio);
 }
 
 /*!
@@ -380,10 +386,8 @@ double tet_radius_ratio( int /*num_nodes*/, double coordinates[][3] )
     return (double)VERDICT_DBL_MAX;
   else
   {
-    double radius_ratio;
-    radius_ratio = numerator.length() * area_sum / (108 * volume * volume);
-
-    return (double) std::min( radius_ratio, VERDICT_DBL_MAX );
+    const double radius_ratio = numerator.length() * area_sum / (108 * volume * volume);
+    return fix_range(radius_ratio);
   }
 
 }
@@ -524,12 +528,9 @@ double tet_aspect_ratio( int /*num_nodes*/, double coordinates[][3] )
   bd = bc * cd;
   D = bd.length();
 
-  double aspect_ratio;
-  aspect_ratio = aspect_ratio_normal_coeff * hm * ( A + B + C + D ) / fabs( detTet );
+  const double aspect_ratio = aspect_ratio_normal_coeff * hm * ( A + B + C + D ) / fabs( detTet );
 
-  if( aspect_ratio > 0 )
-    return (double) std::min( aspect_ratio, VERDICT_DBL_MAX );
-  return (double) std::max( aspect_ratio, -VERDICT_DBL_MAX );
+  return fix_range(aspect_ratio);
 }
 
 /*!
@@ -631,9 +632,7 @@ double tet_aspect_frobenius( int /*num_nodes*/, double coordinates[][3] )
 
   double aspect_frobenius = numerator / denominator;
 
-  if( aspect_frobenius > 0 )
-    return (double) std::min( aspect_frobenius, VERDICT_DBL_MAX );
-  return (double) std::max( aspect_frobenius, -VERDICT_DBL_MAX );
+  return fix_range(aspect_frobenius);
 }
 
 /*!
@@ -687,12 +686,7 @@ double tet_minimum_angle( int /*num_nodes*/, double coordinates[][3] )
   alpha = alpha < zeta    ? alpha : zeta;
   alpha *= normal_coeff;
 
-  if( alpha < VERDICT_DBL_MIN )
-    return (double)VERDICT_DBL_MAX;
-
-  if( alpha > 0 )
-    return (double) std::min( alpha, VERDICT_DBL_MAX );
-  return (double) std::max( alpha, -VERDICT_DBL_MAX );
+  return fix_range(alpha);
 }
 
 /*!
@@ -775,11 +769,7 @@ double tet_collapse_ratio( int /*num_nodes*/, double coordinates[][3] )
   cr = h / l132;          // ratio of height to longest edge of 1-3-2
   if ( cr < crMin ) crMin = cr;
 
-  if( fabs( crMin ) < VERDICT_DBL_MIN )
-    return (double)VERDICT_DBL_MAX;
-  if( crMin > 0 )
-    return (double) std::min( crMin, VERDICT_DBL_MAX );
-  return (double) std::max( crMin, -VERDICT_DBL_MAX );
+  return fix_range( crMin );
 }
 
 double tet_equivolume_skew( int num_nodes, double coordinates[][3] )
@@ -816,7 +806,8 @@ double tet_equivolume_skew( int num_nodes, double coordinates[][3] )
   double optimal_length=circumradius/sqrt(double(3.0)/8.0);
   double optimal_volume=(1.0/12.0)*sqrt(double(2.0))*pow(optimal_length,3);
 
-  return (optimal_volume-volume)/optimal_volume;
+  const double eq_v_skew = (optimal_volume-volume)/optimal_volume;
+  return fix_range( eq_v_skew );
 }
 
 double tet_squish_index( int /*num_nodes*/, double coordinates[][3] )
@@ -1163,7 +1154,6 @@ double tet_jacobian( int num_nodes, double coordinates[][3] )
                coordinates[3][1] - coordinates[0][1],
                coordinates[3][2] - coordinates[0][2] );
 
-
     return (double)(side3 % (side2 * side0));
   }
 }
@@ -1202,7 +1192,9 @@ double tet_shape( int /*num_nodes*/, double coordinates[][3] )
   if ( den < VERDICT_DBL_MIN )
     return (double)0.0;
 
-  return (double)std::max( num/den, 0. );
+  double shape = num / den;
+  if (shape < 0) shape = 0;
+  return fix_range(shape);
 }
 
 /*!
@@ -1354,7 +1346,7 @@ double tet_distortion( int num_nodes, double coordinates[][3] )
       }
    distortion = minimum_jacobian/element_volume;
 
-   return (double)distortion;
+   return fix_range(distortion);
 }
 
 } // namespace verdict
