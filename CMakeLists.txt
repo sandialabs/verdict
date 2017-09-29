@@ -114,7 +114,6 @@ install(FILES
   README
   Verdict.htm
   Verdict.doc
-  verdict_test.cpp
   DESTINATION ${verdict_INSTALL_DOC_DIR}/verdict/${verdict_VERSION}/
   COMPONENT VerdictDevelopment
 )
