@@ -19,7 +19,7 @@
 #include "V_HexMetric.hpp"
 
 #define MAX_NODES_PER_ELEMENT 27
-#define VERDICT_SIGNIFICANT_FIG 10    // 7 significant figures for doubles, use 5 to make tests less sensitive
+#define VERDICT_SIGNIFICANT_FIG 5    // 7 significant figures for doubles, use 5 to make tests less sensitive
 
 
 
