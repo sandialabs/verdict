@@ -30,7 +30,7 @@
 #ifndef __verdict_h
 #define __verdict_h
 
-#include <verdict_config.h>
+#include "verdict_config.h"
 
 #if defined(_WIN32) || defined (__CYGWIN__)
 # define VERDICT_ABI_IMPORT __declspec(dllimport)
@@ -252,6 +252,7 @@ namespace VERDICT_NAMESPACE
         If the maximum nodal jacobian is negative the element is fully inverted, and return a huge 
         negative number, -VERDICT_DBL_MAX.
         Currently only the first 8 nodes are supported. */
+    VERDICT_EXPORT double hex_nodal_jacobian_ratio2( int num_nodes, double *coordinates);
     VERDICT_EXPORT double hex_nodal_jacobian_ratio( int num_nodes, double coordinates[][3]);
   
     //! Calculates hex shear metric   
@@ -291,6 +292,8 @@ namespace VERDICT_NAMESPACE
     VERDICT_EXPORT double hex_distortion( int num_nodes, double coordinates[][3] );
 
     VERDICT_EXPORT double hex_equiangle_skew( int num_nodes, double coordinates[][3] );
+
+    VERDICT_EXPORT double tet_inradius( int num_nodes, double coordinates[][3] );
 
 /* quality functions for tet elements */
 
@@ -706,3 +709,4 @@ namespace VERDICT_NAMESPACE
 } // namespace verdict
 
 #endif  /* __verdict_h */
+

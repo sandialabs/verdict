@@ -25,12 +25,10 @@ set( verdict_SRCS
   V_GaussIntegration.cpp
   V_GaussIntegration.hpp
   V_HexMetric.cpp
-  V_HexMetric.hpp
   V_KnifeMetric.cpp
   V_PyramidMetric.cpp
   V_QuadMetric.cpp
   V_TetMetric.cpp
-  V_TetMetric.hpp
   V_TriMetric.cpp
   v_vector.h
   V_WedgeMetric.cpp

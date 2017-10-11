@@ -13,9 +13,9 @@
 #include <vector>
 #include <array>
 #include <functional>
+#include <math.h>
 
 #include <verdict.h>
-#include "V_TetMetric.hpp"
 #include "V_HexMetric.hpp"
 
 #define MAX_NODES_PER_ELEMENT 27
