@@ -28,6 +28,7 @@
 #include <memory.h>
 #include <vector>
 #include <algorithm>
+#include <cmath>   // for std::isnan
 
 #if defined(__BORLANDC__)
 #pragma warn -8004 /* "assigned a value that is never used" */
@@ -2814,7 +2815,7 @@ double hex_distortion( int num_nodes, double coordinates[][3] )
   distortion = minimum_jacobian/element_volume*8.;
   if      (distortion> VERDICT_DBL_MAX) distortion = VERDICT_DBL_MAX;
   else if (distortion<-VERDICT_DBL_MAX) distortion = -VERDICT_DBL_MAX;
-  else if (isnan(distortion))           distortion = VERDICT_DBL_MAX; // 0/0, or should we return some other value?
+  else if (std::isnan(distortion))           distortion = VERDICT_DBL_MAX; // 0/0, or should we return some other value?
   
   return (double)distortion;
 }

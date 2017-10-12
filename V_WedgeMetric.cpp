@@ -26,6 +26,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include "VerdictVector.hpp"
 #include <memory.h> 
 #include <algorithm>
+#include <cmath> // for std::isnan
 
 #include "verdict_defines.hpp"
 #include "V_GaussIntegration.hpp"
@@ -492,7 +493,7 @@ double wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 
   double edge_ratio = sqrt( max / min );
 
-  if (isnan(edge_ratio))
+  if (std::isnan(edge_ratio))
     return VERDICT_DBL_MAX;
   if (edge_ratio < 1.)
     return 1.;
@@ -814,7 +815,7 @@ double wedge_distortion( int num_nodes, double coordinates[][3] )
   const double master_volume = 0.433013;
   const double distortion = jacobian*master_volume/current_volume/0.866025;
 
-  if (isnan(distortion)) return VERDICT_DBL_MAX;
+  if (std::isnan(distortion)) return VERDICT_DBL_MAX;
   if ( distortion >= VERDICT_DBL_MAX ) return VERDICT_DBL_MAX;
   if ( distortion <= -VERDICT_DBL_MAX ) return -VERDICT_DBL_MAX;
   return distortion;

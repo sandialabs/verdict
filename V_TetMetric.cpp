@@ -28,6 +28,7 @@
 #include "V_GaussIntegration.hpp"
 #include <memory.h>
 #include <algorithm>
+#include <cmath> // for std::isnan
 
 namespace VERDICT_NAMESPACE
 {
@@ -43,7 +44,7 @@ static const double two_thirds = 2.0/3.0;
 
 static double fix_range( double v )
 {
-  if ( isnan(v)) return VERDICT_DBL_MAX;
+  if ( std::isnan(v)) return VERDICT_DBL_MAX;
   if ( v >=  VERDICT_DBL_MAX ) return  VERDICT_DBL_MAX;
   if ( v <= -VERDICT_DBL_MAX ) return -VERDICT_DBL_MAX;
   return v;
