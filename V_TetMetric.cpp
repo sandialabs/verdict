@@ -41,6 +41,23 @@ static const double root_of_2 = sqrt(2.0);
 static const double normal_coeff = 180. * .3183098861837906715377675267450287;
 static const double aspect_ratio_normal_coeff = sqrt(6.) / 12.;
 static const double two_thirds = 2.0/3.0;
+double tet10_characteristic_length( double coordinates[][3] );
+
+static const int tet10_subtet_conn[12][4] =
+{
+  {0, 4, 6, 7},
+  {1, 5, 4, 8},
+  {2, 6, 5, 9},
+  {3, 8, 7, 9},
+  {4, 8, 5, 10},
+  {5, 8, 9, 10},
+  {9, 8, 7, 10},
+  {7, 8, 4, 10},
+  {4, 5, 6, 10},
+  {5, 9, 6, 10},
+  {9, 7, 6, 10},
+  {7, 4, 6, 10}
+};
 
 static double fix_range( double v )
 {
@@ -1356,6 +1373,9 @@ double tet_inradius( int num_nodes, double coordinates[][3] )
   if (num_nodes < 4)
     return 0.;
 
+  if (num_nodes == 10)
+    return tet10_characteristic_length( coordinates );
+  
   //area1 (0,1,2)
   double a1 = verdict::tri_area(3, coordinates);
 
@@ -1406,6 +1426,80 @@ double tet_inradius( int num_nodes, double coordinates[][3] )
   double inradius = 3*tet_volume/(a1 + a2 + a3 + a4);
 
   return inradius;
+}
+
+double tet_timestep( int num_nodes, double coordinates[][3], 
+                     double density, 
+                     double poissons_ratio,
+                     double youngs_modulus )
+{
+  double char_length = 0;
+  if( 10 == num_nodes )
+    char_length = 2*tet10_characteristic_length( coordinates );
+  else
+    char_length = 2*tet_inradius( num_nodes, coordinates );
+  
+  double M = youngs_modulus*(1 - poissons_ratio) / ((1 - 2 * poissons_ratio)*(1 + poissons_ratio));
+  double denominator = sqrt(M / density);
+
+  return char_length / denominator;
+}
+
+double tet10_characteristic_length( double coordinates[][3] )
+{
+  int num_sub_tets = 12;
+
+  //compute auxillary node coordinate
+  VerdictVector aux_node(0,0,0);
+  for( int i=4; i<10; i++ )
+  {
+    VerdictVector tmp_vec( 
+      coordinates[i][0],
+      coordinates[i][1],
+      coordinates[i][2] );
+    aux_node += tmp_vec;
+  }
+  aux_node /= 6;
+
+  double min_tetinradius = VERDICT_DBL_MAX;
+
+  for( int i=0; i<num_sub_tets; i++ )
+  {
+    int subtet_conn[4];
+    subtet_conn[0] = tet10_subtet_conn[i][0];
+    subtet_conn[1] = tet10_subtet_conn[i][1];
+    subtet_conn[2] = tet10_subtet_conn[i][2];
+    subtet_conn[3] = tet10_subtet_conn[i][3];
+
+    //get the coordinates of the nodes
+    double subtet_coords[4][3];
+    for( int k=0; k<4; k++ )
+    {
+      int node_index = subtet_conn[k];
+
+      if( 10 == node_index )
+      {
+        subtet_coords[k][0] = aux_node.x();
+        subtet_coords[k][1] = aux_node.y();
+        subtet_coords[k][2] = aux_node.z();
+      }
+      else
+      {
+        subtet_coords[k][0] = coordinates[node_index][0];
+        subtet_coords[k][1] = coordinates[node_index][1];
+        subtet_coords[k][2] = coordinates[node_index][2];
+      }
+    }
+    
+    double tmp_inradius = tet_inradius(4, subtet_coords);
+    
+    if( tmp_inradius < min_tetinradius )
+      min_tetinradius = tmp_inradius;
+  }
+
+  min_tetinradius *= 2.3;
+
+  return min_tetinradius;
 }
 
 } // namespace verdict

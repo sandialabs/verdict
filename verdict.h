@@ -217,6 +217,14 @@ namespace VERDICT_NAMESPACE
          Solid Dynamics Program, SAND87-1912, Sandia National Laboratories, 1989. */
     VERDICT_EXPORT double hex_dimension( int num_nodes, double coordinates[][3] );
 
+    //! Calculates hex timestep metric
+    /**  timestep = char_length / (M/density),      
+      where M = youngs_modulus*(1 - poissons_ratio) / ((1 - 2 * poissons_ratio)*(1 + poissons_ratio)); */
+    VERDICT_EXPORT double hex_timestep( int num_nodes, double coordinates[][3], 
+                                        double density,
+                                        double poissons_ratio,
+                                        double youngs_modulus );
+
     //! Calculates hex oddy metric   
     VERDICT_EXPORT double hex_oddy( int num_nodes, double coordinates[][3] );
 
@@ -294,6 +302,17 @@ namespace VERDICT_NAMESPACE
     VERDICT_EXPORT double hex_equiangle_skew( int num_nodes, double coordinates[][3] );
 
     VERDICT_EXPORT double tet_inradius( int num_nodes, double coordinates[][3] );
+    
+    //! Calculates hex timestep metric
+    /**  timestep = char_length / (M/density),      
+      where M = youngs_modulus*(1 - poissons_ratio) / ((1 - 2 * poissons_ratio)*(1 + poissons_ratio)); 
+      For a tet10, char_length = 2.3 * smallest tet_inradius or the 12 subtets
+      For all other tets, char_length = tet_inradius of 4 noded tet
+    */
+    VERDICT_EXPORT double tet_timestep( int num_nodes, double coordinates[][3], 
+                                        double density, 
+                                        double poissons_ratio,
+                                        double youngs_modulus );
 
 /* quality functions for tet elements */
 

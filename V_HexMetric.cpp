@@ -2820,7 +2820,17 @@ double hex_distortion( int num_nodes, double coordinates[][3] )
   return (double)distortion;
 }
   
+double hex_timestep( int num_nodes, double coordinates[][3], 
+                     double density,
+                     double poissons_ratio,
+                     double youngs_modulus )
+{
+  double char_length = hex_dimension( num_nodes, coordinates );
+  double M = youngs_modulus*(1 - poissons_ratio) / ((1 - 2 * poissons_ratio)*(1 + poissons_ratio));
+  double denominator = sqrt(M / density);
 
+  return char_length / denominator;
+}
 
 
 
