@@ -1306,7 +1306,7 @@ double tet_distortion( int num_nodes, double coordinates[][3] )
    VerdictVector xxi, xet, xze, xin;
 
    double jacobian, minimum_jacobian;
-   double element_volume =0.0;
+   double element_volume = 0.0;
    minimum_jacobian = VERDICT_DBL_MAX;
 
    // calculate element volume
@@ -1361,8 +1361,9 @@ double tet_distortion( int num_nodes, double coordinates[][3] )
       if (minimum_jacobian > jacobian)
          minimum_jacobian = jacobian;
 
-      }
-   distortion = minimum_jacobian/element_volume;
+   }
+   if (fabs(element_volume) > 0.0)
+      distortion = minimum_jacobian/element_volume;
 
    return fix_range(distortion);
 }

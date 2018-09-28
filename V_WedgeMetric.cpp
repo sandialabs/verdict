@@ -810,10 +810,12 @@ double wedge_jacobian( int num_nodes, double coordinates[][3] )
 
 double wedge_distortion( int num_nodes, double coordinates[][3] )
 {
-  const double jacobian = wedge_jacobian( num_nodes, coordinates );
-  const double current_volume = wedge_volume( num_nodes, coordinates);
-  const double master_volume = 0.433013;
-  const double distortion = jacobian*master_volume/current_volume/0.866025;
+  double jacobian = wedge_jacobian( num_nodes, coordinates );
+  double master_volume = 0.433013;
+  double current_volume = wedge_volume( num_nodes, coordinates);
+  double distortion = VERDICT_DBL_MAX;
+  if (fabs(current_volume) > 0.0)
+    distortion = jacobian*master_volume/current_volume/0.866025;
 
   if (std::isnan(distortion)) return VERDICT_DBL_MAX;
   if ( distortion >= VERDICT_DBL_MAX ) return VERDICT_DBL_MAX;

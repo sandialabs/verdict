@@ -2812,7 +2812,8 @@ double hex_distortion( int num_nodes, double coordinates[][3] )
       minimum_jacobian = jacobian;
     
   }
-  distortion = minimum_jacobian/element_volume*8.;
+  if (fabs(element_volume) > 0.0)
+    distortion = minimum_jacobian/element_volume*8.;
   if      (distortion> VERDICT_DBL_MAX) distortion = VERDICT_DBL_MAX;
   else if (distortion<-VERDICT_DBL_MAX) distortion = -VERDICT_DBL_MAX;
   else if (std::isnan(distortion))           distortion = VERDICT_DBL_MAX; // 0/0, or should we return some other value?
