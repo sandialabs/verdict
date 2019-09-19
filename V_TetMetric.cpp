@@ -1082,8 +1082,8 @@ double tet_condition( int /*num_nodes*/, double coordinates[][3] )
 {
 
   double condition, term1, term2, det;
-  double rt3 = sqrt(3.0);
-  double rt6 = sqrt(6.0);
+  // double rt3 = sqrt(3.0);
+  const double rt6 = sqrt(6.0);
 
   VerdictVector side0, side2, side3;
 
