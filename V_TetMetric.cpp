@@ -324,11 +324,18 @@ double tet_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
   jacobi = side3 % ( side2 * side0 );
 
   // products of lengths squared of each edge attached to a node.
+  double side0_length_squared = side0.length_squared();
+  double side1_length_squared = side1.length_squared();
+  double side2_length_squared = side2.length_squared();
+  double side3_length_squared = side3.length_squared();
+  double side4_length_squared = side4.length_squared();
+  double side5_length_squared = side5.length_squared();
+
   double length_squared[4] = {
-    side0.length_squared() * side2.length_squared() * side3.length_squared(),
-    side0.length_squared() * side1.length_squared() * side4.length_squared(),
-    side1.length_squared() * side2.length_squared() * side5.length_squared(),
-    side3.length_squared() * side4.length_squared() * side5.length_squared()
+    side0_length_squared * side2_length_squared * side3_length_squared,
+    side0_length_squared * side1_length_squared * side4_length_squared,
+    side1_length_squared * side2_length_squared * side5_length_squared,
+    side3_length_squared * side4_length_squared * side5_length_squared
   };
   int which_node = 0;
   if(length_squared[1] > length_squared[which_node])
