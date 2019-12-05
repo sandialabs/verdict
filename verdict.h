@@ -2,13 +2,11 @@
 
   Module:    verdict.h.in
 
-  Copyright (c) 2006 Sandia Corporation.
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+  Copyright 2006 National Technology & Engineering Solutions of Sandia,
+  LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS,
+  the U.S. Government retains certain rights in this software.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+  See LICENSE for details.
 
 =========================================================================*/
 
@@ -23,9 +21,6 @@
  *
  */
 
-// .SECTION Thanks
-// Prior to its inclusion within VTK, this code was developed by the CUBIT
-// project at Sandia National Laboratories. 
 
 #ifndef __verdict_h
 #define __verdict_h
@@ -74,12 +69,6 @@ namespace verdict { using namespace VERDICT_NAMESPACE; }
 
   Verdict calculates individual metrics on a single elment.  
 
-  \section GetVerdict Obtaining, Configuring, Building, and Installing Verdict
-
-  Since your are reading reference documentation generated from the source code,
-  you ostensibly already have Verdict.
-  Instructions for this are on a separate page: \ref ObtainConfigureBuildInstall .
-
   \section UsingVerdict Using Verdict
 
   Verdict functions take the parameters below and return the calculated
@@ -121,47 +110,6 @@ namespace verdict { using namespace VERDICT_NAMESPACE; }
     \endcode
 */
 
-/*!\page ObtainConfigureBuildInstall Obtain, Configure, Build, and Install Verdict
-
-  \section ObtainVerdict Obtaining the Verdict Source Code
-
-  The verdict source code repository is now maintained by <a href="http://www.kitware.com/">Kitware</a>.
-  You can check out the source with \code
-    cvs -d :pserver:anonymous@public.kitware.com:/cvsroot/Verdict login
-    cvs -d :pserver:anonymous@public.kitware.com:/cvsroot/Verdict -z3 co Verdict
-  \endcode
-  When asked for a password, enter "verdict".
-
-  \section ConfiguringVerdict Configuring Verdict
-
-  Verdict uses <a href="http://www.cmake.org/">CMake</a> to create project files.
-  To build Verdict from source, you will need to obtain CMake.
-  
-  We strongly suggest that you build Verdict in a separate directory tree from the source code.
-  Life is just too short to explain why; if you're curious, search the CMake mailing list.
-  To make the instructions clear, we'll assume that you have the Verdict source code in \c /tmp/Verdict.
-  Configuring Verdict is then as simple as \code
-    mkdir /tmp/VerdictBuild
-    cd /tmp/VerdictBuild
-    cmake ../Verdict
-  \endcode
-  At this point, you may wish to edit <tt>/tmp/VerdictBuild/CMakeCache.txt</tt> to change settings
-  from their default values.
-  
-  If you are going to include Verdict inside another library, you might want to read
-  how to use \ref VerdictAsASubProject.
-
-  \section BuildingAndInstallingVerdict Building and Installing Verdict
-
-  Assuming you are using CMake's Makefile generator, building and installing Verdict
-  is accomplished with \code
-    make
-    make install
-  \endcode
-  By default, Verdict will be installed in \c /usr/local.
-  If you wish to change the location, edit your <tt>CMakeCache.txt</tt> file so that
-  \c CMAKE_INSTALL_PREFIX contains a different directory and re-run \c cmake.
- */
 
 namespace VERDICT_NAMESPACE
 {

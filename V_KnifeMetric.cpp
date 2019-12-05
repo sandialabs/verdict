@@ -2,13 +2,11 @@
 
   Module:    V_KnifeMetric.cpp
 
-  Copyright (c) 2006 Sandia Corporation.
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+  Copyright 2006 National Technology & Engineering Solutions of Sandia,
+  LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS,
+  the U.S. Government retains certain rights in this software.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+  See LICENSE for details.
 
 =========================================================================*/
 
