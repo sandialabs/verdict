@@ -290,46 +290,36 @@ double tet_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 */
 double tet_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
 {
+  const VerdictVector side0( coordinates[1][0] - coordinates[0][0],
+                             coordinates[1][1] - coordinates[0][1],
+                             coordinates[1][2] - coordinates[0][2] );
+  const VerdictVector side1( coordinates[2][0] - coordinates[1][0],
+                             coordinates[2][1] - coordinates[1][1],
+                             coordinates[2][2] - coordinates[1][2] );
+  const VerdictVector side2( coordinates[0][0] - coordinates[2][0],
+                             coordinates[0][1] - coordinates[2][1],
+                             coordinates[0][2] - coordinates[2][2] );
+  const VerdictVector side3( coordinates[3][0] - coordinates[0][0],
+                             coordinates[3][1] - coordinates[0][1],
+                             coordinates[3][2] - coordinates[0][2] );
+  const VerdictVector side4( coordinates[3][0] - coordinates[1][0],
+                             coordinates[3][1] - coordinates[1][1],
+                             coordinates[3][2] - coordinates[1][2] );
+  const VerdictVector side5( coordinates[3][0] - coordinates[2][0],
+                             coordinates[3][1] - coordinates[2][1],
+                             coordinates[3][2] - coordinates[2][2] );
 
-  VerdictVector side0, side1, side2, side3, side4, side5;
-
-  side0.set( coordinates[1][0] - coordinates[0][0],
-             coordinates[1][1] - coordinates[0][1],
-             coordinates[1][2] - coordinates[0][2] );
-
-  side1.set( coordinates[2][0] - coordinates[1][0],
-             coordinates[2][1] - coordinates[1][1],
-             coordinates[2][2] - coordinates[1][2] );
-
-  side2.set( coordinates[0][0] - coordinates[2][0],
-             coordinates[0][1] - coordinates[2][1],
-             coordinates[0][2] - coordinates[2][2] );
-
-  side3.set( coordinates[3][0] - coordinates[0][0],
-             coordinates[3][1] - coordinates[0][1],
-             coordinates[3][2] - coordinates[0][2] );
-
-  side4.set( coordinates[3][0] - coordinates[1][0],
-             coordinates[3][1] - coordinates[1][1],
-             coordinates[3][2] - coordinates[1][2] );
-
-  side5.set( coordinates[3][0] - coordinates[2][0],
-             coordinates[3][1] - coordinates[2][1],
-             coordinates[3][2] - coordinates[2][2] );
-
-  double jacobi;
-
-  jacobi = side3 % ( side2 * side0 );
+  const double jacobi = side3 % ( side2 * side0 );
 
   // products of lengths squared of each edge attached to a node.
-  double side0_length_squared = side0.length_squared();
-  double side1_length_squared = side1.length_squared();
-  double side2_length_squared = side2.length_squared();
-  double side3_length_squared = side3.length_squared();
-  double side4_length_squared = side4.length_squared();
-  double side5_length_squared = side5.length_squared();
+  const double side0_length_squared = side0.length_squared();
+  const double side1_length_squared = side1.length_squared();
+  const double side2_length_squared = side2.length_squared();
+  const double side3_length_squared = side3.length_squared();
+  const double side4_length_squared = side4.length_squared();
+  const double side5_length_squared = side5.length_squared();
 
-  double length_squared[4] = {
+  const double length_squared[4] = {
     side0_length_squared * side2_length_squared * side3_length_squared,
     side0_length_squared * side1_length_squared * side4_length_squared,
     side1_length_squared * side2_length_squared * side5_length_squared,
@@ -1045,6 +1035,10 @@ static void TET15_gradients_of_the_shape_functions_for_R_S_T(const double rst[3]
   dhdt[3] =  dhdt[3] - .5*(dhdt[7]+dhdt[8]+dhdt[9])- one_third*(dhdt[14]+dhdt[12]+dhdt[13]) - .25*dhdt[10];
 }
 
+double calculate_tet_volume_using_sides(const VerdictVector &side0, const VerdictVector &side2, const VerdictVector &side3)
+{
+    return  (double)((side3 % (side2 * side0)) / 6.0);
+}
 
 /*!
   the volume of a tet
@@ -1069,7 +1063,7 @@ double tet_volume( int /*num_nodes*/, double coordinates[][3] )
              coordinates[3][1] - coordinates[0][1],
              coordinates[3][2] - coordinates[0][2] );
 
-  return  (double)((side3 % (side2 * side0)) / 6.0);
+  return  calculate_tet_volume_using_sides(side0, side2, side3);
 
 }
 
@@ -1087,7 +1081,6 @@ double tet_condition( int /*num_nodes*/, double coordinates[][3] )
 {
 
   double condition, term1, term2, det;
-  // double rt3 = sqrt(3.0);
   const double rt6 = sqrt(6.0);
 
   VerdictVector side0, side2, side3;
@@ -1451,61 +1444,153 @@ double tet_timestep( int num_nodes, double coordinates[][3],
   return char_length / denominator;
 }
 
-double tet10_characteristic_length( double coordinates[][3] )
+VerdictVector tet10_auxillary_node_coordinate(double coordinates[][3] )
 {
-  int num_sub_tets = 12;
-
-  //compute auxillary node coordinate
-  VerdictVector aux_node(0,0,0);
-  for( int i=4; i<10; i++ )
-  {
-    VerdictVector tmp_vec( 
-      coordinates[i][0],
-      coordinates[i][1],
-      coordinates[i][2] );
-    aux_node += tmp_vec;
-  }
-  aux_node /= 6;
-
-  double min_tetinradius = VERDICT_DBL_MAX;
-
-  for( int i=0; i<num_sub_tets; i++ )
-  {
-    int subtet_conn[4];
-    subtet_conn[0] = tet10_subtet_conn[i][0];
-    subtet_conn[1] = tet10_subtet_conn[i][1];
-    subtet_conn[2] = tet10_subtet_conn[i][2];
-    subtet_conn[3] = tet10_subtet_conn[i][3];
-
-    //get the coordinates of the nodes
-    double subtet_coords[4][3];
-    for( int k=0; k<4; k++ )
+    VerdictVector aux_node(0,0,0);
+    for( int i=4; i<10; i++ )
     {
-      int node_index = subtet_conn[k];
-
-      if( 10 == node_index )
-      {
-        subtet_coords[k][0] = aux_node.x();
-        subtet_coords[k][1] = aux_node.y();
-        subtet_coords[k][2] = aux_node.z();
-      }
-      else
-      {
-        subtet_coords[k][0] = coordinates[node_index][0];
-        subtet_coords[k][1] = coordinates[node_index][1];
-        subtet_coords[k][2] = coordinates[node_index][2];
-      }
+      VerdictVector tmp_vec(
+        coordinates[i][0],
+        coordinates[i][1],
+        coordinates[i][2] );
+      aux_node += tmp_vec;
     }
-    
-    double tmp_inradius = tet_inradius(4, subtet_coords);
-    
-    if( tmp_inradius < min_tetinradius )
-      min_tetinradius = tmp_inradius;
-  }
+    aux_node /= 6;
 
+    return aux_node;
+}
+
+double tet10_min_inradius(double coordinates[][3], int begin_index, int end_index)
+{
+    double min_tetinradius = VERDICT_DBL_MAX;
+
+    VerdictVector auxillary_node = tet10_auxillary_node_coordinate(coordinates);
+
+     for( int i=begin_index; i<=end_index; i++ )
+     {
+       int subtet_conn[4];
+       subtet_conn[0] = tet10_subtet_conn[i][0];
+       subtet_conn[1] = tet10_subtet_conn[i][1];
+       subtet_conn[2] = tet10_subtet_conn[i][2];
+       subtet_conn[3] = tet10_subtet_conn[i][3];
+
+       //get the coordinates of the nodes
+       double subtet_coords[4][3];
+       for( int k=0; k<4; k++ )
+       {
+         int node_index = subtet_conn[k];
+
+         if( 10 == node_index )
+         {
+           subtet_coords[k][0] = auxillary_node.x();
+           subtet_coords[k][1] = auxillary_node.y();
+           subtet_coords[k][2] = auxillary_node.z();
+         }
+         else
+         {
+           subtet_coords[k][0] = coordinates[node_index][0];
+           subtet_coords[k][1] = coordinates[node_index][1];
+           subtet_coords[k][2] = coordinates[node_index][2];
+         }
+       }
+
+       double tmp_inradius = tet_inradius(4, subtet_coords);
+
+       if( tmp_inradius < min_tetinradius )
+         min_tetinradius = tmp_inradius;
+     }
+     return min_tetinradius;
+}
+
+double tet10_characteristic_length( double coordinates[][3])
+{
+  //compute auxillary node coordinate
+  double min_tetinradius = tet10_min_inradius(coordinates,0,11);
   min_tetinradius *= 2.3;
 
   return min_tetinradius;
+}
+double calculate_tet4_outer_radius(double coordinates[][3] )
+{
+    verdict::VerdictVector nE[4];
+     for(int i{0};i<4;i++)
+         nE[i].set(coordinates[i]);
+
+    double aC = (nE[1] - nE[0]).length();
+    double bC = (nE[2] - nE[0]).length();
+    double cC = (nE[3] - nE[0]).length();
+    double AC = (nE[3] - nE[2]).length();
+    double BC = (nE[3] - nE[1]).length();
+    double CC = (nE[2] - nE[1]).length();
+    double VP = ((nE[1] - nE[0])*(nE[2] - nE[0]))%(nE[3] - nE[0]) / 6;
+    double outer_radius = sqrt((aC * AC + bC * BC + cC * CC) *
+    (aC * AC + bC * BC - cC * CC) * (aC * AC - bC * BC + cC * CC) * (-aC * AC + bC * BC + cC * CC)) / 24 / VP;
+
+    return outer_radius;
+}
+
+double tet10_normalized_inradius(double coordinates[][3] )
+{
+    static const double three_1plusrt3 =  3.0*(1+rt3);
+
+    double min_inradius_for_subtet_with_parent_node = tet10_min_inradius(coordinates,0,3);
+    double min_inradius_for_subtet_with_no_parent_node = tet10_min_inradius(coordinates,4,11);
+
+    double outer_radius=calculate_tet4_outer_radius(coordinates);
+
+    double normalized_inradius_for_subtet_with_parent_node= 6.0*min_inradius_for_subtet_with_parent_node/outer_radius;
+    double normalized_inradius_for_subtet_with_no_parent_node= three_1plusrt3*min_inradius_for_subtet_with_no_parent_node/outer_radius;
+
+    return std::min(normalized_inradius_for_subtet_with_parent_node,normalized_inradius_for_subtet_with_no_parent_node);
+}
+
+double tet_normalized_inradius(int num_nodes, double coordinates[][3] )
+{
+    if(num_nodes<10)
+        return 0;
+
+    return tet10_normalized_inradius(coordinates);
+}
+
+double tet_mean_ratio( int num_nodes, double coordinates[][3] )
+{
+    const VerdictVector side0(coordinates[1][0] - coordinates[0][0],
+                              coordinates[1][1] - coordinates[0][1],
+                              coordinates[1][2] - coordinates[0][2]);
+
+    const VerdictVector side2(coordinates[0][0] - coordinates[2][0],
+                              coordinates[0][1] - coordinates[2][1],
+                              coordinates[0][2] - coordinates[2][2]);
+
+    const VerdictVector side3(coordinates[3][0] - coordinates[0][0],
+                              coordinates[3][1] - coordinates[0][1],
+                              coordinates[3][2] - coordinates[0][2]);
+
+    const double tetVolume = calculate_tet_volume_using_sides(side0, side2, side3);
+    if( fabs( tetVolume ) < VERDICT_DBL_MIN )
+        return 0.0;
+
+    const VerdictVector side1(coordinates[2][0] - coordinates[1][0],
+                              coordinates[2][1] - coordinates[1][1],
+                              coordinates[2][2] - coordinates[1][2]);
+
+    const VerdictVector side4(coordinates[3][0] - coordinates[1][0],
+                              coordinates[3][1] - coordinates[1][1],
+                              coordinates[3][2] - coordinates[1][2]);
+
+    const VerdictVector side5(coordinates[3][0] - coordinates[2][0],
+                              coordinates[3][1] - coordinates[2][1],
+                              coordinates[3][2] - coordinates[2][2]);
+
+    const double side0_length_squared = side0.length_squared();
+    const double side1_length_squared = side1.length_squared();
+    const double side2_length_squared = side2.length_squared();
+    const double side3_length_squared = side3.length_squared();
+    const double side4_length_squared = side4.length_squared();
+    const double side5_length_squared = side5.length_squared();
+
+    const int sign = tetVolume < 0. ? -1 : 1;
+    return sign * 12. * std::pow(3.*fabs(tetVolume), 2./3.) / (side0_length_squared + side1_length_squared + side2_length_squared + side3_length_squared + side4_length_squared + side5_length_squared);
 }
 
 } // namespace verdict

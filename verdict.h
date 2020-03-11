@@ -336,6 +336,17 @@ namespace VERDICT_NAMESPACE
        Intl. J. Numer. Meth. Engng. 2000, 48:1165-1185. */
     VERDICT_EXPORT double tet_scaled_jacobian( int num_nodes, double coordinates[][3] );
 
+    //! Calculates tet mean ratio.
+    /** Ratio of tet volume to volume of an equilateral tet with the same RMS edge length
+       Reference 1 --- Compere & Remacle A mesh adaptation framework for dealing with large deforming meshes, IJNME 2010 82:843-867
+       Reference 2 --- Danial Ibanez - PhD Thesis, Conformal Mesh Adaptation on Heterogeneous Supercomputers */
+    VERDICT_EXPORT double tet_mean_ratio( int num_nodes, double coordinates[][3] );
+
+    //! Calculates the minimum normalized inner radius of a tet
+    /** Ratio of the minimum subtet inner radius to tet outer radius*/
+    /* Currently only supports tetra 10.*/
+    VERDICT_EXPORT double tet_normalized_inradius(int num_nodes, double coordinates[][3] );
+
     //! Calculates tet shape metric.
     /** 3/Mean Ratio of weighted Jacobian matrix.
        Reference --- P. Knupp, Algebraic Mesh Quality Metrics for

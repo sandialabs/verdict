@@ -1030,3 +1030,147 @@ TEST(verdict, knife_test1)
   runtest(testcase);
 }
 
+TEST(verdict, tet_meanRatio_perfect_tet)
+{
+    test_case testcase = {
+      "tet_meanRatio_perfect_tet",
+      {
+        { verdict::tet_mean_ratio, 1.0},
+      },
+      4,
+      {
+        { 0, 0, 0 },
+        { 0, 1, 1 },
+        { 1, 0, 1 },
+        { 1, 1, 0 },
+      }
+    };
+
+    runtest(testcase);
+}
+
+TEST(verdict, tet_meanRatio_degenerate_tet)
+{
+    test_case testcase = {
+      "tet_meanRatio_degenerate_tet",
+      {
+        { verdict::tet_mean_ratio, 0.0},
+      },
+      4,
+      {
+        { 0, 0, 0 },
+        { 0, 0, 0 },
+        { 0, 0, 0 },
+        { 0, 0, 0 },
+      }
+    };
+
+    runtest(testcase);
+}
+
+TEST(verdict, tet_meanRatio_unit_right_angle_tet)
+{
+    test_case testcase = {
+      "tet_meanRatio_unit_right_angle_tet",
+      {
+        { verdict::tet_mean_ratio, 0.839947},
+      },
+      4,
+      {
+       { 0,0,0 },
+       { 1,0,0 },
+       { 0,1,0 },
+       { 0,0,1 },
+      }
+    };
+
+    runtest(testcase);
+}
+
+TEST(verdict, tet_meanRatio_nearly_flat_right_angle_tet)
+{
+    test_case testcase = {
+      "tet_meanRatio_nearly_flat_right_angle_tet",
+      {
+        { verdict::tet_mean_ratio, 0.0584774},
+      },
+      4,
+      {
+         { 0,0,0 },
+         { 1,0,0 },
+         { 0,1,0 },
+         { 0,0,.01 },
+      }
+    };
+
+    runtest(testcase);
+}
+
+TEST(verdict, tet_meanRatio_inverted_nearly_flat_right_angle_tet)
+{
+    test_case testcase = {
+      "tet_meanRatio_nearly_flat_right_angle_tet",
+      {
+        { verdict::tet_mean_ratio, -0.0584774},
+      },
+      4,
+      {
+         { 0,0,0 },
+         { 1,0,0 },
+         { 0,1,0 },
+         { 0,0,-.01 },
+      }
+    };
+
+    runtest(testcase);
+}
+
+TEST(verdict, tet_normalized_inradius_perfect_tet10)
+{
+    test_case testcase = {
+      "tet_normalized_subtet_perfect_tet",
+      {
+        { verdict::tet_normalized_inradius, 1.0},
+      },
+      10,
+      {
+       {0.000000,     0.000000,     0.000000},
+       {0.000000,     1.000000,     1.000000},
+       {1.000000,     0.000000,     1.000000},
+       {1.000000,     1.000000,     0.000000},
+       {0.000000,     0.500000,     0.500000},
+       {0.500000,     0.500000,     1.000000},
+       {0.500000,     0.000000,     0.500000},
+       {0.500000,     0.500000,     0.000000},
+       {0.500000,     1.000000,     0.500000},
+       {1.000000,     0.500000,     0.500000},
+      }
+    };
+
+    runtest(testcase);
+}
+
+TEST(verdict, tet_normalized_inradius_deformed_tet10)
+{
+    test_case testcase = {
+          "tet_normalized_subtet_perfect_tet",
+          {
+            { verdict::tet_normalized_inradius, 0.49373899958502704},
+          },
+          10,
+          {
+           {-0.05, -0.1, 0.125},
+           {0.9, 0.025, -0.075},
+           {-0.1, 1.025, -0.075},
+           {0.125, 0.1, 1.025},
+           {0.525, 0.025, -0.05},
+           {0.5, 0.525, 0.05},
+           {0.125, 0.45, -0.075},
+           {0.1, 0.075, 0.575},
+           {0.475, -0.075, 0.55},
+           {-0.075, 0.6, 0.45},
+          }
+        };
+
+        runtest(testcase);
+}
