@@ -679,7 +679,8 @@ TEST(verdict, tet_test1)
       /*  9 */ { verdict::tet_aspect_frobenius, 1.1905507890},
       /* 10 */ { verdict::tet_minimum_angle, 54.735610317 },
       /* 11 */ { verdict::tet_collapse_ratio, 0.40824829046 },
-      /* 12 */ { verdict::tet_equivolume_skew, 0.5 }
+      /* 12 */ { verdict::tet_equivolume_skew, 0.5 },
+      /* 13 */ { verdict::tet_normalized_inradius, 0.0 }
     },
     4,
     {
@@ -710,7 +711,8 @@ TEST(verdict, tet_test2_singular)
       /*  9 */ { verdict::tet_aspect_frobenius, verdict::VERDICT_DBL_MAX },
       /* 10 */ { verdict::tet_minimum_angle, verdict::VERDICT_DBL_MAX },
       /* 11 */ { verdict::tet_collapse_ratio, verdict::VERDICT_DBL_MAX  },
-      /* 12 */ { verdict::tet_equivolume_skew, verdict::VERDICT_DBL_MAX }
+      /* 12 */ { verdict::tet_equivolume_skew, verdict::VERDICT_DBL_MAX },
+      /* 13 */ { verdict::tet_normalized_inradius, 0.0 }
     },
     4,
     {
@@ -724,6 +726,59 @@ TEST(verdict, tet_test2_singular)
   
   runtest(testcase);
 }
+
+TEST(verdict, tet10_test1)
+{
+  test_case testcase = {
+    "tet10_test1",
+    {
+      /* 0 */{ verdict::tet_distortion, 1 },
+      /* 1 */{ verdict::tet_normalized_inradius, 0.61401440738235424 },
+    },
+    10,
+    {
+      { -5, 5, 5 },
+      { -5, -5, -5 },
+      { 5, -5, 5 },
+      { -5, -5, 5 },
+      { -5, 0, 0 },
+      { 0, -5, 0 },
+      { 0, 0, 5 },
+      { -5, 0, 5 },
+      { -5, -5, 0 },
+      { 0, -5, 5 },
+    }
+  };
+  
+  runtest(testcase);
+}
+
+TEST(verdict, tet10_test2_singular)
+{
+  test_case testcase = {
+    "tet10_test2_singular",
+    {
+      /* 0 */{ verdict::tet_distortion, verdict::VERDICT_DBL_MAX },
+      /* 1 */{ verdict::tet_normalized_inradius, verdict::VERDICT_DBL_MAX },
+    },
+    10,
+    {
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+    }
+  };
+  
+  runtest(testcase);
+}
+
 TEST(verdict, hex_test1)
 {
   test_case testcase = {

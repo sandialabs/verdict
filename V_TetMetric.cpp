@@ -1541,7 +1541,8 @@ double tet10_normalized_inradius(double coordinates[][3] )
     double normalized_inradius_for_subtet_with_parent_node= 6.0*min_inradius_for_subtet_with_parent_node/outer_radius;
     double normalized_inradius_for_subtet_with_no_parent_node= three_1plusrt3*min_inradius_for_subtet_with_no_parent_node/outer_radius;
 
-    return std::min(normalized_inradius_for_subtet_with_parent_node,normalized_inradius_for_subtet_with_no_parent_node);
+    double norm_inrad = std::min(normalized_inradius_for_subtet_with_parent_node,normalized_inradius_for_subtet_with_no_parent_node);
+    return fix_range( norm_inrad );
 }
 
 double tet_normalized_inradius(int num_nodes, double coordinates[][3] )
