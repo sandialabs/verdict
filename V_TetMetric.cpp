@@ -1528,6 +1528,8 @@ double calculate_tet4_outer_radius(double coordinates[][3] )
 
     return outer_radius;
 }
+  
+
 
 double tet10_normalized_inradius(double coordinates[][3] )
 {
@@ -1544,13 +1546,36 @@ double tet10_normalized_inradius(double coordinates[][3] )
     double norm_inrad = std::min(normalized_inradius_for_subtet_with_parent_node,normalized_inradius_for_subtet_with_no_parent_node);
     return fix_range( norm_inrad );
 }
+  
+double tet4_normalized_inradius(double coordinates[][3] )
+{
+  double tet10_coords[10][3];
+  for (int i=0; i<4; i++)
+  {
+    tet10_coords[i][0] = coordinates[i][0];
+    tet10_coords[i][1] = coordinates[i][1];
+    tet10_coords[i][2] = coordinates[i][2];
+  }
+  
+  static int eidx[6][2] = {{0,1},{1,2},{2,0},{0,3},{1,3},{2,3}};
+  for (int i=4; i<10; i++)
+  {
+    int i0 = eidx[i-4][0];
+    int i1 = eidx[i-4][1];
+    tet10_coords[i][0] = (coordinates[i0][0] + coordinates[i1][0]) * 0.5;
+    tet10_coords[i][1] = (coordinates[i0][1] + coordinates[i1][1]) * 0.5;
+    tet10_coords[i][2] = (coordinates[i0][2] + coordinates[i1][2]) * 0.5;
+  }
+  return tet10_normalized_inradius(tet10_coords);
+}
 
 double tet_normalized_inradius(int num_nodes, double coordinates[][3] )
 {
-    if(num_nodes<10)
-        return 0;
-
+  if(num_nodes==4)
+    return tet4_normalized_inradius(coordinates);
+  else if(num_nodes==10)
     return tet10_normalized_inradius(coordinates);
+  return 0.0;
 }
 
 double tet_mean_ratio( int num_nodes, double coordinates[][3] )
