@@ -680,7 +680,7 @@ TEST(verdict, tet_test1)
       /* 10 */ { verdict::tet_minimum_angle, 54.735610317 },
       /* 11 */ { verdict::tet_collapse_ratio, 0.40824829046 },
       /* 12 */ { verdict::tet_equivolume_skew, 0.5 },
-      /* 13 */ { verdict::tet_normalized_inradius, 0.0 }
+      /* 13 */ { verdict::tet_normalized_inradius, 0.61401440738235424 }
     },
     4,
     {
@@ -712,7 +712,7 @@ TEST(verdict, tet_test2_singular)
       /* 10 */ { verdict::tet_minimum_angle, verdict::VERDICT_DBL_MAX },
       /* 11 */ { verdict::tet_collapse_ratio, verdict::VERDICT_DBL_MAX  },
       /* 12 */ { verdict::tet_equivolume_skew, verdict::VERDICT_DBL_MAX },
-      /* 13 */ { verdict::tet_normalized_inradius, 0.0 }
+      /* 13 */ { verdict::tet_normalized_inradius, verdict::VERDICT_DBL_MAX }
     },
     4,
     {
