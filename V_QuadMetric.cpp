@@ -1285,181 +1285,181 @@ double quad_distortion( int num_nodes, double coordinates[][3] )
   // parent area = 4 for a quad.
   // min |J| is the minimum over nodes and gaussian integration points
   // created by Ling Pan, CAT on 4/30/01
-
+  
   double element_area =0.0,distrt,thickness_gauss;
   double cur_jacobian=0., sign_jacobian, jacobian ;
   VerdictVector  aa, bb, cc,normal_at_point, xin;
-
-
+  
+  
   //use 2x2 gauss points for linear quads and 3x3 for 2nd order quads
   int number_of_gauss_points = 0;
   if ( num_nodes == 4 )
-    { //2x2 quadrature rule
+  { //2x2 quadrature rule
     number_of_gauss_points = 2;
-    }
+  }
   else if ( num_nodes == 8 )
-    { //3x3 quadrature rule
+  { //3x3 quadrature rule
     number_of_gauss_points = 3;
-    }
-
-
+  }
+  
+  
   int total_number_of_gauss_points = number_of_gauss_points*number_of_gauss_points;
-
+  
   VerdictVector face_normal = quad_normal( coordinates );
-
+  
   double distortion = VERDICT_DBL_MAX;
-
+  
   VerdictVector first, second;
-
+  
   int i;
   //Will work out the case for collapsed quad later
   if ( is_collapsed_quad( coordinates ) == VERDICT_TRUE )
-    {
+  {
     for (  i=0; i<3; i++ )
-      {
-
+    {
+      
       first.set( coordinates[i][0] - coordinates[(i+1)%3][0],
-        coordinates[i][1] - coordinates[(i+1)%3][1],
-        coordinates[i][2] - coordinates[(i+1)%3][2] );
-
+                coordinates[i][1] - coordinates[(i+1)%3][1],
+                coordinates[i][2] - coordinates[(i+1)%3][2] );
+      
       second.set( coordinates[i][0] - coordinates[(i+2)%3][0],
-        coordinates[i][1] - coordinates[(i+2)%3][1],
-        coordinates[i][2] - coordinates[(i+2)%3][2] );
-
+                 coordinates[i][1] - coordinates[(i+2)%3][1],
+                 coordinates[i][2] - coordinates[(i+2)%3][2] );
+      
       sign_jacobian = (face_normal % ( first * second )) > 0? 1.:-1.;
       cur_jacobian = sign_jacobian*(first * second).length();
       distortion = std::min(distortion, cur_jacobian);
-      }
+    }
     element_area = (first*second).length()/2.0;
     distortion /= element_area;
-    }
+  }
   else
-    {
+  {
     double shape_function[maxTotalNumberGaussPoints][maxNumberNodes];
     double dndy1[maxTotalNumberGaussPoints][maxNumberNodes];
     double dndy2[maxTotalNumberGaussPoints][maxNumberNodes];
     double weight[maxTotalNumberGaussPoints];
-
+    
     //create an object of GaussIntegration
     GaussIntegration gint;
     gint.initialize(number_of_gauss_points,num_nodes );
     gint.calculate_shape_function_2d_quad();
     gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], weight);
-
+    
     // calculate element area
     int ife,ja;
     for ( ife=0;ife<total_number_of_gauss_points; ife++)
-      {
+    {
       aa.set(0.0,0.0,0.0);
       bb.set(0.0,0.0,0.0);
-
+      
       for (ja=0;ja<num_nodes;ja++)
-        {
+      {
         xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
         aa += dndy1[ife][ja]*xin;
         bb += dndy2[ife][ja]*xin;
-        }
+      }
       normal_at_point = aa*bb;
       jacobian = normal_at_point.length();
       element_area += weight[ife]*jacobian;
-      }
-
-
+    }
+    
+    
     double dndy1_at_node[maxNumberNodes][maxNumberNodes];
     double dndy2_at_node[maxNumberNodes][maxNumberNodes];
-
+    
     gint.calculate_derivative_at_nodes( dndy1_at_node,  dndy2_at_node);
-
+    
     VerdictVector normal_at_nodes[9];
-
-
+    
+    
     //evaluate normal at nodes and distortion values at nodes
     int jai;
     for (ja =0; ja<num_nodes; ja++)
-      {
+    {
       aa.set(0.0,0.0,0.0);
       bb.set(0.0,0.0,0.0);
       for (jai =0; jai<num_nodes; jai++)
-        {
+      {
         xin.set(coordinates[jai][0], coordinates[jai][1], coordinates[jai][2]);
         aa += dndy1_at_node[ja][jai]*xin;
         bb += dndy2_at_node[ja][jai]*xin;
-        }
+      }
       normal_at_nodes[ja] = aa*bb;
       normal_at_nodes[ja].normalize();
-
-      }
-
+      
+    }
+    
     //determine if element is flat
     bool flat_element =true;
     double dot_product;
-
+    
     for ( ja=0; ja<num_nodes;ja++)
-      {
+    {
       dot_product = normal_at_nodes[0]%normal_at_nodes[ja];
       if (fabs(dot_product) <0.99)
-        {
+      {
         flat_element = false;
         break;
-        }
       }
-
+    }
+    
     // take into consideration of the thickness of the element
     double thickness;
     //get_quad_thickness(face, element_area, thickness );
     thickness = 0.001*sqrt(element_area);
-
+    
     //set thickness gauss point location
     double zl = 0.5773502691896;
     if (flat_element) zl =0.0;
-
+    
     int no_gauss_pts_z = (flat_element)? 1 : 2;
     double thickness_z;
     int igz;
     //loop on Gauss points
     for (ife=0;ife<total_number_of_gauss_points;ife++)
-      {
+    {
       //loop on the thickness direction gauss points
       for ( igz=0;igz<no_gauss_pts_z;igz++)
-        {
+      {
         zl = -zl;
         thickness_z = zl*thickness/2.0;
-
+        
         aa.set(0.0,0.0,0.0);
         bb.set(0.0,0.0,0.0);
         cc.set(0.0,0.0,0.0);
-
+        
         for (ja=0;ja<num_nodes;ja++)
-          {
+        {
           xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
           xin += thickness_z*normal_at_nodes[ja];
           aa  += dndy1[ife][ja]*xin;
           bb  += dndy2[ife][ja]*xin;
           thickness_gauss = shape_function[ife][ja]*thickness/2.0;
           cc  += thickness_gauss*normal_at_nodes[ja];
-          }
-
+        }
+        
         normal_at_point = aa*bb;
         jacobian = normal_at_point.length();
         distrt = cc%normal_at_point;
         if (distrt < distortion) distortion = distrt;
-        }
       }
-
+    }
+    
     //loop through nodal points
     for ( ja =0; ja<num_nodes; ja++)
-      {
+    {
       for ( igz=0;igz<no_gauss_pts_z;igz++)
-        {
+      {
         zl = -zl;
         thickness_z = zl*thickness/2.0;
-
+        
         aa.set(0.0,0.0,0.0);
         bb.set(0.0,0.0,0.0);
         cc.set(0.0,0.0,0.0);
-
+        
         for ( jai =0; jai<num_nodes; jai++)
-          {
+        {
           xin.set(coordinates[jai][0], coordinates[jai][1], coordinates[jai][2]);
           xin += thickness_z*normal_at_nodes[ja];
           aa += dndy1_at_node[ja][jai]*xin;
@@ -1469,23 +1469,23 @@ double quad_distortion( int num_nodes, double coordinates[][3] )
           else
             thickness_gauss = 0.;
           cc  += thickness_gauss*normal_at_nodes[jai];
-          }
-
         }
+        
+      }
       normal_at_point = aa*bb;
       sign_jacobian = (face_normal % normal_at_point) > 0 ? 1. : -1.;
       distrt = sign_jacobian * (cc % normal_at_point);
-
+      
       if (distrt < distortion) distortion = distrt;
-      }
-
+    }
+    
     if ( element_area * thickness != 0 )
       distortion *= 8. / ( element_area * thickness );
     else
       distortion *= 8.;
-
-    }
-
+    
+  }
+  
   return (double)distortion;
 }
 
