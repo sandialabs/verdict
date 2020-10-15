@@ -49,12 +49,12 @@ void runtest(test_case &this_testcase)
   {
     itest++;
     
-    // list the current subcase, otherwise there is no way to tell which metric failed
-    std::cout << "Test case \"" << testname << "\" #" << itest << std::endl;
-    
     // Compute the answer from the verdict library
     const double calculated_answer = data.mFunction(num_nodes, this_testcase.mCoords);
     const double expected_answer = data.mAnswer;
+    
+    // list the current subcase, otherwise there is no way to tell which metric failed
+    std::cout << "Test case \"" << testname << "\" #" << itest << " Calculated = " << calculated_answer << " Expected = " << expected_answer << std::endl;
     
     EXPECT_NEAR( calculated_answer, expected_answer, fabs(expected_answer) * VERDICT_RELATIVE_TOL + VERDICT_ABSOLUTE_TOL );
 
@@ -426,7 +426,8 @@ TEST(verdict, tri_simple)
       { verdict::tri_shape, 1.0 },
       /*  8 */ { verdict::tri_edge_ratio, 1},
       /*  9 */ { verdict::tri_aspect_frobenius, 1},
-      /* 10 */ { verdict::tri_equiangle_skew, 1.8069363487e-09}
+      /* 10 */ { verdict::tri_equiangle_skew, 1.8069363487e-09},
+      /* 11 */ { verdict::tri_normalized_inradius, 1.0}
     },
     3,
     {
@@ -453,7 +454,8 @@ TEST(verdict, tri_singular)
       { verdict::tri_shape, 1 },
       /*  8 */ { verdict::tri_edge_ratio, 1},
       /*  9 */ { verdict::tri_aspect_frobenius, 1},
-      /* 10 */ { verdict::tri_equiangle_skew, 4.0316550098e-11}
+      /* 10 */ { verdict::tri_equiangle_skew, 4.0316550098e-11},
+      /* 11 */ { verdict::tri_normalized_inradius, 1.0}
     },
     3,
     {
@@ -480,7 +482,8 @@ TEST(verdict, tri_six_nodes)
       { verdict::tri_shape, 0.89498424344 },
       /*  8 */ { verdict::tri_edge_ratio, 1.4005493428},
       /*  9 */ { verdict::tri_aspect_frobenius, 1.1173381066},
-      /* 10 */ { verdict::tri_equiangle_skew, 0.24322035270}
+      /* 10 */ { verdict::tri_equiangle_skew, 0.24322035270},
+      /* 11 */ { verdict::tri_normalized_inradius, 0.603527}
     },
     6,
     {
