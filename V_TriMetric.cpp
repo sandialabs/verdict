@@ -638,192 +638,301 @@ TODO:  make a short definition of the distortion and comment below
 */
 double tri_distortion( int num_nodes, double coordinates[][3] )
 {
-
-   double distortion;
-   int total_number_of_gauss_points=0;
-   VerdictVector  aa, bb, cc,normal_at_point, xin;
-   double element_area = 0.;
-
-   aa.set(coordinates[1][0] - coordinates[0][0], 
-    coordinates[1][1] - coordinates[0][1],
-    coordinates[1][2] - coordinates[0][2] );
   
-   bb.set(coordinates[2][0] - coordinates[0][0], 
-    coordinates[2][1] - coordinates[0][1],
-    coordinates[2][2] - coordinates[0][2] );
+  double distortion;
+  int total_number_of_gauss_points=0;
+  VerdictVector  aa, bb, cc,normal_at_point, xin;
+  double element_area = 0.;
   
-
-   VerdictVector tri_normal = aa * bb;
- 
-   int number_of_gauss_points=0;
-   if (num_nodes ==3)
-   {
-      distortion = 1.0;
-      return (double)distortion;
-   }
-   
-   else if (num_nodes ==6)
-   {
-      total_number_of_gauss_points = 6;
-      number_of_gauss_points = 6;
-   }
-
-   distortion = VERDICT_DBL_MAX;
-   double shape_function[maxTotalNumberGaussPoints][maxNumberNodes];
-   double dndy1[maxTotalNumberGaussPoints][maxNumberNodes];
-   double dndy2[maxTotalNumberGaussPoints][maxNumberNodes];
-   double weight[maxTotalNumberGaussPoints];
-
-   //create an object of GaussIntegration
-   int number_dims = 2;
-   int is_tri = 1;
-   GaussIntegration gint;
-   gint.initialize(number_of_gauss_points,num_nodes, number_dims, is_tri);
-   gint.calculate_shape_function_2d_tri();
-   gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], weight);
-
-         // calculate element area
-   int ife, ja;
-   for (ife=0;ife<total_number_of_gauss_points; ife++)
-   {
+  aa.set(coordinates[1][0] - coordinates[0][0],
+         coordinates[1][1] - coordinates[0][1],
+         coordinates[1][2] - coordinates[0][2] );
+  
+  bb.set(coordinates[2][0] - coordinates[0][0],
+         coordinates[2][1] - coordinates[0][1],
+         coordinates[2][2] - coordinates[0][2] );
+  
+  
+  VerdictVector tri_normal = aa * bb;
+  
+  int number_of_gauss_points=0;
+  if (num_nodes ==3)
+  {
+    distortion = 1.0;
+    return (double)distortion;
+  }
+  
+  else if (num_nodes ==6)
+  {
+    total_number_of_gauss_points = 6;
+    number_of_gauss_points = 6;
+  }
+  
+  distortion = VERDICT_DBL_MAX;
+  double shape_function[maxTotalNumberGaussPoints][maxNumberNodes];
+  double dndy1[maxTotalNumberGaussPoints][maxNumberNodes];
+  double dndy2[maxTotalNumberGaussPoints][maxNumberNodes];
+  double weight[maxTotalNumberGaussPoints];
+  
+  //create an object of GaussIntegration
+  int number_dims = 2;
+  int is_tri = 1;
+  GaussIntegration gint;
+  gint.initialize(number_of_gauss_points,num_nodes, number_dims, is_tri);
+  gint.calculate_shape_function_2d_tri();
+  gint.get_shape_func(shape_function[0], dndy1[0], dndy2[0], weight);
+  
+  // calculate element area
+  int ife, ja;
+  for (ife=0;ife<total_number_of_gauss_points; ife++)
+  {
+    aa.set(0.0,0.0,0.0);
+    bb.set(0.0,0.0,0.0);
+    
+    for (ja=0;ja<num_nodes;ja++)
+    {
+      xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
+      aa += dndy1[ife][ja]*xin;
+      bb += dndy2[ife][ja]*xin;
+    }
+    normal_at_point = aa*bb;
+    double jacobian = normal_at_point.length();
+    element_area += weight[ife]*jacobian;
+  }
+  
+  element_area *= 0.8660254;
+  double dndy1_at_node[maxNumberNodes][maxNumberNodes];
+  double dndy2_at_node[maxNumberNodes][maxNumberNodes];
+  
+  
+  gint.calculate_derivative_at_nodes_2d_tri( dndy1_at_node,  dndy2_at_node);
+  
+  VerdictVector normal_at_nodes[7];
+  
+  
+  
+  //evaluate normal at nodes and distortion values at nodes
+  int  jai=0;
+  for (ja =0; ja<num_nodes; ja++)
+  {
+    aa.set(0.0,0.0,0.0);
+    bb.set(0.0,0.0,0.0);
+    for (jai =0; jai<num_nodes; jai++)
+    {
+      xin.set(coordinates[jai][0], coordinates[jai][1], coordinates[jai][2]);
+      aa += dndy1_at_node[ja][jai]*xin;
+      bb += dndy2_at_node[ja][jai]*xin;
+    }
+    normal_at_nodes[ja] = aa*bb;
+    normal_at_nodes[ja].normalize();
+  }
+  
+  //determine if element is flat
+  bool flat_element =true;
+  double dot_product;
+  
+  for ( ja=0; ja<num_nodes;ja++)
+  {
+    dot_product = normal_at_nodes[0]%normal_at_nodes[ja];
+    if (fabs(dot_product) <0.99)
+    {
+      flat_element = false;
+      break;
+    }
+  }
+  
+  // take into consideration of the thickness of the element
+  double thickness, thickness_gauss;
+  double distrt;
+  //get_tri_thickness(tri, element_area, thickness );
+  thickness = 0.001*sqrt(element_area);
+  
+  //set thickness gauss point location
+  double zl = 0.5773502691896;
+  if (flat_element) zl =0.0;
+  
+  int no_gauss_pts_z = (flat_element)? 1 : 2;
+  double thickness_z;
+  
+  //loop on integration points
+  int igz;
+  for (ife=0;ife<total_number_of_gauss_points;ife++)
+  {
+    //loop on the thickness direction gauss points
+    for (igz=0;igz<no_gauss_pts_z;igz++)
+    {
+      zl = -zl;
+      thickness_z = zl*thickness/2.0;
+      
       aa.set(0.0,0.0,0.0);
       bb.set(0.0,0.0,0.0);
-
+      cc.set(0.0,0.0,0.0);
+      
       for (ja=0;ja<num_nodes;ja++)
       {
-         xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
-         aa += dndy1[ife][ja]*xin;
-         bb += dndy2[ife][ja]*xin;
+        xin.set(coordinates[ja][0], coordinates[ja][1], coordinates[ja][2]);
+        xin += thickness_z*normal_at_nodes[ja];
+        aa  += dndy1[ife][ja]*xin;
+        bb  += dndy2[ife][ja]*xin;
+        thickness_gauss = shape_function[ife][ja]*thickness/2.0;
+        cc  += thickness_gauss*normal_at_nodes[ja];
       }
-         normal_at_point = aa*bb;
-         double jacobian = normal_at_point.length();
-         element_area += weight[ife]*jacobian;
-   }
-
-   element_area *= 0.8660254;
-   double dndy1_at_node[maxNumberNodes][maxNumberNodes];
-   double dndy2_at_node[maxNumberNodes][maxNumberNodes];
-
-
-   gint.calculate_derivative_at_nodes_2d_tri( dndy1_at_node,  dndy2_at_node);
-
-   VerdictVector normal_at_nodes[7];
-
-
-
-   //evaluate normal at nodes and distortion values at nodes
-   int  jai=0;
-   for (ja =0; ja<num_nodes; ja++)
-   {
+      
+      normal_at_point = aa*bb;
+      distrt = cc%normal_at_point;
+      if (distrt < distortion) distortion = distrt;
+    }
+  }
+  
+  //loop through nodal points
+  for ( ja =0; ja<num_nodes; ja++)
+  {
+    for ( igz=0;igz<no_gauss_pts_z;igz++)
+    {
+      zl = -zl;
+      thickness_z = zl*thickness/2.0;
+      
       aa.set(0.0,0.0,0.0);
       bb.set(0.0,0.0,0.0);
-      for (jai =0; jai<num_nodes; jai++)
+      cc.set(0.0,0.0,0.0);
+      
+      for ( jai =0; jai<num_nodes; jai++)
       {
-         xin.set(coordinates[jai][0], coordinates[jai][1], coordinates[jai][2]);
-         aa += dndy1_at_node[ja][jai]*xin;
-         bb += dndy2_at_node[ja][jai]*xin;
+        xin.set(coordinates[jai][0], coordinates[jai][1], coordinates[jai][2]);
+        xin += thickness_z*normal_at_nodes[ja];
+        aa += dndy1_at_node[ja][jai]*xin;
+        bb += dndy2_at_node[ja][jai]*xin;
+        if (jai == ja)
+          thickness_gauss = thickness/2.0;
+        else
+          thickness_gauss = 0.;
+        cc  += thickness_gauss*normal_at_nodes[jai];
       }
-      normal_at_nodes[ja] = aa*bb;
-      normal_at_nodes[ja].normalize();
-   }
-
-   //determine if element is flat
-   bool flat_element =true;
-   double dot_product;
-
-   for ( ja=0; ja<num_nodes;ja++)
-   {
-      dot_product = normal_at_nodes[0]%normal_at_nodes[ja];
-      if (fabs(dot_product) <0.99)
-      {
-         flat_element = false;
-         break;
-      }
-   }
-
-   // take into consideration of the thickness of the element
-   double thickness, thickness_gauss;
-   double distrt;
-   //get_tri_thickness(tri, element_area, thickness );
-     thickness = 0.001*sqrt(element_area);
-
-   //set thickness gauss point location
-   double zl = 0.5773502691896;
-   if (flat_element) zl =0.0;
-
-   int no_gauss_pts_z = (flat_element)? 1 : 2;
-   double thickness_z;
-
-   //loop on integration points
-   int igz;
-   for (ife=0;ife<total_number_of_gauss_points;ife++)
-   {
-      //loop on the thickness direction gauss points
-      for (igz=0;igz<no_gauss_pts_z;igz++)
-      {
-  zl = -zl;
-         thickness_z = zl*thickness/2.0;
-
-         aa.set(0.0,0.0,0.0);
-         bb.set(0.0,0.0,0.0);
-         cc.set(0.0,0.0,0.0);
-
-         for (ja=0;ja<num_nodes;ja++)
-         {
-            xin.set(coordinates[jai][0], coordinates[jai][1], coordinates[jai][2]);
-            xin += thickness_z*normal_at_nodes[ja];
-            aa  += dndy1[ife][ja]*xin;
-            bb  += dndy2[ife][ja]*xin;
-            thickness_gauss = shape_function[ife][ja]*thickness/2.0;
-            cc  += thickness_gauss*normal_at_nodes[ja];
-         }
-
-         normal_at_point = aa*bb;
-         distrt = cc%normal_at_point;
-         if (distrt < distortion) distortion = distrt;
-      }
-   }
-
-   //loop through nodal points
-   for ( ja =0; ja<num_nodes; ja++)
-   {
-      for ( igz=0;igz<no_gauss_pts_z;igz++)
-      {
-         zl = -zl;
-         thickness_z = zl*thickness/2.0;
-
-         aa.set(0.0,0.0,0.0);
-         bb.set(0.0,0.0,0.0);
-         cc.set(0.0,0.0,0.0);
-
-         for ( jai =0; jai<num_nodes; jai++)
-         {
-            xin.set(coordinates[jai][0], coordinates[jai][1], coordinates[jai][2]);
-            xin += thickness_z*normal_at_nodes[ja];
-            aa += dndy1_at_node[ja][jai]*xin;
-            bb += dndy2_at_node[ja][jai]*xin;
-            if (jai == ja)
-               thickness_gauss = thickness/2.0;
-            else
-               thickness_gauss = 0.;
-            cc  += thickness_gauss*normal_at_nodes[jai];
-         }
-      }
-
-      normal_at_point = aa*bb;
-      double sign_jacobian = (tri_normal % normal_at_point) > 0? 1.:-1.;
-      distrt = sign_jacobian  * (cc%normal_at_point);
-
-      if (distrt < distortion) distortion = distrt;
-   }     
-   if (element_area*thickness !=0)
-      distortion *=1./( element_area*thickness);
-   else
-      distortion *=1.;
-   
+    }
+    
+    normal_at_point = aa*bb;
+    double sign_jacobian = (tri_normal % normal_at_point) > 0? 1.:-1.;
+    distrt = sign_jacobian  * (cc%normal_at_point);
+    
+    if (distrt < distortion) distortion = distrt;
+  }
+  if (element_area*thickness !=0)
+    distortion *=1./( element_area*thickness);
+  else
+    distortion *=1.;
+  
   if( distortion > 0 )
     return (double) std::min( distortion, VERDICT_DBL_MAX );
   return (double) std::max( distortion, -VERDICT_DBL_MAX );
+}
+
+double tri_inradius(double coordinates[][3])
+{
+  double sp = 0.0;
+  VerdictVector sides[3];
+  for (int i=0; i<3; i++)
+  {
+    int j = (i+1)%3;
+    sides[i].set(coordinates[j][0] - coordinates[i][0],
+                 coordinates[j][1] - coordinates[i][1],
+                 coordinates[j][2] - coordinates[i][2]);
+    sp += sides[i].length();
+  }
+  sp /= 2.0;
+  
+  VerdictVector cross = sides[1] * sides[0];
+  double area = cross.length() / 2.0;
+  
+  double ir = area/sp;
+  return ir;
+}
+  
+double tri6_min_inradius(double coordinates[][3])
+{
+  static int SUBTRI_NODES[4][3] = {{0,3,5}, {3,1,4}, {5,4,2}, {3,4,5}};
+  double min_inrad = VERDICT_DBL_MAX;
+  for (int i=0; i<4; i++)
+  {
+    double subtri_coords[3][3];
+    for (int j=0; j<3; j++)
+    {
+      int idx = SUBTRI_NODES[i][j];
+      subtri_coords[j][0] = coordinates[idx][0];
+      subtri_coords[j][1] = coordinates[idx][1];
+      subtri_coords[j][2] = coordinates[idx][2];
+    }
+    double subtri_inrad = tri_inradius(subtri_coords);
+    if (subtri_inrad < min_inrad)
+      min_inrad = subtri_inrad;
+  }
+  return min_inrad;
+}
+  
+double calculate_tri3_outer_radius(double coordinates[][3])
+{
+  double sp = 0.0;
+  VerdictVector sides[3];
+  double slen[3];
+  for (int i=0; i<3; i++)
+  {
+    int j = (i+1)%3;
+    sides[i].set(coordinates[j][0] - coordinates[i][0],
+                 coordinates[j][1] - coordinates[i][1],
+                 coordinates[j][2] - coordinates[i][2]);
+    slen[i] = sides[i].length();
+    sp += slen[i];
+  }
+  sp /= 2.0;
+  
+  VerdictVector cross = sides[1] * sides[0];
+  double area = cross.length() / 2.0;
+  double ir = area/sp;
+  
+  double cr = (slen[0]*slen[1]*slen[2]) / (4.0 * ir * sp);
+  return cr;
+}
+  
+double tri6_normalized_inradius(double coordinates[][3] )
+{
+  double min_inradius_for_subtri = tri6_min_inradius(coordinates);
+  double outer_radius=calculate_tri3_outer_radius(coordinates);
+  double normalized_inradius = 4.0*min_inradius_for_subtri/outer_radius;
+  
+  return normalized_inradius;
+}
+  
+double tri3_normalized_inradius(double coordinates[][3] )
+{
+  double tri6_coords[6][3];
+  for (int i=0; i<3; i++)
+  {
+    tri6_coords[i][0] = coordinates[i][0];
+    tri6_coords[i][1] = coordinates[i][1];
+    tri6_coords[i][2] = coordinates[i][2];
+  }
+    
+  static int eidx[3][2] = {{0,1},{1,2},{2,0}};
+  for (int i=3; i<6; i++)
+  {
+    int i0 = eidx[i-3][0];
+    int i1 = eidx[i-3][1];
+    tri6_coords[i][0] = (coordinates[i0][0] + coordinates[i1][0]) * 0.5;
+    tri6_coords[i][1] = (coordinates[i0][1] + coordinates[i1][1]) * 0.5;
+    tri6_coords[i][2] = (coordinates[i0][2] + coordinates[i1][2]) * 0.5;
+  }
+  return tri6_normalized_inradius(tri6_coords);
+}
+
+  //! Calculates the minimum normalized inner radius of a tri6
+  /** Ratio of the minimum subtri inner radius to tri outer radius*/
+  /* Currently supports tri 6 and 3.*/
+double tri_normalized_inradius( int num_nodes, double coordinates[][3] )
+{
+  if(num_nodes==3)
+    return tri3_normalized_inradius(coordinates);
+  else if(num_nodes==6)
+    return tri6_normalized_inradius(coordinates);
+  return 0.0;
 }
 
 } // namespace verdict

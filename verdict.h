@@ -344,7 +344,7 @@ namespace VERDICT_NAMESPACE
 
     //! Calculates the minimum normalized inner radius of a tet
     /** Ratio of the minimum subtet inner radius to tet outer radius*/
-    /* Currently only supports tetra 10.*/
+    /* Currently supports tetra 10 and 4.*/
     VERDICT_EXPORT double tet_normalized_inradius(int num_nodes, double coordinates[][3] );
 
     //! Calculates tet shape metric.
@@ -683,6 +683,11 @@ namespace VERDICT_NAMESPACE
 
     //! Calculates triangle equiangle skew metric.
     VERDICT_EXPORT double tri_equiangle_skew( int num_nodes, double coordinates[][3] );
+  
+    //! Calculates the minimum normalized inner radius of a high order triangle
+    /** Ratio of the minimum subtet inner radius to tet outer radius*/
+    /* Currently supports tri 6 and 3.*/
+    VERDICT_EXPORT double tri_normalized_inradius(int num_nodes, double coordinates[][3] );
 
 } // namespace verdict
 
