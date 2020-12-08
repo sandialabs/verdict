@@ -25,6 +25,7 @@
 #include "verdict_defines.hpp"
 #include <memory.h>
 #include <vector>
+#include <array>
 #include <algorithm>
 
 static const double SQRT2_HALVES = sqrt(2.0)/2.0;
@@ -207,13 +208,13 @@ double pyramid_scaled_jacobian( int num_nodes, double coordinates[][3] )
 
   make_pyramid_tets(coordinates, tet1_coords, tet2_coords, tet3_coords, tet4_coords);
 
-  std::vector<double> scaled_jacob(4);
+  std::array<double,4> scaled_jacob;
   scaled_jacob[0] = tet_scaled_jacobian(4, tet1_coords);
   scaled_jacob[1] = tet_scaled_jacobian(4, tet2_coords);
   scaled_jacob[2] = tet_scaled_jacobian(4, tet3_coords);
   scaled_jacob[3] = tet_scaled_jacobian(4, tet4_coords);
 
-  std::vector<double>::iterator iter = std::min_element(scaled_jacob.begin(), scaled_jacob.end());
+  auto iter = std::min_element(scaled_jacob.begin(), scaled_jacob.end());
 
   // scale the minimum scaled jacobian so that a perfect pyramid has
   // a value of 1 and cap it to make sure it is not > 1.0 or < 0.0
