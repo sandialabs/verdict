@@ -1573,7 +1573,7 @@ double tet_normalized_inradius(int num_nodes, double coordinates[][3] )
 {
   if(num_nodes==4)
     return tet4_normalized_inradius(coordinates);
-  else if(num_nodes==10)
+  else if(num_nodes>=10)
     return tet10_normalized_inradius(coordinates);
   return 0.0;
 }
