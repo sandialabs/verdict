@@ -1045,26 +1045,200 @@ double calculate_tet_volume_using_sides(const VerdictVector &side0, const Verdic
 
   1/6 * jacobian at a corner node
 */
-double tet_volume( int /*num_nodes*/, double coordinates[][3] )
+double tet_volume( int num_nodes, double coordinates[][3] )
 {
-
   //Determine side vectors
   VerdictVector side0, side2, side3;
+  if (4 == num_nodes)
+  {
+    side2.set(coordinates[1][0] - coordinates[0][0],
+              coordinates[1][1] - coordinates[0][1],
+              coordinates[1][2] - coordinates[0][2]);
 
-  side0.set( coordinates[1][0] - coordinates[0][0],
-             coordinates[1][1] - coordinates[0][1],
-             coordinates[1][2] - coordinates[0][2] );
+    side0.set(coordinates[2][0] - coordinates[0][0],
+              coordinates[2][1] - coordinates[0][1],
+              coordinates[2][2] - coordinates[0][2]);
 
-  side2.set( coordinates[0][0] - coordinates[2][0],
-             coordinates[0][1] - coordinates[2][1],
-             coordinates[0][2] - coordinates[2][2] );
+    side3.set(coordinates[3][0] - coordinates[0][0],
+              coordinates[3][1] - coordinates[0][1],
+              coordinates[3][2] - coordinates[0][2]);
+    return  calculate_tet_volume_using_sides(side0, side2, side3);
+  }
+  else
+  {   
+    VerdictVector tet_pts[15];
 
-  side3.set( coordinates[3][0] - coordinates[0][0],
-             coordinates[3][1] - coordinates[0][1],
-             coordinates[3][2] - coordinates[0][2] );
+    //create a vector for each point
+    for (int k = 0; k < num_nodes; k++)    
+      tet_pts[k].set(coordinates[k][0], coordinates[k][1], coordinates[k][2]);    
 
-  return  calculate_tet_volume_using_sides(side0, side2, side3);
+    //determine center point of the higher-order nodes      
+    VerdictVector centroid(0, 0, 0);
+    for( int k=4; k<num_nodes; k++ )
+      centroid += VerdictVector(coordinates[k][0], coordinates[k][1], coordinates[k][2]);
+    centroid /= (num_nodes - 4);
 
+    if (8 == num_nodes)
+    {
+      double tet_volume = 0;
+
+      int tet_face_conn[4][4] = 
+      {
+        {0,2,1,4},
+        {0,1,3,7},
+        {1,2,3,5},
+        {0,3,2,6}
+      };
+
+      for (int i = 0; i<4; i++)
+      {        
+        VerdictVector &node0 = tet_pts[tet_face_conn[i][0]];
+        VerdictVector &node1 = tet_pts[tet_face_conn[i][1]];
+        VerdictVector &node2 = tet_pts[tet_face_conn[i][2]];
+        VerdictVector &node3 = tet_pts[tet_face_conn[i][3]];
+
+        //012
+        side2 = node3 - node0;
+        side0 = node1 - node0;
+        side3 = centroid - node0;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);
+
+        //123
+        side2 = node3 - node1;
+        side0 = node2 - node1;
+        side3 = centroid - node1;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);
+
+        //032
+        side2 = node2 - node0;
+        side0 = node3 - node0;
+        side3 = centroid - node0;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);
+      }
+
+      return tet_volume;
+    }
+    if (10 == num_nodes)
+    {
+      double tet_volume = 0;
+
+      int tet_face_conn[4][6] = 
+      {
+        {0,2,1,6,5,4},
+        {0,1,3,4,8,7},
+        {1,2,3,5,9,8},
+        {0,3,2,7,9,6}
+      };
+
+      for (int i = 0; i<4; i++)
+      {        
+        VerdictVector &node0 = tet_pts[tet_face_conn[i][0]];
+        VerdictVector &node1 = tet_pts[tet_face_conn[i][1]];
+        VerdictVector &node2 = tet_pts[tet_face_conn[i][2]];
+        VerdictVector &node3 = tet_pts[tet_face_conn[i][3]];
+        VerdictVector &node4 = tet_pts[tet_face_conn[i][4]];
+        VerdictVector &node5 = tet_pts[tet_face_conn[i][5]];
+
+        //053
+        side2 = node5 - node0;
+        side0 = node3 - node0;
+        side3 = centroid - node0;
+        double tmp_vol = 0;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
+
+        //134
+        side2 = node3 - node1;
+        side0 = node4 - node1;
+        side3 = centroid - node1;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
+
+        //254
+        side2 = node4 - node2;
+        side0 = node5 - node2;
+        side3 = centroid - node2;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
+
+        //345
+        side2 = node5 - node3;
+        side0 = node4 - node3;
+        side3 = centroid - node3;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);
+      }
+
+      return tet_volume;
+    }
+    if ( num_nodes >= 14)
+    {
+      double tet_volume = 0;
+
+      int tet_face_conn[4][7] = 
+      {
+        {0,3,2,7,9,6,12},
+        {0,2,1,6,5,4,10},
+        {0,1,3,4,8,7,13},
+        {1,2,3,5,9,8,11}
+      };
+
+      if (num_nodes == 15)
+      {
+        tet_face_conn[0][6]++;
+        tet_face_conn[1][6]++;
+        tet_face_conn[2][6]++;
+        tet_face_conn[3][6]++;
+      }
+
+      for (int i = 0; i<4; i++)
+      {        
+        VerdictVector &node0 = tet_pts[tet_face_conn[i][0]];
+        VerdictVector &node1 = tet_pts[tet_face_conn[i][1]];
+        VerdictVector &node2 = tet_pts[tet_face_conn[i][2]];
+        VerdictVector &node3 = tet_pts[tet_face_conn[i][3]];
+        VerdictVector &node4 = tet_pts[tet_face_conn[i][4]];
+        VerdictVector &node5 = tet_pts[tet_face_conn[i][5]];
+        VerdictVector &node6 = tet_pts[tet_face_conn[i][6]];
+
+        //056
+        side2 = node5 - node0;
+        side0 = node6 - node0;
+        side3 = centroid - node0;
+        double tmp_vol = 0;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
+
+        //063
+        side2 = node6 - node0;
+        side0 = node3 - node0;
+        side3 = centroid - node0;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
+
+        //136
+        side2 = node3 - node1;
+        side0 = node6 - node1;
+        side3 = centroid - node1;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
+
+        //164
+        side2 = node6 - node1;
+        side0 = node4 - node1;
+        side3 = centroid - node1;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);
+        
+        //246
+        side2 = node4 - node2;
+        side0 = node6 - node2;
+        side3 = centroid - node2;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);
+        
+        //265
+        side2 = node6 - node2;
+        side0 = node5 - node2;
+        side3 = centroid - node2;
+        tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);
+      }
+
+      return tet_volume;
+    }
+  }
+  return 0;
 }
 
 /*!
