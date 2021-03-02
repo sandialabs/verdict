@@ -1143,7 +1143,6 @@ double tet_volume( int num_nodes, double coordinates[][3] )
         side2 = node5 - node0;
         side0 = node3 - node0;
         side3 = centroid - node0;
-        double tmp_vol = 0;
         tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
 
         //134
@@ -1201,7 +1200,6 @@ double tet_volume( int num_nodes, double coordinates[][3] )
         side2 = node5 - node0;
         side0 = node6 - node0;
         side3 = centroid - node0;
-        double tmp_vol = 0;
         tet_volume += calculate_tet_volume_using_sides(side0, side2, side3);        
 
         //063
