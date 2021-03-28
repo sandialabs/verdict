@@ -92,6 +92,130 @@ static const double HEX27_node_local_coord[27][3] =
   {0,1,0}
 };
 
+static int hex20_subtet_conn[36][4] =
+{
+  {0, 12, 8, 20},
+  {4, 16, 12, 20},
+  {16, 5, 13, 20},
+  {1, 8, 13, 20},
+  {8, 12, 16, 20},
+  {8, 16, 13, 20},
+  
+  {1, 13, 9, 20},
+  {5, 17, 13, 20},
+  {6, 14, 17, 20},
+  {2, 9, 14, 20},
+  {9, 17, 14, 20},
+  {9, 13, 17, 20},
+
+  {7, 15, 18, 20},
+  {3, 10, 15, 20},
+  {2, 14, 10, 20},
+  {6, 18, 14, 20},
+  {10, 18, 15, 20},
+  {10, 14, 18, 20},
+
+  {7, 19, 15, 20},
+  {4, 12, 19, 20},
+  {0, 11, 12, 20},
+  {3, 15, 11, 20},
+  {11, 19, 12, 20},
+  {11, 15, 19, 20},
+
+  {4, 19, 16, 20},
+  {5, 16, 17, 20},
+  {6, 17, 18, 20},
+  {7, 18, 19, 20},
+  {16, 18, 17, 20},
+  {16, 19, 18, 20},
+
+  {0, 8, 11, 20},
+  {8, 1, 9, 20},
+  {2, 10, 9, 20},
+  {3, 11, 10, 20},
+  {8, 9, 10, 20},
+  {8, 10, 11, 20}  
+};
+
+static int hex27_subtet_conn[48][4] =
+{
+  {0, 12, 8, 20},
+  {4, 16, 12, 20},
+  {16, 5, 13, 20},
+  {1, 8, 13, 20},
+  {25, 8, 12, 20},
+  {25, 12, 16, 20},
+  {25, 16, 13, 20},
+  {25, 13, 8, 20},  
+  
+  {1, 13, 9, 20},
+  {5, 17, 13, 20},
+  {6, 14, 17, 20},
+  {2, 9, 14, 20},  
+  {24, 9, 13, 20},
+  {24, 13, 17, 20},
+  {24, 17, 14, 20},
+  {24, 14, 9, 20},  
+
+  {7, 15, 18, 20},
+  {3, 10, 15, 20},
+  {2, 14, 10, 20},
+  {6, 18, 14, 20},
+  {26, 10, 14, 20},
+  {26, 14, 18, 20},
+  {26, 18, 15, 20},
+  {26, 15, 10, 20},
+
+  {7, 19, 15, 20},
+  {4, 12, 19, 20},
+  {0, 11, 12, 20},
+  {3, 15, 11, 20},
+  {23, 11, 15, 20},
+  {23, 15, 19, 20},
+  {23, 19, 12, 20},
+  {23, 12, 11, 20},
+
+  {4, 19, 16, 20},
+  {5, 16, 17, 20},
+  {6, 17, 18, 20},
+  {7, 18, 19, 20},
+  {22, 16, 19, 20},
+  {22, 19, 18, 20},
+  {22, 18, 17, 20},
+  {22, 17, 16, 20},
+
+  {0, 8, 11, 20},
+  {8, 1, 9, 20},
+  {2, 10, 9, 20},
+  {3, 11, 10, 20},
+  {21, 8, 9, 20},
+  {21, 9, 10, 20},  
+  {21, 10, 11, 20},
+  {21, 11, 8, 20}  
+};
+
+static double compute_tet_volume( VerdictVector &v1, VerdictVector &v2, VerdictVector &v3 )
+{
+  return  (double)((v3 % (v1*v2)) / 6.0);
+}
+
+//Compute interior node
+VerdictVector hex20_auxillary_node_coordinate(double coordinates[][3] )
+{
+    VerdictVector aux_node(0,0,0);
+    for( int i=0; i<8; i++ )
+    {
+      VerdictVector tmp_vec(
+        coordinates[i][0],
+        coordinates[i][1],
+        coordinates[i][2] );
+      aux_node += tmp_vec;
+    }
+    aux_node /= 6;
+
+    return aux_node;
+}
+
 static void HEX27_gradients_of_the_shape_functions_for_RST(const double rst[3], double dhdr[27],double dhds[27],double dhdt[27])
 {
   double g1r = -0.5 * rst[0] * (1 - rst[0]);
@@ -1091,62 +1215,104 @@ double hex_taper( int /*num_nodes*/, double coordinates[][3] )
   Split the hex into 24 tets.
   sum the volume of each tet.
 */
-double hex_volume( int /*num_nodes*/, double coordinates[][3] )
+double hex_volume( int num_nodes, double coordinates[][3] )
 {
+  double volume = 0.0;
 
-  VerdictVector node_pos[8];
-  make_hex_nodes ( coordinates, node_pos );
-
-  //define the nodes of each face of the hex
-  int faces[6][4]=
-  {
-    {0,1,5,4},
-    {1,2,6,5},
-    {2,3,7,6},
-    {3,0,4,7},
-    {3,2,1,0},
-    {4,5,6,7},
-  };
-
-  //calculate the center of each face
-  VerdictVector fcenter[6];
-  for(int f=0;f<6;f++)
-  {
-   fcenter[f]=(node_pos[faces[f][0]] + node_pos[faces[f][1]] + node_pos[faces[f][2]] + node_pos[faces[f][3]]) * 0.25;
-  }
-
-  //calculate the center of the hex
-  VerdictVector hcenter = (node_pos[0] + node_pos[1] + node_pos[2] + node_pos[3] +
-                         node_pos[4] + node_pos[5] + node_pos[6] + node_pos[7]) * 0.125;
-
-
-  double volume=0.0;
-  for(int i=0;i<6;i++)
-  {
-    //for each face calculate the vectors from the nodes and center of the face to the center of the hex.
-    //These vectors define three of the sides of the tets.
-    VerdictVector side[5];
-    side[4]=hcenter-fcenter[i];//vector from center of face to center of hex.
-    for(int s=0;s<4;s++)
+  if (num_nodes>9)
+  {    
+    int (*subtet_conn_array)[4];
+    int num_subtets = 0;
+    if (27 == num_nodes)
     {
-      side[s]=hcenter-node_pos[faces[i][s]];//vector from face node to center of hex.
+      num_subtets = 48;
+      subtet_conn_array = hex27_subtet_conn;
+    }
+    else if (20 == num_nodes)
+    {
+      num_subtets = 36;
+      subtet_conn_array = hex20_subtet_conn;
+    }
+    else
+      return 0.0;
+
+    VerdictVector aux_node = hex20_auxillary_node_coordinate(coordinates);
+
+    for (int k = 0; k < num_subtets; k++)
+    {
+      VerdictVector v1(
+        coordinates[subtet_conn_array[k][1]][0] - coordinates[subtet_conn_array[k][0]][0],
+        coordinates[subtet_conn_array[k][1]][1] - coordinates[subtet_conn_array[k][0]][1],
+        coordinates[subtet_conn_array[k][1]][2] - coordinates[subtet_conn_array[k][0]][2]);
+      
+      VerdictVector v2(
+        coordinates[subtet_conn_array[k][2]][0] - coordinates[subtet_conn_array[k][0]][0],
+        coordinates[subtet_conn_array[k][2]][1] - coordinates[subtet_conn_array[k][0]][1],
+        coordinates[subtet_conn_array[k][2]][2] - coordinates[subtet_conn_array[k][0]][2]);
+      
+      VerdictVector v3(
+        aux_node.x() - coordinates[subtet_conn_array[k][0]][0],
+        aux_node.y() - coordinates[subtet_conn_array[k][0]][1],
+        aux_node.z() - coordinates[subtet_conn_array[k][0]][2]);        
+
+      volume += compute_tet_volume( v1, v2, v3 );
+    }
+  }  
+  else
+  {
+
+    VerdictVector node_pos[8];
+    make_hex_nodes(coordinates, node_pos);
+
+    //define the nodes of each face of the hex
+    int faces[6][4] =
+    {
+      {0,1,5,4},
+      {1,2,6,5},
+      {2,3,7,6},
+      {3,0,4,7},
+      {3,2,1,0},
+      {4,5,6,7},
+    };
+
+    //calculate the center of each face
+    VerdictVector fcenter[6];
+    for (int f = 0; f < 6; f++)
+    {
+      fcenter[f] = (node_pos[faces[f][0]] + node_pos[faces[f][1]] + node_pos[faces[f][2]] + node_pos[faces[f][3]]) * 0.25;
     }
 
-    //for each of the four tets that originate from this face.
-    //calculate the volume of the tet.
-    //This is done by calculating the triple product of three vectors that originate from a corner node of the tet.
-    //This is also the jacobain at the corner node of the tet.
-    //The volume is 1/6 of jacobian at a corner node.
-    for(int j=0;j<3;j++)//first three tets
+    //calculate the center of the hex
+    VerdictVector hcenter = (node_pos[0] + node_pos[1] + node_pos[2] + node_pos[3] +
+      node_pos[4] + node_pos[5] + node_pos[6] + node_pos[7]) * 0.125;
+    
+    for (int i = 0; i < 6; i++)
     {
-      volume += (double)(VerdictVector::Dot(side[4], (side[j + 1] * side[j])) / 6.0);
+      //for each face calculate the vectors from the nodes and center of the face to the center of the hex.
+      //These vectors define three of the sides of the tets.
+      VerdictVector side[5];
+      side[4] = hcenter - fcenter[i];//vector from center of face to center of hex.
+      for (int s = 0; s < 4; s++)
+      {
+        side[s] = hcenter - node_pos[faces[i][s]];//vector from face node to center of hex.
+      }
+
+      //for each of the four tets that originate from this face.
+      //calculate the volume of the tet.
+      //This is done by calculating the triple product of three vectors that originate from a corner node of the tet.
+      //This is also the jacobain at the corner node of the tet.
+      //The volume is 1/6 of jacobian at a corner node.
+      for (int j = 0; j < 3; j++)//first three tets
+      {
+        volume += (double)(VerdictVector::Dot(side[4], (side[j + 1] * side[j])) / 6.0);
+      }
+      volume += (double)(VerdictVector::Dot(side[4], (side[0] * side[3])) / 6.0);//fourth tet.
     }
-    volume += (double)(VerdictVector::Dot(side[4], (side[0] * side[3])) / 6.0);//fourth tet.
   }
 
-  if ( volume > 0 )
-    return (double) std::min( volume, VERDICT_DBL_MAX );
-  return (double) std::max( volume, -VERDICT_DBL_MAX );
+  if (volume > 0)
+    return (double)std::min(volume, VERDICT_DBL_MAX);
+  return (double)std::max(volume, -VERDICT_DBL_MAX);
 }
 
 /*!
