@@ -275,13 +275,6 @@ namespace VERDICT_NAMESPACE
         quality measures, Finite Elem. Anal. Des., Vol 15(1993), 255-261. */ 
     VERDICT_EXPORT double tet_radius_ratio( int num_nodes, double coordinates[][3] );
 
-    //! Calculates the radius ratio metric of a positively oriented tet.
-    /** CR / (3.0 * IR)  where CR = circumsphere radius, IR = inscribed sphere radius
-        if the element is positively-oriented.
-        Reference ---  V. N. Parthasarathy et al, A comparison of tetrahedron 
-        quality measures, Finite Elem. Anal. Des., Vol 15(1993), 255-261. */ 
-    VERDICT_EXPORT double tet_aspect_beta( int num_nodes, double coordinates[][3] );
-
     //! Calculates tet aspect ratio metric.
     /**  Hmax / (2 sqrt(6) r) where Hmax and r respectively denote the greatest edge 
        length and the inradius of the tetrahedron
