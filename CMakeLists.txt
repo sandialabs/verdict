@@ -113,8 +113,6 @@ endif ()
 #
 install(FILES 
   README
-  Verdict.htm
-  Verdict.doc
   DESTINATION ${verdict_INSTALL_DOC_DIR}/verdict/${verdict_VERSION}/
   COMPONENT VerdictDevelopment
 )
