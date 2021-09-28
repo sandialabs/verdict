@@ -1,7 +1,9 @@
 /*=========================================================================
-  Copyright 2006 National Technology & Engineering Solutions of Sandia,
-  LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS,
-  the U.S. Government retains certain rights in this software.
+  
+  Module:    V_HexMetric.hpp
+
+  Copyright 2003,2006,2019 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
+  Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
 
   See LICENSE for details.
 
