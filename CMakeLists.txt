@@ -10,7 +10,7 @@ if(POLICY CMP0063)
 endif()
 
 set( verdict_MAJOR_VERSION "1")
-set( verdict_MINOR_VERSION "3")
+set( verdict_MINOR_VERSION "4")
 set( verdict_BUILD_VERSION "0")
 set( verdict_VERSION_FLAT "${verdict_MAJOR_VERSION}${verdict_MINOR_VERSION}${verdict_BUILD_VERSION}" )
 set( verdict_VERSION "${verdict_MAJOR_VERSION}.${verdict_MINOR_VERSION}.${verdict_BUILD_VERSION}" )
