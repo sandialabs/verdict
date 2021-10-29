@@ -131,5 +131,5 @@ install(TARGETS verdict EXPORT ${VERDICT_EXPORT_GROUP}
 export(EXPORT ${VERDICT_EXPORT_GROUP} FILE VerdictConfig.cmake)
 
 install(EXPORT ${VERDICT_EXPORT_GROUP} FILE VerdictConfig.cmake
-      DESTINATION cmake/Verdict COMPONENT VerdictDevelopment
+      DESTINATION cmake COMPONENT VerdictDevelopment
 )
