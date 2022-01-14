@@ -20,9 +20,10 @@
 #ifndef VERDICT_DEFINES
 #define VERDICT_DEFINES
 
-#include <math.h>
 #include "v_vector.h"
 #include "VerdictVector.hpp"
+
+#include <cmath>
 
 namespace VERDICT_NAMESPACE
 {
@@ -44,20 +45,6 @@ inline double determinant( VerdictVector v1,
   return VerdictVector::Dot(v1, (v2 * v3));
 }
 
-#define jacobian_matrix(a,b,c,d,e,f,g) \
-	double jac_mat_tmp; \
-	jac_mat_tmp = sqrt(a); \
-	if(jac_mat_tmp == 0) { d = 0; e = 0; f = 0; g = 0; } \
-	else { d = jac_mat_tmp; e = 0; f = b/jac_mat_tmp; g = c/jac_mat_tmp; }
-
-
-// this assumes that detmw != 0
-#define form_t(m11,m21,m12,m22,mw11,mw21,mw12,mw22,detmw,xm11,xm21,xm12,xm22) \
-	xm11= (m11*mw22-m12*mw21)/detmw; \
-	xm21= (m21*mw22-m22*mw21)/detmw; \
-	xm12= (m12*mw11-m11*mw12)/detmw; \
-	xm22= (m22*mw11-m21*mw12)/detmw;
-
 
 static const double sqrt_2 = sqrt(2.0);
 
@@ -71,7 +58,6 @@ inline double normalize_jacobian( double jacobi,
 
   if ( jacobi != 0.0 )
   {
-    
     double l1, l2, l3, length_product;
     // Note: there may be numerical problems if one is a lot shorter
     // than the others this way. But scaling each vector before the
@@ -90,13 +76,15 @@ inline double normalize_jacobian( double jacobi,
     }
     
     if( tet_flag == 1)
+    {
       return_value = sqrt_2 * jacobi / length_product;
+    }
     else
+    {
       return_value = jacobi / length_product;
-    
+    }
   }
   return return_value;
-  
 }
 
 
@@ -107,12 +95,6 @@ inline double  norm_squared( double m11,
 {
   return m11*m11+m21*m21+m12*m12+m22*m22;
 }
-
-#define metric_matrix(m11,m21,m12,m22,gm11,gm12,gm22) \
-	gm11 = m11*m11+m21*m21; \
-	gm12 = m11*m12+m21*m22; \
-	gm22 = m12*m12+m22*m22;
-
 
 inline int skew_matrix(double gm11, double gm12, double gm22, double det, double &qm11, double &qm21, double &qm12, double &qm22 )
 {
@@ -148,7 +130,7 @@ inline void inverse(VerdictVector x1,
   u1 /= detx;
   u2 /= detx;
   u3 /= detx;
-} 
+}
 
 /*
 inline void form_T(double a1[3],
@@ -295,7 +277,9 @@ inline double skew_x( VerdictVector& q1,
   
   double skew = 0;
   if ( kappa > VERDICT_DBL_MIN )
+  {
     skew = 3/kappa;
+  }
   
   return skew;
 }
