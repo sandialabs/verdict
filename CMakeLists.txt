@@ -35,7 +35,6 @@ set( verdict_SRCS
   V_QuadMetric.cpp
   V_TetMetric.cpp
   V_TriMetric.cpp
-  v_vector.h
   V_WedgeMetric.cpp
   verdict.h
   VerdictVector.cpp

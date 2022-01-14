@@ -20,7 +20,6 @@
 #ifndef VERDICT_DEFINES
 #define VERDICT_DEFINES
 
-#include "v_vector.h"
 #include "VerdictVector.hpp"
 
 #include <cmath>
@@ -131,50 +130,6 @@ inline void inverse(VerdictVector x1,
   u2 /= detx;
   u3 /= detx;
 }
-
-/*
-inline void form_T(double a1[3],
-  double a2[3],
-  double a3[3],
-  double w1[3],
-  double w2[3],
-  double w3[3],
-  double t1[3],
-  double t2[3],
-  double t3[3] )
-{
-
-  double x1[3], x2[3], x3[3];
-  double ra1[3], ra2[3], ra3[3];
-  
-  x1[0] = a1[0];
-  x1[1] = a2[0];
-  x1[2] = a3[0];
-  
-  x2[0] = a1[1];
-  x2[1] = a2[1];
-  x2[2] = a3[1];
-  
-  x3[0] = a1[2];
-  x3[1] = a2[2];
-  x3[2] = a3[2];
-  
-  inverse(w1,w2,w3,x1,x2,x3);
-  
-  t1[0] = dot_product(ra1, x1);
-  t1[1] = dot_product(ra1, x2);
-  t1[2] = dot_product(ra1, x3);
-
-  t2[0] = dot_product(ra2, x1);
-  t2[0] = dot_product(ra2, x2);
-  t2[0] = dot_product(ra2, x3);
-  
-  t3[0] = dot_product(ra3, x1);
-  t3[0] = dot_product(ra3, x2);
-  t3[0] = dot_product(ra3, x3);
-
-}
-*/
 
 inline void form_Q( const VerdictVector& v1,
     const VerdictVector& v2,
