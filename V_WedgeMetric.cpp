@@ -506,7 +506,7 @@ double wedge_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
     min = i2;
   }
 
-  double edge_ratio = sqrt(max / min);
+  double edge_ratio = std::sqrt(max / min);
 
   if (std::isnan(edge_ratio))
   {
@@ -886,7 +886,7 @@ double wedge_distortion(int num_nodes, const double coordinates[][3])
   double master_volume = 0.433013;
   double current_volume = wedge_volume(num_nodes, coordinates);
   double distortion = VERDICT_DBL_MAX;
-  if (fabs(current_volume) > 0.0)
+  if (std::abs(current_volume) > 0.0)
     distortion = jacobian * master_volume / current_volume / 0.866025;
 
   if (std::isnan(distortion))
@@ -1022,7 +1022,7 @@ double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   vec3.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
     coordinates[2][2] - coordinates[0][2]);
 
-  lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
+  lengths = std::sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = (vec2 % (vec1 * vec3));
   min_jacobian = current_jacobian / lengths;
@@ -1037,7 +1037,7 @@ double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   vec3.set(coordinates[0][0] - coordinates[1][0], coordinates[0][1] - coordinates[1][1],
     coordinates[0][2] - coordinates[1][2]);
 
-  lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
+  lengths = std::sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
   min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
@@ -1052,7 +1052,7 @@ double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   vec3.set(coordinates[1][0] - coordinates[2][0], coordinates[1][1] - coordinates[2][1],
     coordinates[1][2] - coordinates[2][2]);
 
-  lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
+  lengths = std::sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
   min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
@@ -1067,7 +1067,7 @@ double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   vec3.set(coordinates[5][0] - coordinates[3][0], coordinates[5][1] - coordinates[3][1],
     coordinates[5][2] - coordinates[3][2]);
 
-  lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
+  lengths = std::sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
   min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
@@ -1082,7 +1082,7 @@ double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   vec3.set(coordinates[3][0] - coordinates[4][0], coordinates[3][1] - coordinates[4][1],
     coordinates[3][2] - coordinates[4][2]);
 
-  lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
+  lengths = std::sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
   min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
@@ -1097,12 +1097,12 @@ double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   vec3.set(coordinates[2][0] - coordinates[5][0], coordinates[2][1] - coordinates[5][1],
     coordinates[2][2] - coordinates[5][2]);
 
-  lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
+  lengths = std::sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
   min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
 
-  min_jacobian *= 2 / sqrt(3.0);
+  min_jacobian *= 2 / std::sqrt(3.0);
 
   if (min_jacobian > 0)
   {
@@ -1145,8 +1145,8 @@ double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
-    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+    norm_jacobi = current_jacobian * 2.0 / std::sqrt(3.0);
+    current_shape = 3 * std::pow(norm_jacobi, two_thirds) /
       (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
     min_shape = std::min(current_shape, min_shape);
   }
@@ -1168,8 +1168,8 @@ double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
-    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+    norm_jacobi = current_jacobian * 2.0 / std::sqrt(3.0);
+    current_shape = 3 * std::pow(norm_jacobi, two_thirds) /
       (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
     min_shape = std::min(current_shape, min_shape);
   }
@@ -1191,8 +1191,8 @@ double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
-    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+    norm_jacobi = current_jacobian * 2.0 / std::sqrt(3.0);
+    current_shape = 3 * std::pow(norm_jacobi, two_thirds) /
       (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
     min_shape = std::min(current_shape, min_shape);
   }
@@ -1214,8 +1214,8 @@ double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
-    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+    norm_jacobi = current_jacobian * 2.0 / std::sqrt(3.0);
+    current_shape = 3 * std::pow(norm_jacobi, two_thirds) /
       (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
     min_shape = std::min(current_shape, min_shape);
   }
@@ -1237,8 +1237,8 @@ double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
-    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+    norm_jacobi = current_jacobian * 2.0 / std::sqrt(3.0);
+    current_shape = 3 * std::pow(norm_jacobi, two_thirds) /
       (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
     min_shape = std::min(current_shape, min_shape);
   }
@@ -1260,8 +1260,8 @@ double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
-    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+    norm_jacobi = current_jacobian * 2.0 / std::sqrt(3.0);
+    current_shape = 3 * std::pow(norm_jacobi, two_thirds) /
       (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
     min_shape = std::min(current_shape, min_shape);
   }

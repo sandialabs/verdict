@@ -43,7 +43,7 @@ inline double determinant(VerdictVector v1, VerdictVector v2, VerdictVector v3)
   return VerdictVector::Dot(v1, (v2 * v3));
 }
 
-static const double sqrt_2 = sqrt(2.0);
+static const double sqrt_2 = std::sqrt(2.0);
 
 inline double normalize_jacobian(
   double jacobi, VerdictVector& v1, VerdictVector& v2, VerdictVector& v3, int tet_flag = 0)
@@ -60,13 +60,13 @@ inline double normalize_jacobian(
     l1 = v1.length_squared();
     l2 = v2.length_squared();
     l3 = v3.length_squared();
-    length_product = sqrt(l1 * l2 * l3);
+    length_product = std::sqrt(l1 * l2 * l3);
 
     // if some numerical scaling problem, or just plain roundoff,
     // then push back into range [-1,1].
-    if (length_product < fabs(jacobi))
+    if (length_product < std::abs(jacobi))
     {
-      length_product = fabs(jacobi);
+      length_product = std::abs(jacobi);
     }
 
     if (tet_flag == 1)
@@ -89,7 +89,7 @@ inline double norm_squared(double m11, double m21, double m12, double m22)
 inline int skew_matrix(double gm11, double gm12, double gm22, double det, double& qm11,
   double& qm21, double& qm12, double& qm22)
 {
-  double tmp = sqrt(gm11 * gm22);
+  double tmp = std::sqrt(gm11 * gm22);
   if (tmp == 0)
   {
     return false;
@@ -133,14 +133,14 @@ inline void form_Q(const VerdictVector& v1, const VerdictVector& v2, const Verdi
   g23 = VerdictVector::Dot(v2, v3);
   g33 = VerdictVector::Dot(v3, v3);
 
-  double rtg11 = sqrt(g11);
-  double rtg22 = sqrt(g22);
-  double rtg33 = sqrt(g33);
+  double rtg11 = std::sqrt(g11);
+  double rtg22 = std::sqrt(g22);
+  double rtg33 = std::sqrt(g33);
   VerdictVector temp1;
 
   temp1 = v1 * v2;
 
-  double cross = sqrt(VerdictVector::Dot(temp1, temp1));
+  double cross = std::sqrt(VerdictVector::Dot(temp1, temp1));
 
   double q11, q21, q31;
   double q12, q22, q32;
@@ -196,7 +196,7 @@ inline double skew_x(VerdictVector& q1, VerdictVector& q2, VerdictVector& q3, Ve
   inverse(x1, x2, x3, u1, u2, u3);
   normsq1 = norm_squared(x1, x2, x3);
   normsq2 = norm_squared(u1, u2, u3);
-  kappa = sqrt(normsq1 * normsq2);
+  kappa = std::sqrt(normsq1 * normsq2);
 
   double skew = 0;
   if (kappa > VERDICT_DBL_MIN)

@@ -32,9 +32,9 @@ static const double one_third = 1.0 / 3.0;
 static const double two_thirds = 2.0 / 3.0;
 static const double one_fourth = 1.0 / 4.0;
 static const double four_ninths = 4.0 / 9.0;
-static const double sqrt2 = sqrt(2.0);
-static const double sqrt3 = sqrt(3.0);
-static const double sqrt6 = sqrt(6.0);
+static const double sqrt2 = std::sqrt(2.0);
+static const double sqrt3 = std::sqrt(3.0);
+static const double sqrt6 = std::sqrt(6.0);
 static const double three_times_1plussqrt3 = 3.0 * (1 + sqrt3);
 static const double normal_coeff = 180. * .3183098861837906715377675267450287;
 static const double aspect_ratio_normal_coeff = sqrt6 / 12.;
@@ -98,12 +98,12 @@ double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   VerdictVector bcd = bc * cd;
   bcd.normalize();
 
-  double alpha = acos(-(abc % abd));
-  double beta = acos(-(abc % acd));
-  double gamma = acos(-(abc % bcd));
-  double delta = acos(-(abd % acd));
-  double epsilon = acos(-(abd % bcd));
-  double zeta = acos(-(acd % bcd));
+  double alpha = std::acos(-(abc % abd));
+  double beta = std::acos(-(abc % acd));
+  double gamma = std::acos(-(abc % bcd));
+  double delta = std::acos(-(abd % acd));
+  double epsilon = std::acos(-(abd % bcd));
+  double zeta = std::acos(-(acd % bcd));
 
   double min_angle = alpha;
   min_angle = min_angle < beta ? min_angle : beta;
@@ -121,7 +121,7 @@ double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   max_angle = max_angle > zeta ? max_angle : zeta;
   max_angle *= normal_coeff;
 
-  double theta = acos(1 / 3.0) * normal_coeff; // 70.528779365509308630754000660038;
+  double theta = std::acos(1 / 3.0) * normal_coeff; // 70.528779365509308630754000660038;
 
   double dihedral_skew_max = (max_angle - theta) / (180 - theta);
   double dihedral_skew_min = (theta - min_angle) / theta;
@@ -130,18 +130,18 @@ double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   max_angle = 0.0;
 
   double angles[12];
-  angles[0] = acos(-(ab % bc));
-  angles[1] = acos((bc % ac));
-  angles[2] = acos((ac % ab));
-  angles[3] = acos(-(ab % bd));
-  angles[4] = acos((bd % ad));
-  angles[5] = acos((ad % ab));
-  angles[6] = acos(-(bc % cd));
-  angles[7] = acos((cd % bd));
-  angles[8] = acos((bd % bc));
-  angles[9] = acos((ad % cd));
-  angles[10] = acos(-(cd % ac));
-  angles[11] = acos((ac % ad));
+  angles[0] = std::acos(-(ab % bc));
+  angles[1] = std::acos((bc % ac));
+  angles[2] = std::acos((ac % ab));
+  angles[3] = std::acos(-(ab % bd));
+  angles[4] = std::acos((bd % ad));
+  angles[5] = std::acos((ad % ab));
+  angles[6] = std::acos(-(bc % cd));
+  angles[7] = std::acos((cd % bd));
+  angles[8] = std::acos((bd % bc));
+  angles[9] = std::acos((ad % cd));
+  angles[10] = std::acos(-(cd % ac));
+  angles[11] = std::acos((ac % ad));
 
   for (int a = 0; a < 12; a++)
   {
@@ -178,7 +178,7 @@ static int tet_get_weight(
   w2.set(0.5, 0.5 * sqrt3, 0);
   w3.set(0.5, sqrt3 / 6.0, sqrt2 / sqrt3);
 
-  double scale = pow(6. * average_tet_volume / determinant(w1, w2, w3), 0.3333333333333);
+  double scale = std::pow(6. * average_tet_volume / determinant(w1, w2, w3), 0.3333333333333);
 
   w1 *= scale;
   w2 *= scale;
@@ -267,7 +267,7 @@ double tet_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   M2 = Mab > Mcd ? Mab : Mcd;
   M2 = M2 > Mef ? M2 : Mef;
 
-  const double edge_ratio = sqrt(M2 / m2);
+  const double edge_ratio = std::sqrt(M2 / m2);
 
   return fix_range(edge_ratio);
 }
@@ -322,10 +322,10 @@ double tet_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
     which_node = 3;
   }
 
-  double length_product = sqrt(length_squared[which_node]);
-  if (length_product < fabs(jacobi))
+  double length_product = std::sqrt(length_squared[which_node]);
+  if (length_product < std::abs(jacobi))
   {
-    length_product = fabs(jacobi);
+    length_product = std::abs(jacobi);
   }
 
   if (length_product < VERDICT_DBL_MIN)
@@ -379,7 +379,7 @@ double tet_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 
   double volume = tet_volume(4, coordinates);
 
-  if (fabs(volume) < VERDICT_DBL_MIN)
+  if (std::abs(volume) < VERDICT_DBL_MIN)
   {
     return (double)VERDICT_DBL_MAX;
   }
@@ -417,7 +417,7 @@ double tet_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
 
   double detTet = ab % (ac * ad);
 
-  if (fabs(detTet) < VERDICT_DBL_MIN)
+  if (std::abs(detTet) < VERDICT_DBL_MIN)
   {
     return (double)VERDICT_DBL_MAX;
   }
@@ -442,7 +442,7 @@ double tet_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
   double B = ac2 > ad2 ? ac2 : ad2;
   double C = bd2 > cd2 ? bd2 : cd2;
   double D = A > B ? A : B;
-  double hm = D > C ? sqrt(D) : sqrt(C);
+  double hm = D > C ? std::sqrt(D) : std::sqrt(C);
 
   bd = ab * bc;
   A = bd.length();
@@ -453,7 +453,7 @@ double tet_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
   bd = bc * cd;
   D = bd.length();
 
-  const double aspect_ratio = aspect_ratio_normal_coeff * hm * (A + B + C + D) / fabs(detTet);
+  const double aspect_ratio = aspect_ratio_normal_coeff * hm * (A + B + C + D) / std::abs(detTet);
 
   return fix_range(aspect_ratio);
 }
@@ -486,7 +486,7 @@ double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
   side5.set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
     coordinates[3][2] - coordinates[2][2]);
 
-  double volume = fabs(tet_volume(4, coordinates));
+  double volume = std::abs(tet_volume(4, coordinates));
 
   if (volume < VERDICT_DBL_MIN)
   {
@@ -494,11 +494,12 @@ double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
   }
   else
   {
-    double srms = sqrt((side0.length_squared() + side1.length_squared() + side2.length_squared() +
-                         side3.length_squared() + side4.length_squared() + side5.length_squared()) /
-      6.0);
+    double srms =
+      std::sqrt((side0.length_squared() + side1.length_squared() + side2.length_squared() +
+                  side3.length_squared() + side4.length_squared() + side5.length_squared()) /
+        6.0);
 
-    double aspect_ratio_gamma = pow(srms, 3) / (8.48528137423857 * volume);
+    double aspect_ratio_gamma = std::pow(srms, 3) / (8.48528137423857 * volume);
     return (double)aspect_ratio_gamma;
   }
 }
@@ -525,7 +526,7 @@ double tet_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
   double denominator = ab % (ac * ad);
   denominator *= denominator;
   denominator *= 2.;
-  denominator = 3. * pow(denominator, one_third);
+  denominator = 3. * std::pow(denominator, one_third);
 
   if (denominator < VERDICT_DBL_MIN)
   {
@@ -584,12 +585,12 @@ double tet_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
   VerdictVector bcd = bc * cd;
   double nbcd = bcd.length();
 
-  double alpha = acos((abc % abd) / (nabc * nabd));
-  double beta = acos((abc % acd) / (nabc * nacd));
-  double gamma = acos((abc % bcd) / (nabc * nbcd));
-  double delta = acos((abd % acd) / (nabd * nacd));
-  double epsilon = acos((abd % bcd) / (nabd * nbcd));
-  double zeta = acos((acd % bcd) / (nacd * nbcd));
+  double alpha = std::acos((abc % abd) / (nabc * nabd));
+  double beta = std::acos((abc % acd) / (nabc * nacd));
+  double gamma = std::acos((abc % bcd) / (nabc * nbcd));
+  double delta = std::acos((abd % acd) / (nabd * nacd));
+  double epsilon = std::acos((abd % bcd) / (nabd * nbcd));
+  double zeta = std::acos((acd % bcd) / (nacd * nbcd));
 
   alpha = alpha < beta ? alpha : beta;
   alpha = alpha < gamma ? alpha : gamma;
@@ -717,8 +718,8 @@ double tet_equivolume_skew(int num_nodes, const double coordinates[][3])
   double circumradius = num.length() / den;
 
   double volume = tet_volume(num_nodes, coordinates);
-  double optimal_length = circumradius / sqrt(double(3.0) / 8.0);
-  double optimal_volume = (1.0 / 12.0) * sqrt(double(2.0)) * pow(optimal_length, 3);
+  double optimal_length = circumradius / std::sqrt(double(3.0) / 8.0);
+  double optimal_volume = (1.0 / 12.0) * std::sqrt(double(2.0)) * std::pow(optimal_length, 3);
 
   const double eq_v_skew = (optimal_volume - volume) / optimal_volume;
   return fix_range(eq_v_skew);
@@ -1167,13 +1168,13 @@ double tet_condition(int /*num_nodes*/, const double coordinates[][3])
   term2 = (c_1 * c_2) % (c_1 * c_2) + (c_2 * c_3) % (c_2 * c_3) + (c_1 * c_3) % (c_1 * c_3);
   det = c_1 % (c_2 * c_3);
 
-  if (fabs(det) <= VERDICT_DBL_MIN)
+  if (std::abs(det) <= VERDICT_DBL_MIN)
   {
     return VERDICT_DBL_MAX;
   }
   else
   {
-    condition = sqrt(term1 * term2) / (3.0 * det);
+    condition = std::sqrt(term1 * term2) / (3.0 * det);
   }
 
   return (double)condition;
@@ -1256,7 +1257,7 @@ double tet_shape(int /*num_nodes*/, const double coordinates[][3])
   {
     return (double)0.0;
   }
-  double num = 3 * pow(sqrt2 * jacobian, two_thirds);
+  double num = 3 * std::pow(sqrt2 * jacobian, two_thirds);
   double den = 1.5 * (edge0 % edge0 + edge2 % edge2 + edge3 % edge3) -
     (edge0 % -edge2 + -edge2 % edge3 + edge3 % edge0);
 
@@ -1423,7 +1424,7 @@ double tet_distortion(int num_nodes, const double coordinates[][3])
       minimum_jacobian = jacobian;
     }
   }
-  if (fabs(element_volume) > 0.0)
+  if (std::abs(element_volume) > 0.0)
   {
     distortion = minimum_jacobian / element_volume;
   }
@@ -1511,7 +1512,7 @@ double tet_timestep(int num_nodes, const double coordinates[][3], double density
 
   double M =
     youngs_modulus * (1 - poissons_ratio) / ((1 - 2 * poissons_ratio) * (1 + poissons_ratio));
-  double denominator = sqrt(M / density);
+  double denominator = std::sqrt(M / density);
 
   return char_length / denominator;
 }
@@ -1596,7 +1597,7 @@ double calculate_tet4_outer_radius(const double coordinates[][3])
   double BC = (nE[3] - nE[1]).length();
   double CC = (nE[2] - nE[1]).length();
   double VP = ((nE[1] - nE[0]) * (nE[2] - nE[0])) % (nE[3] - nE[0]) / 6;
-  double outer_radius = sqrt((aC * AC + bC * BC + cC * CC) * (aC * AC + bC * BC - cC * CC) *
+  double outer_radius = std::sqrt((aC * AC + bC * BC + cC * CC) * (aC * AC + bC * BC - cC * CC) *
                           (aC * AC - bC * BC + cC * CC) * (-aC * AC + bC * BC + cC * CC)) /
     24 / VP;
 

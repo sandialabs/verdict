@@ -27,7 +27,7 @@
 
 namespace VERDICT_NAMESPACE
 {
-static const double sqrt2 = sqrt(2.0);
+static const double sqrt2 = std::sqrt(2.0);
 static const double radius_ratio_normal_coeff = 1. / (2. * sqrt2);
 
 /*!
@@ -42,7 +42,7 @@ static int quad_get_weight(
   m12 = 0;
   m22 = 1;
 
-  double scale = sqrt(average_quad_size / (m11 * m22 - m21 * m12));
+  double scale = std::sqrt(average_quad_size / (m11 * m22 - m21 * m12));
 
   m11 *= scale;
   m21 *= scale;
@@ -305,19 +305,19 @@ void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinat
     return;
   }
 
-  angle = acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
+  angle = std::acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
   min_angle = std::min(angle, min_angle);
   max_angle = std::max(angle, max_angle);
 
-  angle = acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
+  angle = std::acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
   min_angle = std::min(angle, min_angle);
   max_angle = std::max(angle, max_angle);
 
-  angle = acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
+  angle = std::acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
   min_angle = std::min(angle, min_angle);
   max_angle = std::max(angle, max_angle);
 
-  angle = acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
+  angle = std::acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
   min_angle = std::min(angle, min_angle);
   max_angle = std::max(angle, max_angle);
 
@@ -393,7 +393,7 @@ double quad_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   }
   else
   {
-    double edge_ratio = sqrt(M2 / m2);
+    double edge_ratio = std::sqrt(M2 / m2);
 
     if (edge_ratio > 0)
     {
@@ -529,7 +529,7 @@ double quad_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
     return (double)VERDICT_DBL_MAX;
   }
 
-  double radius_ratio = radius_ratio_normal_coeff * sqrt((a2 + b2 + c2 + d2) * h2) / t0;
+  double radius_ratio = radius_ratio_normal_coeff * std::sqrt((a2 + b2 + c2 + d2) * h2) / t0;
 
   if (radius_ratio > 0)
   {
@@ -666,7 +666,7 @@ double quad_skew(int /*num_nodes*/, const double coordinates[][3])
     return 0.0;
   }
 
-  double skew = fabs(principle_axes[0] % principle_axes[1]);
+  double skew = std::abs(principle_axes[0] % principle_axes[1]);
   return (double)std::min(skew, VERDICT_DBL_MAX);
 }
 
@@ -729,8 +729,8 @@ double quad_warpage(int /*num_nodes*/, const double coordinates[][3])
     return (double)VERDICT_DBL_MIN;
   }
 
-  double warpage =
-    pow(std::min(corner_normals[0] % corner_normals[2], corner_normals[1] % corner_normals[3]), 3);
+  double warpage = std::pow(
+    std::min(corner_normals[0] % corner_normals[2], corner_normals[1] % corner_normals[3]), 3);
 
   if (warpage > 0)
   {
@@ -792,8 +792,8 @@ double quad_stretch(int /*num_nodes*/, const double coordinates[][3])
   else
   {
     double stretch = (double)(sqrt2 *
-      sqrt(std::min(std::min(lengths_squared[0], lengths_squared[1]),
-             std::min(lengths_squared[2], lengths_squared[3])) /
+      std::sqrt(std::min(std::min(lengths_squared[0], lengths_squared[1]),
+                  std::min(lengths_squared[2], lengths_squared[3])) /
         diag02));
 
     return (double)std::min(stretch, VERDICT_DBL_MAX);
@@ -841,16 +841,16 @@ double quad_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
     return 0.0;
   }
 
-  angle = acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
+  angle = std::acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
   max_angle = std::max(angle, max_angle);
 
-  angle = acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
+  angle = std::acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
   max_angle = std::max(angle, max_angle);
 
-  angle = acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
+  angle = std::acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
   max_angle = std::max(angle, max_angle);
 
-  angle = acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
+  angle = std::acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
   max_angle = std::max(angle, max_angle);
 
   max_angle = max_angle * 180.0 / VERDICT_PI;
@@ -912,16 +912,16 @@ double quad_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
     return 360.0;
   }
 
-  angle = acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
+  angle = std::acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
   min_angle = std::min(angle, min_angle);
 
-  angle = acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
+  angle = std::acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
   min_angle = std::min(angle, min_angle);
 
-  angle = acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
+  angle = std::acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
   min_angle = std::min(angle, min_angle);
 
-  angle = acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
+  angle = std::acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
   min_angle = std::min(angle, min_angle);
 
   min_angle = min_angle * 180.0 / VERDICT_PI;
@@ -1382,7 +1382,7 @@ double quad_distortion(int num_nodes, const double coordinates[][3])
     for (ja = 0; ja < num_nodes; ja++)
     {
       dot_product = normal_at_nodes[0] % normal_at_nodes[ja];
-      if (fabs(dot_product) < 0.99)
+      if (std::abs(dot_product) < 0.99)
       {
         flat_element = false;
         break;
@@ -1392,7 +1392,7 @@ double quad_distortion(int num_nodes, const double coordinates[][3])
     // take into consideration the thickness of the element
     double thickness;
     // get_quad_thickness(face, element_area, thickness );
-    thickness = 0.001 * sqrt(element_area);
+    thickness = 0.001 * std::sqrt(element_area);
 
     // set thickness gauss point location
     double zl = 0.5773502691896;

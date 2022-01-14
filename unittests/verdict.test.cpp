@@ -19,15 +19,12 @@
  */
 
 #include "verdict.h"
-#include "V_HexMetric.hpp"
 
 #include "gtest/gtest.h"
 
 #include <cmath>
-#include <fstream>
 #include <functional>
 #include <iostream>
-#include <stdexcept>
 #include <vector>
 
 #define MAX_NODES_PER_ELEMENT 27
@@ -71,7 +68,7 @@ void runtest(test_case& this_testcase)
               << std::endl;
 
     EXPECT_NEAR(calculated_answer, expected_answer,
-      fabs(expected_answer) * VERDICT_RELATIVE_TOL + VERDICT_ABSOLUTE_TOL);
+      std::abs(expected_answer) * VERDICT_RELATIVE_TOL + VERDICT_ABSOLUTE_TOL);
 
     // old test using strings
     /*
@@ -88,7 +85,7 @@ void runtest(test_case& this_testcase)
     // for expected values of zero, we only care about absolute tolerance, not relative tolerance,
     std::string expected_v_str = expected.str();
     std::string answer_v_str = answer.str();
-    if ( fabs(answer_from_lib) < VERDICT_ABSOLUTE_TOL )
+    if ( std::abs(answer_from_lib) < VERDICT_ABSOLUTE_TOL )
     {
       std::stringstream expected_abs;
       expected_abs.setf(std::ios::scientific, std::ios::floatfield);
@@ -128,8 +125,9 @@ void runtest(test_case& this_testcase)
 
 TEST(verdict, tet_incircle_right)
 {
-  test_case testcase = { "tet_incircle_right", { { verdict::tet_inradius, 0.5 - 1. / sqrt(12) } },
-    4, { { 0, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } };
+  test_case testcase = { "tet_incircle_right",
+    { { verdict::tet_inradius, 0.5 - 1. / std::sqrt(12) } }, 4,
+    { { 0, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } };
 
   runtest(testcase);
 }
@@ -137,7 +135,7 @@ TEST(verdict, tet_incircle_right)
 TEST(verdict, tet_incircle_right2)
 {
   test_case testcase = { "tet_incircle_right2",
-    { { verdict::tet_inradius, 2.0 * (0.5 - 1. / sqrt(12)) } }, 4,
+    { { verdict::tet_inradius, 2.0 * (0.5 - 1. / std::sqrt(12)) } }, 4,
     { { 0, 0, 0 }, { 2, 0, 0 }, { 0, 2, 0 }, { 0, 0, 2 } } };
 
   runtest(testcase);
@@ -148,29 +146,29 @@ TEST(verdict, tet_incircle_equilateral)
   const double pi = verdict::VERDICT_PI;
 
   // equilateral tet, with side length 1
-  double l2 = sin(30 * pi / 180) / sin(120 * pi / 180);
-  double h = sqrt(1 - l2 * l2);
+  double l2 = std::sin(30 * pi / 180) / std::sin(120 * pi / 180);
+  double h = std::sqrt(1 - l2 * l2);
 
-  test_case testcase = { "tet_incircle_equilateral", { { verdict::tet_inradius, sqrt(6.) / 12. } },
-    4,
-    { { 0, 0, 0 }, { 1, 0, 0 }, { cos(60 * pi / 180), sin(60 * pi / 180), 0 },
-      { l2 * cos(30 * pi / 180), l2 * sin(30 * pi / 180), h } } };
+  test_case testcase = { "tet_incircle_equilateral",
+    { { verdict::tet_inradius, std::sqrt(6.) / 12. } }, 4,
+    { { 0, 0, 0 }, { 1, 0, 0 }, { std::cos(60 * pi / 180), std::sin(60 * pi / 180), 0 },
+      { l2 * std::cos(30 * pi / 180), l2 * std::sin(30 * pi / 180), h } } };
 
   runtest(testcase);
 }
 
 TEST(verdict, tet_incircle_equilateral2)
 {
-  const double pi = 2. * asin(1.);
+  const double pi = 2. * std::asin(1.);
 
   // equilateral tet, with side length 2
-  double l2 = 2. * sin(30 * pi / 180) / sin(120 * pi / 180);
-  double h = sqrt(4. - l2 * l2);
+  double l2 = 2. * std::sin(30 * pi / 180) / std::sin(120 * pi / 180);
+  double h = std::sqrt(4. - l2 * l2);
 
   test_case testcase = { "tet_incircle_equilateral2",
-    { { verdict::tet_inradius, 2 * sqrt(6.) / 12. } }, 4,
-    { { 0, 0, 0 }, { 2, 0, 0 }, { 2 * cos(60 * pi / 180), 2 * sin(60 * pi / 180), 0 },
-      { l2 * cos(30 * pi / 180), l2 * sin(30 * pi / 180), h } } };
+    { { verdict::tet_inradius, 2 * std::sqrt(6.) / 12. } }, 4,
+    { { 0, 0, 0 }, { 2, 0, 0 }, { 2 * std::cos(60 * pi / 180), 2 * std::sin(60 * pi / 180), 0 },
+      { l2 * std::cos(30 * pi / 180), l2 * std::sin(30 * pi / 180), h } } };
 
   runtest(testcase);
 }
@@ -186,7 +184,7 @@ TEST(verdict, tet_incircle_flat)
 TEST(verdict, tet_incircle_inverted)
 {
   test_case testcase = { "tet_incircle_inverted",
-    { { verdict::tet_inradius, -0.5 + 1. / sqrt(12) } }, 4,
+    { { verdict::tet_inradius, -0.5 + 1. / std::sqrt(12) } }, 4,
     { { 0, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, -1 } } };
 
   runtest(testcase);
@@ -271,7 +269,7 @@ TEST(verdict, wedge_simple)
 {
   test_case testcase = { "wedge_simple",
     { { verdict::wedge_volume, 0.5 }, { verdict::wedge_equiangle_skew, 0.25 },
-      { verdict::wedge_edge_ratio, sqrt(2.) },
+      { verdict::wedge_edge_ratio, std::sqrt(2.) },
       { verdict::wedge_max_aspect_frobenius, 1.1357042248 },
       { verdict::wedge_mean_aspect_frobenius, 1.0978474174 }, { verdict::wedge_distortion, 1 },
       { verdict::wedge_max_stretch, 1 } },
@@ -489,7 +487,7 @@ TEST(verdict, tet_test1)
     { { verdict::tet_volume, 166.66666667 }, { verdict::tet_condition, 1.2247448714 },
       { verdict::tet_jacobian, 1000 }, { verdict::tet_shape, 0.83994736660 },
       { verdict::tet_distortion, 1 },
-      /*  6 */ { verdict::tet_edge_ratio, sqrt(2.) },
+      /*  6 */ { verdict::tet_edge_ratio, std::sqrt(2.) },
       /*  7 */ { verdict::tet_radius_ratio, 1.3660254038 },
       /*  8 */ { verdict::tet_aspect_ratio, 1.3660254038 },
       /*  9 */ { verdict::tet_aspect_frobenius, 1.1905507890 },
@@ -608,7 +606,7 @@ TEST(verdict, hex_test2_perfect_cube)
   test_case testcase = { "hex_test2_perfect_cube",
     { { verdict::hex_skew, 0. }, { verdict::hex_taper, 0. }, { verdict::hex_volume, 1.0 },
       { verdict::hex_stretch, 1.0 }, { verdict::hex_diagonal, 1.0 },
-      { verdict::hex_dimension, 1. / sqrt(3.) }, { verdict::hex_condition, 1.0 },
+      { verdict::hex_dimension, 1. / std::sqrt(3.) }, { verdict::hex_condition, 1.0 },
       { verdict::hex_med_aspect_frobenius, 1 }, { verdict::hex_jacobian, 1.0 },
       { verdict::hex_shear, 1.0 }, { verdict::hex_shape, 1.0 }, { verdict::hex_distortion, 1.0 },
       { verdict::hex_nodal_jacobian_ratio, 1.0 }, { verdict::hex_oddy, 0. },
@@ -633,7 +631,7 @@ TEST(verdict, hex_test3_flat)
       { verdict::hex_distortion, verdict::VERDICT_DBL_MAX },
       { verdict::hex_nodal_jacobian_ratio, -verdict::VERDICT_DBL_MAX },
       { verdict::hex_oddy, verdict::VERDICT_DBL_MAX },
-      { verdict::hex_edge_ratio, 1.0 / sqrt(0.02) }, { verdict::hex_equiangle_skew, 0.5 } },
+      { verdict::hex_edge_ratio, 1.0 / std::sqrt(0.02) }, { verdict::hex_equiangle_skew, 0.5 } },
     8,
     { // squashed flat
       { 0, 0, 0 }, { 1, 0, 0 }, { 1, 1, 0 }, { 0, 1, 0 }, { 0.1, 0.1, 0 }, { 0.9, 0.1, 0 },
@@ -651,7 +649,7 @@ TEST(verdict, hex_test4_inside_out)
       /*  3 */ { verdict::hex_volume, -1. }, // !=
       /*  4 */ { verdict::hex_stretch, 1 },
       /*  5 */ { verdict::hex_diagonal, 1.0 },
-      /*  6 */ { verdict::hex_dimension, 1. / sqrt(3.) },
+      /*  6 */ { verdict::hex_dimension, 1. / std::sqrt(3.) },
       /*  7 */ { verdict::hex_condition, verdict::VERDICT_DBL_MAX },            // !=
       /*  8 */ { verdict::hex_med_aspect_frobenius, verdict::VERDICT_DBL_MAX }, // !=
       /*  9 */ { verdict::hex_jacobian, -1. },                                  // !=
