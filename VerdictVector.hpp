@@ -26,8 +26,9 @@
 #define VERDICTVECTOR_HPP
 
 #include "verdict.h"
-#include <assert.h>
-#include <math.h>
+
+#include <cassert>
+#include <cmath>
 
 namespace VERDICT_NAMESPACE
 {
