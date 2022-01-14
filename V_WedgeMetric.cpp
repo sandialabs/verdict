@@ -3,12 +3,12 @@
   Module:    V_WedgeMetric.cpp
 
   Copyright 2003,2006,2019 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
-  Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
+  Under the terms of Contract DE-NA0003525 with NTESS,
+  the U.S. Government retains certain rights in this software.
 
   See LICENSE for details.
 
 =========================================================================*/
-
 
 /*
  *
@@ -18,157 +18,144 @@
  *
  */
 
-
-#include "verdict.h"
 #include "VerdictVector.hpp"
-#include <memory.h> 
+#include "verdict.h"
+
 #include <algorithm>
 #include <cmath> // for std::isnan
 
-#include "verdict_defines.hpp"
-#include "V_GaussIntegration.hpp"
-
-extern double tri_equiangle_skew( int num_nodes, double coordinates[][3] );
-extern double quad_equiangle_skew( int num_nodes, double coordinates[][3] );
-
 namespace VERDICT_NAMESPACE
 {
+extern double tri_equiangle_skew(int num_nodes, const double coordinates[][3]);
+extern double quad_equiangle_skew(int num_nodes, const double coordinates[][3]);
+
+static const double one_third = 1.0 / 3.0;
+static const double two_thirds = 2.0 / 3.0;
+
 // local methods
-void make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
-                          double quad1[][3], double quad2[][3], double quad3[][3]);
-
-
-static const double one_third = 1.0/3.0;
-static const double two_thirds = 2.0/3.0;
+void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tri2[][3],
+  double quad1[][3], double quad2[][3], double quad3[][3]);
 
 /*
    the wedge element
 
 
-   5
-   ^
-   / \
-   / | \
-   / /2\ \
+        5
+        ^
+       / \
+      / | \
+     / /2\ \
    6/_______\4
-   | /   \ |
-   |/_____\|
+    | /   \ |
+    |/_____\|
    3         1
 
  */
 
+static const double WEDGE21_node_local_coord[21][3] = { { 0, 0, -1 }, { 1.0, 0, -1 },
+  { 0, 1.0, -1 }, { 0, 0, 1.0 }, { 1.0, 0, 1.0 }, { 0, 1.0, 1.0 }, { 0.5, 0, -1 }, { 0.5, 0.5, -1 },
+  { 0, 0.5, -1 }, { 0.0, 0.0, 0 }, { 1.0, 0, 0 }, { 0, 1.0, 0 }, { 0.5, 0, 1.0 }, { 0.5, 0.5, 1.0 },
+  { 0, 0.5, 1.0 }, { one_third, one_third, 0 }, { one_third, one_third, -1 },
+  { one_third, one_third, 1.0 }, { 0.5, 0.5, 0 }, { 0, 0.5, 0 }, { 0.5, 0, 0 } };
 
-
-
-
-static const double WEDGE21_node_local_coord[21][3] =
-{
-  {0,0,-1}, {1.0,0,-1}, {0,1.0,-1}, {0,0,1.0}, {1.0,0,1.0}, {0,1.0,1.0},
-  {0.5,0,-1}, {0.5,0.5,-1}, {0,0.5,-1},
-  {0.0,0.0,0}, {1.0,0,0}, {0,1.0,0},
-  {0.5,0,1.0}, {0.5,0.5,1.0}, {0,0.5,1.0},
-  {one_third,one_third,0}, {one_third,one_third,-1}, {one_third,one_third,1.0},
-  {0.5,0.5,0}, {0,0.5,0}, {0.5,0,0}
-};
-
-static void WEDGE21_gradients_of_the_shape_functions_for_RST(const double rst[3], double dhdr[21],double dhds[21],double dhdt[21])
+static void WEDGE21_gradients_of_the_shape_functions_for_RST(
+  const double rst[3], double dhdr[21], double dhds[21], double dhdt[21])
 {
   double RSM = 1.0 - rst[0] - rst[1];
-  double RR = rst[0]*rst[0];
-  double RS = rst[0]*rst[1];
-  double SS = rst[1]*rst[1];
+  double RR = rst[0] * rst[0];
+  double RS = rst[0] * rst[1];
+  double SS = rst[1] * rst[1];
   double TP = 1.0 + rst[2];
   double TM = 1.0 - rst[2];
-  double T2P = 1.0 + 2.0*rst[2];
-  double T2M = 1.0 - 2.0*rst[2];
+  double T2P = 1.0 + 2.0 * rst[2];
+  double T2M = 1.0 - 2.0 * rst[2];
 
-  dhdr[0]  = -0.5*rst[2]*TM*(4.0*rst[0] + 7.0*rst[1] - 3.0 - 6.0*RS - 3.0*SS);
-  dhds[0]  = -0.5*rst[2]*TM*(7.0*rst[0] + 4.0*rst[1] - 3.0 - 6.0*RS - 3.0*RR);
-  dhdt[0]  = -0.5*T2M*RSM*(1.0 - 2.0*(rst[0]+rst[1]) + 3.0*RS);
+  dhdr[0] = -0.5 * rst[2] * TM * (4.0 * rst[0] + 7.0 * rst[1] - 3.0 - 6.0 * RS - 3.0 * SS);
+  dhds[0] = -0.5 * rst[2] * TM * (7.0 * rst[0] + 4.0 * rst[1] - 3.0 - 6.0 * RS - 3.0 * RR);
+  dhdt[0] = -0.5 * T2M * RSM * (1.0 - 2.0 * (rst[0] + rst[1]) + 3.0 * RS);
 
-  dhdr[1]  = -0.5*rst[2]*TM*(4.0*rst[0] - 1.0 + 3.0*rst[1] - 6.0*RS - 3.0*SS);
-  dhds[1]  = -0.5*rst[2]*TM*(3.0*rst[0] - 6.0*RS - 3.0*RR);
-  dhdt[1]  = -0.5*T2M*(rst[0] - 2.0*(RSM*rst[0] + RS) + 3.0*RSM*RS);
+  dhdr[1] = -0.5 * rst[2] * TM * (4.0 * rst[0] - 1.0 + 3.0 * rst[1] - 6.0 * RS - 3.0 * SS);
+  dhds[1] = -0.5 * rst[2] * TM * (3.0 * rst[0] - 6.0 * RS - 3.0 * RR);
+  dhdt[1] = -0.5 * T2M * (rst[0] - 2.0 * (RSM * rst[0] + RS) + 3.0 * RSM * RS);
 
-  dhdr[2]  = -0.5*rst[2]*TM*(3.0*rst[1] - 6.0*RS - 3.0*SS);
-  dhds[2]  = -0.5*rst[2]*TM*(4.0*rst[1] - 1.0 + 3.0*rst[0] - 6.0*RS - 3.0*RR);
-  dhdt[2]  = -0.5*T2M*(rst[1] - 2.0*(RSM*rst[1] + RS) + 3.0*RSM*RS);
+  dhdr[2] = -0.5 * rst[2] * TM * (3.0 * rst[1] - 6.0 * RS - 3.0 * SS);
+  dhds[2] = -0.5 * rst[2] * TM * (4.0 * rst[1] - 1.0 + 3.0 * rst[0] - 6.0 * RS - 3.0 * RR);
+  dhdt[2] = -0.5 * T2M * (rst[1] - 2.0 * (RSM * rst[1] + RS) + 3.0 * RSM * RS);
 
-  dhdr[3]  =  0.5*rst[2]*TP*(4.0*rst[0] + 7.0*rst[1] - 3.0 - 6.0*RS - 3.0*SS);
-  dhds[3]  =  0.5*rst[2]*TP*(7.0*rst[0] + 4.0*rst[1] - 3.0 - 6.0*RS - 3.0*RR);
-  dhdt[3]  =  0.5*T2P*RSM*(1.0 - 2.0*(rst[0]+rst[1]) + 3.0*RS);
+  dhdr[3] = 0.5 * rst[2] * TP * (4.0 * rst[0] + 7.0 * rst[1] - 3.0 - 6.0 * RS - 3.0 * SS);
+  dhds[3] = 0.5 * rst[2] * TP * (7.0 * rst[0] + 4.0 * rst[1] - 3.0 - 6.0 * RS - 3.0 * RR);
+  dhdt[3] = 0.5 * T2P * RSM * (1.0 - 2.0 * (rst[0] + rst[1]) + 3.0 * RS);
 
-  dhdr[4]  =  0.5*rst[2]*TP*(4.0*rst[0] - 1.0 + 3.0*rst[1] - 6.0*RS - 3.0*SS);
-  dhds[4]  =  0.5*rst[2]*TP*(3.0*rst[0] - 6.0*RS - 3.0*RR);
-  dhdt[4]  =  0.5*T2P*(rst[0] - 2.0*(RSM*rst[0] + RS) + 3.0*RSM*RS);
+  dhdr[4] = 0.5 * rst[2] * TP * (4.0 * rst[0] - 1.0 + 3.0 * rst[1] - 6.0 * RS - 3.0 * SS);
+  dhds[4] = 0.5 * rst[2] * TP * (3.0 * rst[0] - 6.0 * RS - 3.0 * RR);
+  dhdt[4] = 0.5 * T2P * (rst[0] - 2.0 * (RSM * rst[0] + RS) + 3.0 * RSM * RS);
 
-  dhdr[5]  =  0.5*rst[2]*TP*(3.0*rst[1] - 6.0*RS - 3.0*SS);
-  dhds[5]  =  0.5*rst[2]*TP*(4.0*rst[1] - 1.0 + 3.0*rst[0] - 6.0*RS - 3.0*RR);
-  dhdt[5]  =  0.5*T2P*(rst[1] - 2.0*(RSM*rst[1] + RS) + 3.0*RSM*RS);
+  dhdr[5] = 0.5 * rst[2] * TP * (3.0 * rst[1] - 6.0 * RS - 3.0 * SS);
+  dhds[5] = 0.5 * rst[2] * TP * (4.0 * rst[1] - 1.0 + 3.0 * rst[0] - 6.0 * RS - 3.0 * RR);
+  dhdt[5] = 0.5 * T2P * (rst[1] - 2.0 * (RSM * rst[1] + RS) + 3.0 * RSM * RS);
 
-  dhdr[6]  = -0.5*rst[2]*TM*(4.0 - 8.0*rst[0] - 16.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[6]  = -0.5*rst[2]*TM*(-16.0*rst[0] + 12.0*RR + 24.0*RS);
-  dhdt[6]  = -0.5*T2M*RSM*(4.0*rst[0] - 12.0*RS);
+  dhdr[6] = -0.5 * rst[2] * TM * (4.0 - 8.0 * rst[0] - 16.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[6] = -0.5 * rst[2] * TM * (-16.0 * rst[0] + 12.0 * RR + 24.0 * RS);
+  dhdt[6] = -0.5 * T2M * RSM * (4.0 * rst[0] - 12.0 * RS);
 
-  dhdr[7]  = -0.5*rst[2]*TM*(-8.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[7]  = -0.5*rst[2]*TM*(-8.0*rst[0] + 12.0*RR + 24.0*RS);
-  dhdt[7]  = -0.5*T2M*(4.0*RS - 12.0*RSM*RS);
+  dhdr[7] = -0.5 * rst[2] * TM * (-8.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[7] = -0.5 * rst[2] * TM * (-8.0 * rst[0] + 12.0 * RR + 24.0 * RS);
+  dhdt[7] = -0.5 * T2M * (4.0 * RS - 12.0 * RSM * RS);
 
-  dhdr[8]  = -0.5*rst[2]*TM*(-16.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[8]  = -0.5*rst[2]*TM*(4.0 - 16.0*rst[0] - 8.0*rst[1] + 12.0*RR + 24.0*RS);
-  dhdt[8]  = -0.5*T2M*RSM*(4.0*rst[1] - 12.0*RS);
+  dhdr[8] = -0.5 * rst[2] * TM * (-16.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[8] = -0.5 * rst[2] * TM * (4.0 - 16.0 * rst[0] - 8.0 * rst[1] + 12.0 * RR + 24.0 * RS);
+  dhdt[8] = -0.5 * T2M * RSM * (4.0 * rst[1] - 12.0 * RS);
 
-  dhdr[12]  =  0.5*rst[2]*TP*(4.0 - 8.0*rst[0] - 16.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[12]  =  0.5*rst[2]*TP*(-16.0*rst[0] + 12.0*RR + 24.0*RS);
-  dhdt[12]  =  0.5*T2P*RSM*(4.0*rst[0] - 12.0*RS);
+  dhdr[12] = 0.5 * rst[2] * TP * (4.0 - 8.0 * rst[0] - 16.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[12] = 0.5 * rst[2] * TP * (-16.0 * rst[0] + 12.0 * RR + 24.0 * RS);
+  dhdt[12] = 0.5 * T2P * RSM * (4.0 * rst[0] - 12.0 * RS);
 
-  dhdr[13]  =  0.5*rst[2]*TP*(-8.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[13]  =  0.5*rst[2]*TP*(-8.0*rst[0] + 12.0*RR + 24.0*RS);
-  dhdt[13]  =  0.5*T2P*(4.0*RS - 12.0*RSM*RS);
+  dhdr[13] = 0.5 * rst[2] * TP * (-8.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[13] = 0.5 * rst[2] * TP * (-8.0 * rst[0] + 12.0 * RR + 24.0 * RS);
+  dhdt[13] = 0.5 * T2P * (4.0 * RS - 12.0 * RSM * RS);
 
-  dhdr[14]  =  0.5*rst[2]*TP*(-16.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[14]  =  0.5*rst[2]*TP*(4.0 - 16.0*rst[0] - 8.0*rst[1] + 12.0*RR + 24.0*RS);
-  dhdt[14]  =  0.5*T2P*RSM*(4.0*rst[1] - 12.0*RS);
+  dhdr[14] = 0.5 * rst[2] * TP * (-16.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[14] = 0.5 * rst[2] * TP * (4.0 - 16.0 * rst[0] - 8.0 * rst[1] + 12.0 * RR + 24.0 * RS);
+  dhdt[14] = 0.5 * T2P * RSM * (4.0 * rst[1] - 12.0 * RS);
 
-  dhdr[9]  =  TP*TM*(4.0*rst[0] + 7.0*rst[1] - 3.0 - 6.0*RS - 3.0*SS);
-  dhds[9]  =  TP*TM*(7.0*rst[0] + 4.0*rst[1] - 3.0 - 6.0*RS - 3.0*RR);
-  dhdt[9]  = -2.0*rst[2]*RSM*(1.0 - 2.0*(rst[0]+rst[1]) + 3.0*RS);
+  dhdr[9] = TP * TM * (4.0 * rst[0] + 7.0 * rst[1] - 3.0 - 6.0 * RS - 3.0 * SS);
+  dhds[9] = TP * TM * (7.0 * rst[0] + 4.0 * rst[1] - 3.0 - 6.0 * RS - 3.0 * RR);
+  dhdt[9] = -2.0 * rst[2] * RSM * (1.0 - 2.0 * (rst[0] + rst[1]) + 3.0 * RS);
 
-  dhdr[10]  =  TP*TM*(4.0*rst[0] - 1.0 + 3.0*rst[1] - 6.0*RS - 3.0*SS);
-  dhds[10]  =  TP*TM*(3.0*rst[0] - 6.0*RS - 3.0*RR);
-  dhdt[10]  = -2.0*rst[2]*(rst[0] - 2.0*(RSM*rst[0] + RS) + 3.0*RSM*RS);
+  dhdr[10] = TP * TM * (4.0 * rst[0] - 1.0 + 3.0 * rst[1] - 6.0 * RS - 3.0 * SS);
+  dhds[10] = TP * TM * (3.0 * rst[0] - 6.0 * RS - 3.0 * RR);
+  dhdt[10] = -2.0 * rst[2] * (rst[0] - 2.0 * (RSM * rst[0] + RS) + 3.0 * RSM * RS);
 
-  dhdr[11]  =  TP*TM*(3.0*rst[1] - 6.0*RS - 3.0*SS);
-  dhds[11]  =  TP*TM*(4.0*rst[1] - 1.0 + 3.0*rst[0] - 6.0*RS - 3.0*RR);
-  dhdt[11]  = -2.0*rst[2]*(rst[1] - 2.0*(RSM*rst[1] + RS) + 3.0*RSM*RS);
+  dhdr[11] = TP * TM * (3.0 * rst[1] - 6.0 * RS - 3.0 * SS);
+  dhds[11] = TP * TM * (4.0 * rst[1] - 1.0 + 3.0 * rst[0] - 6.0 * RS - 3.0 * RR);
+  dhdt[11] = -2.0 * rst[2] * (rst[1] - 2.0 * (RSM * rst[1] + RS) + 3.0 * RSM * RS);
 
-  dhdr[16]  = -0.5*27.0*rst[2]*TM*(rst[1] - 2.0*RS - SS);
-  dhds[16]  = -0.5*27.0*rst[2]*TM*(rst[0] - RR - 2.0*RS);
-  dhdt[16]  = -0.5*27.0*T2M*RSM*RS;
+  dhdr[16] = -0.5 * 27.0 * rst[2] * TM * (rst[1] - 2.0 * RS - SS);
+  dhds[16] = -0.5 * 27.0 * rst[2] * TM * (rst[0] - RR - 2.0 * RS);
+  dhdt[16] = -0.5 * 27.0 * T2M * RSM * RS;
 
-  dhdr[17]  =  0.5*27.0*rst[2]*TP*(rst[1] - 2.0*RS - SS);
-  dhds[17]  =  0.5*27.0*rst[2]*TP*(rst[0] - RR - 2.0*RS);
-  dhdt[17]  =  0.5*27.0*T2P*RSM*RS;
+  dhdr[17] = 0.5 * 27.0 * rst[2] * TP * (rst[1] - 2.0 * RS - SS);
+  dhds[17] = 0.5 * 27.0 * rst[2] * TP * (rst[0] - RR - 2.0 * RS);
+  dhdt[17] = 0.5 * 27.0 * T2P * RSM * RS;
 
-  dhdr[20]  =  TP*TM*(4.0 - 8.0*rst[0] - 16.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[20]  =  TP*TM*(-16.0*rst[0] + 12.0*RR + 24.0*RS);
-  dhdt[20]  = -2.0*rst[2]*RSM*(4.0*rst[0] - 12.0*RS);
+  dhdr[20] = TP * TM * (4.0 - 8.0 * rst[0] - 16.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[20] = TP * TM * (-16.0 * rst[0] + 12.0 * RR + 24.0 * RS);
+  dhdt[20] = -2.0 * rst[2] * RSM * (4.0 * rst[0] - 12.0 * RS);
 
-  dhdr[18]  =  TP*TM*(-8.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[18]  =  TP*TM*(-8.0*rst[0] + 12.0*RR + 24.0*RS);
-  dhdt[18]  = -2.0*rst[2]*(4.0*RS - 12.0*RSM*RS);
+  dhdr[18] = TP * TM * (-8.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[18] = TP * TM * (-8.0 * rst[0] + 12.0 * RR + 24.0 * RS);
+  dhdt[18] = -2.0 * rst[2] * (4.0 * RS - 12.0 * RSM * RS);
 
-  dhdr[19]  =  TP*TM*(-16.0*rst[1] + 24.0*RS + 12.0*SS);
-  dhds[19]  =  TP*TM*(4.0 - 16.0*rst[0] - 8.0*rst[1] + 12.0*RR + 24.0*RS);
-  dhdt[19]  = -2.0*rst[2]*RSM*(4.0*rst[1] - 12.0*RS);
+  dhdr[19] = TP * TM * (-16.0 * rst[1] + 24.0 * RS + 12.0 * SS);
+  dhds[19] = TP * TM * (4.0 - 16.0 * rst[0] - 8.0 * rst[1] + 12.0 * RR + 24.0 * RS);
+  dhdt[19] = -2.0 * rst[2] * RSM * (4.0 * rst[1] - 12.0 * RS);
 
-  dhdr[15]  =  27.0*TM*TP*(rst[1] - 2.0*RS - SS);
-  dhds[15]  =  27.0*TM*TP*(rst[0] - RR - 2.0*RS);
-  dhdt[15]  = -2.0*27.0*rst[2]*RSM*RS;
+  dhdr[15] = 27.0 * TM * TP * (rst[1] - 2.0 * RS - SS);
+  dhds[15] = 27.0 * TM * TP * (rst[0] - RR - 2.0 * RS);
+  dhdt[15] = -2.0 * 27.0 * rst[2] * RSM * RS;
 }
 
-
-double wedge_equiangle_skew( int num_nodes, double coordinates[][3] )
+double wedge_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   double tri1[3][3];
   double tri2[3][3];
@@ -176,37 +163,32 @@ double wedge_equiangle_skew( int num_nodes, double coordinates[][3] )
   double quad2[4][3];
   double quad3[4][3];
 
-  make_wedge_faces(coordinates, tri1,tri2,quad1,quad2,quad3);
+  make_wedge_faces(coordinates, tri1, tri2, quad1, quad2, quad3);
 
+  double tri1_skew = tri_equiangle_skew(3, tri1);
+  double tri2_skew = tri_equiangle_skew(3, tri2);
+  double quad1_skew = quad_equiangle_skew(4, quad1);
+  double quad2_skew = quad_equiangle_skew(4, quad2);
+  double quad3_skew = quad_equiangle_skew(4, quad3);
 
-  double tri1_skew=tri_equiangle_skew(3,tri1);
-  double tri2_skew=tri_equiangle_skew(3,tri2);
-  double quad1_skew=quad_equiangle_skew( 4, quad1 );
-  double quad2_skew=quad_equiangle_skew( 4, quad2 );
-  double quad3_skew=quad_equiangle_skew( 4, quad3 );
-
-  double max_skew=tri1_skew;
-  max_skew = max_skew > tri2_skew      ? max_skew : tri2_skew;
-  max_skew = max_skew > quad1_skew      ? max_skew : quad1_skew;
-  max_skew = max_skew > quad2_skew      ? max_skew : quad2_skew;
-  max_skew = max_skew > quad3_skew      ? max_skew : quad3_skew;
+  double max_skew = tri1_skew;
+  max_skew = max_skew > tri2_skew ? max_skew : tri2_skew;
+  max_skew = max_skew > quad1_skew ? max_skew : quad1_skew;
+  max_skew = max_skew > quad2_skew ? max_skew : quad2_skew;
+  max_skew = max_skew > quad3_skew ? max_skew : quad3_skew;
 
   return max_skew;
 }
 
-
 /*!
-
   calculate the volume of a wedge
 
   this is done by dividing the wedge into 11 tets
   and summing the volume of each tet
 
  */
-
-double wedge_volume( int /*num_nodes*/, double coordinates[][3] )
+double wedge_volume(int /*num_nodes*/, const double coordinates[][3])
 {
-
   // We need to divide the wedge into 11 tets.
   // This is a better solution than 3 tets or 3 hexes because
   // if the wedge is twisted then the 3 quads will be twisted.
@@ -221,32 +203,29 @@ double wedge_volume( int /*num_nodes*/, double coordinates[][3] )
   // volume calculation across multiple wedges.
 
   double center_coords[3][3];
-  //calculate the center of the quads
-  center_coords[0][0] =  (coordinates[0][0] + coordinates[1][0] +
-      coordinates[3][0] + coordinates[4][0]) / 4;
-  center_coords[0][1] =  (coordinates[0][1] + coordinates[1][1] +
-      coordinates[3][1] + coordinates[4][1] ) / 4;
-  center_coords[0][2] =  (coordinates[0][2] + coordinates[1][2] +
-      coordinates[3][2] + coordinates[4][2] ) / 4;
+  // calculate the center of the quads
+  center_coords[0][0] =
+    (coordinates[0][0] + coordinates[1][0] + coordinates[3][0] + coordinates[4][0]) / 4;
+  center_coords[0][1] =
+    (coordinates[0][1] + coordinates[1][1] + coordinates[3][1] + coordinates[4][1]) / 4;
+  center_coords[0][2] =
+    (coordinates[0][2] + coordinates[1][2] + coordinates[3][2] + coordinates[4][2]) / 4;
 
+  center_coords[1][0] =
+    (coordinates[1][0] + coordinates[2][0] + coordinates[4][0] + coordinates[5][0]) / 4;
+  center_coords[1][1] =
+    (coordinates[1][1] + coordinates[2][1] + coordinates[4][1] + coordinates[5][1]) / 4;
+  center_coords[1][2] =
+    (coordinates[1][2] + coordinates[2][2] + coordinates[4][2] + coordinates[5][2]) / 4;
 
-  center_coords[1][0] =  (coordinates[1][0] + coordinates[2][0] +
-      coordinates[4][0] + coordinates[5][0]) / 4;
-  center_coords[1][1] =  (coordinates[1][1] + coordinates[2][1] +
-      coordinates[4][1] + coordinates[5][1] ) / 4;
-  center_coords[1][2] =  (coordinates[1][2] + coordinates[2][2] +
-      coordinates[4][2] + coordinates[5][2] ) / 4;
+  center_coords[2][0] =
+    (coordinates[2][0] + coordinates[0][0] + coordinates[3][0] + coordinates[5][0]) / 4;
+  center_coords[2][1] =
+    (coordinates[2][1] + coordinates[0][1] + coordinates[3][1] + coordinates[5][1]) / 4;
+  center_coords[2][2] =
+    (coordinates[2][2] + coordinates[0][2] + coordinates[3][2] + coordinates[5][2]) / 4;
 
-
-  center_coords[2][0] =  (coordinates[2][0] + coordinates[0][0] +
-      coordinates[3][0] + coordinates[5][0]) / 4;
-  center_coords[2][1] =  (coordinates[2][1] + coordinates[0][1] +
-      coordinates[3][1] + coordinates[5][1] ) / 4;
-  center_coords[2][2] =  (coordinates[2][2] + coordinates[0][2] +
-      coordinates[3][2] + coordinates[5][2] ) / 4;
-
-
-  //create the tets.
+  // create the tets.
   double tet_coords[11][4][3];
   tet_coords[0][0][0] = coordinates[0][0];
   tet_coords[0][0][1] = coordinates[0][1];
@@ -391,10 +370,10 @@ double wedge_volume( int /*num_nodes*/, double coordinates[][3] )
   tet_coords[10][3][1] = coordinates[3][1];
   tet_coords[10][3][2] = coordinates[3][2];
 
-  double volume=0.0;
-  for(int t=0;t<11;t++)
+  double volume = 0.0;
+  for (int t = 0; t < 11; t++)
   {
-    volume+=tet_volume(4,tet_coords[t]);
+    volume += tet_volume(4, tet_coords[t]);
   }
 
   return (double)volume;
@@ -412,45 +391,36 @@ double wedge_volume( int /*num_nodes*/, double coordinates[][3] )
    q for right, unit wedge : 1
    Reference : -
    */
-double wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
+double wedge_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
-  VerdictVector a,b,c,d,e,f,g,h,i;
+  VerdictVector a, b, c, d, e, f, g, h, i;
 
-  a.set( coordinates[1][0] - coordinates[0][0],
-      coordinates[1][1] - coordinates[0][1],
-      coordinates[1][2] - coordinates[0][2] );
+  a.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+    coordinates[1][2] - coordinates[0][2]);
 
-  b.set( coordinates[2][0] - coordinates[1][0],
-      coordinates[2][1] - coordinates[1][1],
-      coordinates[2][2] - coordinates[1][2] );
+  b.set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+    coordinates[2][2] - coordinates[1][2]);
 
-  c.set( coordinates[0][0] - coordinates[2][0],
-      coordinates[0][1] - coordinates[2][1],
-      coordinates[0][2] - coordinates[2][2] );
+  c.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+    coordinates[0][2] - coordinates[2][2]);
 
-  d.set( coordinates[4][0] - coordinates[3][0],
-      coordinates[4][1] - coordinates[3][1],
-      coordinates[4][2] - coordinates[3][2] );
+  d.set(coordinates[4][0] - coordinates[3][0], coordinates[4][1] - coordinates[3][1],
+    coordinates[4][2] - coordinates[3][2]);
 
-  e.set( coordinates[5][0] - coordinates[4][0],
-      coordinates[5][1] - coordinates[4][1],
-      coordinates[5][2] - coordinates[4][2] );
+  e.set(coordinates[5][0] - coordinates[4][0], coordinates[5][1] - coordinates[4][1],
+    coordinates[5][2] - coordinates[4][2]);
 
-  f.set( coordinates[3][0] - coordinates[5][0],
-      coordinates[3][1] - coordinates[5][1],
-      coordinates[3][2] - coordinates[5][2] );
+  f.set(coordinates[3][0] - coordinates[5][0], coordinates[3][1] - coordinates[5][1],
+    coordinates[3][2] - coordinates[5][2]);
 
-  g.set( coordinates[3][0] - coordinates[0][0],
-      coordinates[3][1] - coordinates[0][1],
-      coordinates[3][2] - coordinates[0][2] );
+  g.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+    coordinates[3][2] - coordinates[0][2]);
 
-  h.set( coordinates[4][0] - coordinates[1][0],
-      coordinates[4][1] - coordinates[1][1],
-      coordinates[4][2] - coordinates[1][2] );
+  h.set(coordinates[4][0] - coordinates[1][0], coordinates[4][1] - coordinates[1][1],
+    coordinates[4][2] - coordinates[1][2]);
 
-  i.set( coordinates[5][0] - coordinates[2][0],
-      coordinates[5][1] - coordinates[2][1],
-      coordinates[5][2] - coordinates[2][2] );
+  i.set(coordinates[5][0] - coordinates[2][0], coordinates[5][1] - coordinates[2][1],
+    coordinates[5][2] - coordinates[2][2]);
 
   double a2 = a.length_squared();
   double b2 = b.length_squared();
@@ -464,44 +434,95 @@ double wedge_edge_ratio( int /*num_nodes*/, double coordinates[][3] )
 
   double max = a2, min = a2;
 
-  if (max <= b2){max = b2;}
-  if (b2 <= min){min = b2;}
+  if (max <= b2)
+  {
+    max = b2;
+  }
+  if (b2 <= min)
+  {
+    min = b2;
+  }
 
-  if (max <= c2){max = c2;}
-  if (c2 <= min){min = c2;}
+  if (max <= c2)
+  {
+    max = c2;
+  }
+  if (c2 <= min)
+  {
+    min = c2;
+  }
 
-  if (max <= d2){max = d2;}
-  if (d2 <= min){min = d2;}
+  if (max <= d2)
+  {
+    max = d2;
+  }
+  if (d2 <= min)
+  {
+    min = d2;
+  }
 
-  if (max <= e2){max = e2;}
-  if (e2 <= min){min = e2;}
+  if (max <= e2)
+  {
+    max = e2;
+  }
+  if (e2 <= min)
+  {
+    min = e2;
+  }
 
-  if (max <= f2){max = f2;}
-  if (f2 <= min){min = f2;}
+  if (max <= f2)
+  {
+    max = f2;
+  }
+  if (f2 <= min)
+  {
+    min = f2;
+  }
 
-  if (max <= g2){max = g2;}
-  if (g2 <= min){min = g2;}
+  if (max <= g2)
+  {
+    max = g2;
+  }
+  if (g2 <= min)
+  {
+    min = g2;
+  }
 
-  if (max <= h2){max = h2;}
-  if (h2 <= min){min = h2;}
+  if (max <= h2)
+  {
+    max = h2;
+  }
+  if (h2 <= min)
+  {
+    min = h2;
+  }
 
-  if (max <= i2){max = i2;}
-  if (i2 <= min){min = i2;}
+  if (max <= i2)
+  {
+    max = i2;
+  }
+  if (i2 <= min)
+  {
+    min = i2;
+  }
 
-  double edge_ratio = sqrt( max / min );
+  double edge_ratio = sqrt(max / min);
 
   if (std::isnan(edge_ratio))
+  {
     return VERDICT_DBL_MAX;
+  }
   if (edge_ratio < 1.)
+  {
     return 1.;
-  return  (double) std::min( edge_ratio, VERDICT_DBL_MAX );
-
+  }
+  return (double)std::min(edge_ratio, VERDICT_DBL_MAX);
 }
 
-static void aspects( int num_nodes, double coordinates[][3],
-                    double &aspect1, double &aspect2, double &aspect3, double &aspect4, double &aspect5, double &aspect6)
+static void aspects(int num_nodes, const double coordinates[][3], double& aspect1, double& aspect2,
+  double& aspect3, double& aspect4, double& aspect5, double& aspect6)
 {
-  if ( num_nodes < 6 )
+  if (num_nodes < 6)
   {
     aspect1 = 0;
     aspect2 = 0;
@@ -511,60 +532,130 @@ static void aspects( int num_nodes, double coordinates[][3],
     aspect6 = 0;
     return;
   }
-  
+
   double mini_tris[4][3];
   int i = 0;
   // Take first tetrahedron
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[3][i];}
-  
-  aspect1 = tet_aspect_frobenius(4,mini_tris);
-  
-  //Take second tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[4][i];}
-  
-  aspect2 = tet_aspect_frobenius(4,mini_tris);
-  
-  //3rd tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[5][i];}
-  
-  aspect3 = tet_aspect_frobenius(4,mini_tris);
-  
-  //4th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[0][i];}
-  
-  aspect4 = tet_aspect_frobenius(4,mini_tris);
-  
-  //5th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[1][i];}
-  
-  aspect5 = tet_aspect_frobenius(4,mini_tris);
-  
-  //6th tet
-  for (i = 0; i < 3; i++){mini_tris[0][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){mini_tris[1][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){mini_tris[2][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){mini_tris[3][i] = coordinates[2][i];}
-  
-  aspect6 = tet_aspect_frobenius(4,mini_tris);
-  
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[0][i] = coordinates[0][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[1][i] = coordinates[1][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[2][i] = coordinates[2][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[3][i] = coordinates[3][i];
+  }
+
+  aspect1 = tet_aspect_frobenius(4, mini_tris);
+
+  // Take second tet
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[0][i] = coordinates[1][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[1][i] = coordinates[2][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[2][i] = coordinates[0][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[3][i] = coordinates[4][i];
+  }
+
+  aspect2 = tet_aspect_frobenius(4, mini_tris);
+
+  // 3rd tet
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[0][i] = coordinates[2][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[1][i] = coordinates[0][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[2][i] = coordinates[1][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[3][i] = coordinates[5][i];
+  }
+
+  aspect3 = tet_aspect_frobenius(4, mini_tris);
+
+  // 4th tet
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[0][i] = coordinates[3][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[1][i] = coordinates[5][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[2][i] = coordinates[4][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[3][i] = coordinates[0][i];
+  }
+
+  aspect4 = tet_aspect_frobenius(4, mini_tris);
+
+  // 5th tet
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[0][i] = coordinates[4][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[1][i] = coordinates[3][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[2][i] = coordinates[5][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[3][i] = coordinates[1][i];
+  }
+
+  aspect5 = tet_aspect_frobenius(4, mini_tris);
+
+  // 6th tet
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[0][i] = coordinates[5][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[1][i] = coordinates[4][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[2][i] = coordinates[3][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    mini_tris[3][i] = coordinates[2][i];
+  }
+
+  aspect6 = tet_aspect_frobenius(4, mini_tris);
 }
-  
-  
+
 /* For wedges, there is not a unique definition of the aspect Frobenius. Rather,
  * this metric uses the aspect Frobenius defined for tetrahedral (see section
  * 6.4) and is comparable in methodology to the maximum aspect Frobenius defined
@@ -581,22 +672,22 @@ static void aspects( int num_nodes, double coordinates[][3],
  q for right, unit wedge : 1
  Reference : Adapted from section 7.7
  Verdict Function : wedge_max_aspect_frobenius or wedge_condition
-
  */
-
-double wedge_max_aspect_frobenius( int num_nodes, double coordinates[][3] )
+double wedge_max_aspect_frobenius(int num_nodes, const double coordinates[][3])
 {
   double aspect1, aspect2, aspect3, aspect4, aspect5, aspect6;
-  aspects( num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6 );
+  aspects(num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6);
 
-  double max_aspect = std::max( {aspect1,aspect2,aspect3,aspect4,aspect5,aspect6} );
-  
-  if (max_aspect >= VERDICT_DBL_MAX )
+  double max_aspect = std::max({ aspect1, aspect2, aspect3, aspect4, aspect5, aspect6 });
+
+  if (max_aspect >= VERDICT_DBL_MAX)
+  {
     return VERDICT_DBL_MAX;
+  }
   max_aspect /= 1.16477;
   return std::max(max_aspect, 1.);
-
 }
+
 /*
    For wedges, there is not a unique definition of the aspect Frobenius. Rather,
    this metric uses the aspect Frobenius defined for tetrahedra (see section
@@ -612,18 +703,18 @@ double wedge_max_aspect_frobenius( int num_nodes, double coordinates[][3] )
    q for right, unit wedge : 1
    Reference : Adapted from section 7.8
    Verdict Function : wedge_mean_aspect_frobenius
-
    */
-
-double wedge_mean_aspect_frobenius( int num_nodes, double coordinates[][3] )
+double wedge_mean_aspect_frobenius(int num_nodes, const double coordinates[][3])
 {
   double aspect1, aspect2, aspect3, aspect4, aspect5, aspect6;
-  aspects( num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6 );
+  aspects(num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6);
 
   double mean_aspect = (aspect1 + aspect2 + aspect3 + aspect4 + aspect5 + aspect6);
   if (mean_aspect >= VERDICT_DBL_MAX)
+  {
     return VERDICT_DBL_MAX;
-  
+  }
+
   mean_aspect /= (6. * 1.16477);
   return std::max(mean_aspect, 1.);
 }
@@ -644,34 +735,35 @@ double wedge_mean_aspect_frobenius( int num_nodes, double coordinates[][3] )
  Reference : Adapted from section 6.10
  Verdict Function : wedge_jacobian
  */
-
-double wedge_jacobian( int num_nodes, double coordinates[][3] )
+double wedge_jacobian(int num_nodes, const double coordinates[][3])
 {
-  if(num_nodes == 21)
+  if (num_nodes == 21)
   {
     double dhdr[21];
     double dhds[21];
     double dhdt[21];
     double min_determinant = VERDICT_DBL_MAX;
 
-    for(int i=0; i<15; i++)
+    for (int i = 0; i < 15; i++)
     {
-      WEDGE21_gradients_of_the_shape_functions_for_RST(WEDGE21_node_local_coord[i], dhdr, dhds, dhdt);
-      double jacobian[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+      WEDGE21_gradients_of_the_shape_functions_for_RST(
+        WEDGE21_node_local_coord[i], dhdr, dhds, dhdt);
+      double jacobian[3][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
 
-      for(int j=0; j<21; j++)
+      for (int j = 0; j < 21; j++)
       {
-        jacobian[0][0]+=coordinates[j][0]*dhdr[j];
-        jacobian[0][1]+=coordinates[j][0]*dhds[j];
-        jacobian[0][2]+=coordinates[j][0]*dhdt[j];
-        jacobian[1][0]+=coordinates[j][1]*dhdr[j];
-        jacobian[1][1]+=coordinates[j][1]*dhds[j];
-        jacobian[1][2]+=coordinates[j][1]*dhdt[j];
-        jacobian[2][0]+=coordinates[j][2]*dhdr[j];
-        jacobian[2][1]+=coordinates[j][2]*dhds[j];
-        jacobian[2][2]+=coordinates[j][2]*dhdt[j];
+        jacobian[0][0] += coordinates[j][0] * dhdr[j];
+        jacobian[0][1] += coordinates[j][0] * dhds[j];
+        jacobian[0][2] += coordinates[j][0] * dhdt[j];
+        jacobian[1][0] += coordinates[j][1] * dhdr[j];
+        jacobian[1][1] += coordinates[j][1] * dhds[j];
+        jacobian[1][2] += coordinates[j][1] * dhdt[j];
+        jacobian[2][0] += coordinates[j][2] * dhdr[j];
+        jacobian[2][1] += coordinates[j][2] * dhds[j];
+        jacobian[2][2] += coordinates[j][2] * dhdt[j];
       }
-      double det = (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
+      double det =
+        (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
       min_determinant = std::min(det, min_determinant);
     }
     return min_determinant;
@@ -679,107 +771,91 @@ double wedge_jacobian( int num_nodes, double coordinates[][3] )
   else
   {
     double min_jacobian = 0, current_jacobian = 0;
-    VerdictVector vec1,vec2,vec3;
+    VerdictVector vec1, vec2, vec3;
 
     // Node 0
-    vec1.set( coordinates[1][0] - coordinates[0][0],
-        coordinates[1][1] - coordinates[0][1],
-        coordinates[1][2] - coordinates[0][2] );
+    vec1.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+      coordinates[1][2] - coordinates[0][2]);
 
-    vec2.set( coordinates[3][0] - coordinates[0][0],
-        coordinates[3][1] - coordinates[0][1],
-        coordinates[3][2] - coordinates[0][2] );
+    vec2.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+      coordinates[3][2] - coordinates[0][2]);
 
-    vec3.set( coordinates[2][0] - coordinates[0][0],
-        coordinates[2][1] - coordinates[0][1],
-        coordinates[2][2] - coordinates[0][2] );
+    vec3.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
+      coordinates[2][2] - coordinates[0][2]);
 
     current_jacobian = vec2 % (vec1 * vec3);
     min_jacobian = current_jacobian;
 
-    //node 1
-    vec1.set( coordinates[2][0] - coordinates[1][0],
-        coordinates[2][1] - coordinates[1][1],
-        coordinates[2][2] - coordinates[1][2] );
+    // node 1
+    vec1.set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+      coordinates[2][2] - coordinates[1][2]);
 
-    vec2.set( coordinates[4][0] - coordinates[1][0],
-        coordinates[4][1] - coordinates[1][1],
-        coordinates[4][2] - coordinates[1][2] );
+    vec2.set(coordinates[4][0] - coordinates[1][0], coordinates[4][1] - coordinates[1][1],
+      coordinates[4][2] - coordinates[1][2]);
 
-    vec3.set( coordinates[0][0] - coordinates[1][0],
-        coordinates[0][1] - coordinates[1][1],
-        coordinates[0][2] - coordinates[1][2] );
+    vec3.set(coordinates[0][0] - coordinates[1][0], coordinates[0][1] - coordinates[1][1],
+      coordinates[0][2] - coordinates[1][2]);
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = std::min(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian, min_jacobian);
 
-    //node 2
-    vec1.set( coordinates[0][0] - coordinates[2][0],
-        coordinates[0][1] - coordinates[2][1],
-        coordinates[0][2] - coordinates[2][2] );
+    // node 2
+    vec1.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+      coordinates[0][2] - coordinates[2][2]);
 
-    vec2.set( coordinates[5][0] - coordinates[2][0],
-        coordinates[5][1] - coordinates[2][1],
-        coordinates[5][2] - coordinates[2][2] );
+    vec2.set(coordinates[5][0] - coordinates[2][0], coordinates[5][1] - coordinates[2][1],
+      coordinates[5][2] - coordinates[2][2]);
 
-    vec3.set( coordinates[1][0] - coordinates[2][0],
-        coordinates[1][1] - coordinates[2][1],
-        coordinates[1][2] - coordinates[2][2] );
+    vec3.set(coordinates[1][0] - coordinates[2][0], coordinates[1][1] - coordinates[2][1],
+      coordinates[1][2] - coordinates[2][2]);
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = std::min(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian, min_jacobian);
 
-    //node 3
-    vec1.set( coordinates[0][0] - coordinates[3][0],
-        coordinates[0][1] - coordinates[3][1],
-        coordinates[0][2] - coordinates[3][2] );
+    // node 3
+    vec1.set(coordinates[0][0] - coordinates[3][0], coordinates[0][1] - coordinates[3][1],
+      coordinates[0][2] - coordinates[3][2]);
 
-    vec2.set( coordinates[4][0] - coordinates[3][0],
-        coordinates[4][1] - coordinates[3][1],
-        coordinates[4][2] - coordinates[3][2] );
+    vec2.set(coordinates[4][0] - coordinates[3][0], coordinates[4][1] - coordinates[3][1],
+      coordinates[4][2] - coordinates[3][2]);
 
-    vec3.set( coordinates[5][0] - coordinates[3][0],
-        coordinates[5][1] - coordinates[3][1],
-        coordinates[5][2] - coordinates[3][2] );
+    vec3.set(coordinates[5][0] - coordinates[3][0], coordinates[5][1] - coordinates[3][1],
+      coordinates[5][2] - coordinates[3][2]);
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = std::min(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian, min_jacobian);
 
-    //node 4
-    vec1.set( coordinates[1][0] - coordinates[4][0],
-        coordinates[1][1] - coordinates[4][1],
-        coordinates[1][2] - coordinates[4][2] );
+    // node 4
+    vec1.set(coordinates[1][0] - coordinates[4][0], coordinates[1][1] - coordinates[4][1],
+      coordinates[1][2] - coordinates[4][2]);
 
-    vec2.set( coordinates[5][0] - coordinates[4][0],
-        coordinates[5][1] - coordinates[4][1],
-        coordinates[5][2] - coordinates[4][2] );
+    vec2.set(coordinates[5][0] - coordinates[4][0], coordinates[5][1] - coordinates[4][1],
+      coordinates[5][2] - coordinates[4][2]);
 
-    vec3.set( coordinates[3][0] - coordinates[4][0],
-        coordinates[3][1] - coordinates[4][1],
-        coordinates[3][2] - coordinates[4][2] );
+    vec3.set(coordinates[3][0] - coordinates[4][0], coordinates[3][1] - coordinates[4][1],
+      coordinates[3][2] - coordinates[4][2]);
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = std::min(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian, min_jacobian);
 
-    //node 5
-    vec1.set( coordinates[3][0] - coordinates[5][0],
-        coordinates[3][1] - coordinates[5][1],
-        coordinates[3][2] - coordinates[5][2] );
+    // node 5
+    vec1.set(coordinates[3][0] - coordinates[5][0], coordinates[3][1] - coordinates[5][1],
+      coordinates[3][2] - coordinates[5][2]);
 
-    vec2.set( coordinates[4][0] - coordinates[5][0],
-        coordinates[4][1] - coordinates[5][1],
-        coordinates[4][2] - coordinates[5][2] );
+    vec2.set(coordinates[4][0] - coordinates[5][0], coordinates[4][1] - coordinates[5][1],
+      coordinates[4][2] - coordinates[5][2]);
 
-    vec3.set( coordinates[2][0] - coordinates[5][0],
-        coordinates[2][1] - coordinates[5][1],
-        coordinates[2][2] - coordinates[5][2] );
+    vec3.set(coordinates[2][0] - coordinates[5][0], coordinates[2][1] - coordinates[5][1],
+      coordinates[2][2] - coordinates[5][2]);
 
     current_jacobian = vec2 % (vec1 * vec3);
-    min_jacobian = std::min(current_jacobian,min_jacobian);
+    min_jacobian = std::min(current_jacobian, min_jacobian);
 
-    if ( min_jacobian > 0 )
-      return (double) std::min( min_jacobian, VERDICT_DBL_MAX );
-    return (double) std::max( min_jacobian, -VERDICT_DBL_MAX );
+    if (min_jacobian > 0)
+    {
+      return (double)std::min(min_jacobian, VERDICT_DBL_MAX);
+    }
+    return (double)std::max(min_jacobian, -VERDICT_DBL_MAX);
   }
 }
 
@@ -804,19 +880,27 @@ double wedge_jacobian( int num_nodes, double coordinates[][3] )
  Reference : Adapted from section 7.3
  Verdict Function : wedge_distortion
  */
-
-double wedge_distortion( int num_nodes, double coordinates[][3] )
+double wedge_distortion(int num_nodes, const double coordinates[][3])
 {
-  double jacobian = wedge_jacobian( num_nodes, coordinates );
+  double jacobian = wedge_jacobian(num_nodes, coordinates);
   double master_volume = 0.433013;
-  double current_volume = wedge_volume( num_nodes, coordinates);
+  double current_volume = wedge_volume(num_nodes, coordinates);
   double distortion = VERDICT_DBL_MAX;
   if (fabs(current_volume) > 0.0)
-    distortion = jacobian*master_volume/current_volume/0.866025;
+    distortion = jacobian * master_volume / current_volume / 0.866025;
 
-  if (std::isnan(distortion)) return VERDICT_DBL_MAX;
-  if ( distortion >= VERDICT_DBL_MAX ) return VERDICT_DBL_MAX;
-  if ( distortion <= -VERDICT_DBL_MAX ) return -VERDICT_DBL_MAX;
+  if (std::isnan(distortion))
+  {
+    return VERDICT_DBL_MAX;
+  }
+  if (distortion >= VERDICT_DBL_MAX)
+  {
+    return VERDICT_DBL_MAX;
+  }
+  if (distortion <= -VERDICT_DBL_MAX)
+  {
+    return -VERDICT_DBL_MAX;
+  }
   return distortion;
 }
 
@@ -833,41 +917,77 @@ double wedge_distortion( int num_nodes, double coordinates[][3] )
    Reference : Adapted from section 5.21
    Verdict Function : wedge_max_stretch
    */
-
-double wedge_max_stretch( int /*num_nodes*/, double coordinates[][3] )
+double wedge_max_stretch(int /*num_nodes*/, const double coordinates[][3])
 {
-  //This function finds the stretch of the 3 quadrilateral faces and returns the maximum value
+  // This function finds the stretch of the 3 quadrilateral faces and returns the maximum value
 
   double stretch = 42, quad_face[4][3], stretch1 = 42, stretch2 = 42, stretch3 = 42;
   int i = 0;
 
-  //first face
-  for (i = 0; i < 3; i++){quad_face[0][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){quad_face[1][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){quad_face[2][i] = coordinates[4][i];}
-  for (i = 0; i < 3; i++){quad_face[3][i] = coordinates[3][i];}
-  stretch1 = quad_stretch(4,quad_face);
+  // first face
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[0][i] = coordinates[0][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[1][i] = coordinates[1][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[2][i] = coordinates[4][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[3][i] = coordinates[3][i];
+  }
+  stretch1 = quad_stretch(4, quad_face);
 
-  //second face
-  for (i = 0; i < 3; i++){quad_face[0][i] = coordinates[1][i];}
-  for (i = 0; i < 3; i++){quad_face[1][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){quad_face[2][i] = coordinates[5][i];}
-  for (i = 0; i < 3; i++){quad_face[3][i] = coordinates[4][i];}
-  stretch2 = quad_stretch(4,quad_face);
+  // second face
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[0][i] = coordinates[1][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[1][i] = coordinates[2][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[2][i] = coordinates[5][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[3][i] = coordinates[4][i];
+  }
+  stretch2 = quad_stretch(4, quad_face);
 
-  //third face
-  for (i = 0; i < 3; i++){quad_face[0][i] = coordinates[2][i];}
-  for (i = 0; i < 3; i++){quad_face[1][i] = coordinates[0][i];}
-  for (i = 0; i < 3; i++){quad_face[2][i] = coordinates[3][i];}
-  for (i = 0; i < 3; i++){quad_face[3][i] = coordinates[5][i];}
-  stretch3 = quad_stretch(4,quad_face);
+  // third face
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[0][i] = coordinates[2][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[1][i] = coordinates[0][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[2][i] = coordinates[3][i];
+  }
+  for (i = 0; i < 3; i++)
+  {
+    quad_face[3][i] = coordinates[5][i];
+  }
+  stretch3 = quad_stretch(4, quad_face);
 
-  stretch = std::max( {stretch1,stretch2,stretch3} );
+  stretch = std::max({ stretch1, stretch2, stretch3 });
 
-  if ( stretch > 0 )
-    return (double) std::min( stretch, VERDICT_DBL_MAX );
-  return (double) std::max( stretch, -VERDICT_DBL_MAX );
-
+  if (stretch > 0)
+  {
+    return (double)std::min(stretch, VERDICT_DBL_MAX);
+  }
+  return (double)std::max(stretch, -VERDICT_DBL_MAX);
 }
 
 /*
@@ -887,126 +1007,108 @@ double wedge_max_stretch( int /*num_nodes*/, double coordinates[][3] )
    Reference : Adapted from section 6.14 and 7.11
    Verdict Function : wedge_scaled_jacobian
    */
-
-double wedge_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
+double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
 {
-  double min_jacobian = 0, current_jacobian = 0,lengths = 42;
-  VerdictVector vec1,vec2,vec3;
+  double min_jacobian = 0, current_jacobian = 0, lengths = 42;
+  VerdictVector vec1, vec2, vec3;
 
   // Node 0
-  vec1.set( coordinates[1][0] - coordinates[0][0],
-      coordinates[1][1] - coordinates[0][1],
-      coordinates[1][2] - coordinates[0][2] );
+  vec1.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+    coordinates[1][2] - coordinates[0][2]);
 
-  vec2.set( coordinates[3][0] - coordinates[0][0],
-      coordinates[3][1] - coordinates[0][1],
-      coordinates[3][2] - coordinates[0][2] );
+  vec2.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+    coordinates[3][2] - coordinates[0][2]);
 
-  vec3.set( coordinates[2][0] - coordinates[0][0],
-      coordinates[2][1] - coordinates[0][1],
-      coordinates[2][2] - coordinates[0][2] );
+  vec3.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
+    coordinates[2][2] - coordinates[0][2]);
 
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = (vec2 % (vec1 * vec3));
-  min_jacobian = current_jacobian/lengths;
+  min_jacobian = current_jacobian / lengths;
 
-  //node 1
-  vec1.set( coordinates[2][0] - coordinates[1][0],
-      coordinates[2][1] - coordinates[1][1],
-      coordinates[2][2] - coordinates[1][2] );
+  // node 1
+  vec1.set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+    coordinates[2][2] - coordinates[1][2]);
 
-  vec2.set( coordinates[4][0] - coordinates[1][0],
-      coordinates[4][1] - coordinates[1][1],
-      coordinates[4][2] - coordinates[1][2] );
+  vec2.set(coordinates[4][0] - coordinates[1][0], coordinates[4][1] - coordinates[1][1],
+    coordinates[4][2] - coordinates[1][2]);
 
-  vec3.set( coordinates[0][0] - coordinates[1][0],
-      coordinates[0][1] - coordinates[1][1],
-      coordinates[0][2] - coordinates[1][2] );
+  vec3.set(coordinates[0][0] - coordinates[1][0], coordinates[0][1] - coordinates[1][1],
+    coordinates[0][2] - coordinates[1][2]);
 
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
 
-  //node 2
-  vec1.set( coordinates[0][0] - coordinates[2][0],
-      coordinates[0][1] - coordinates[2][1],
-      coordinates[0][2] - coordinates[2][2] );
+  // node 2
+  vec1.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+    coordinates[0][2] - coordinates[2][2]);
 
-  vec2.set( coordinates[5][0] - coordinates[2][0],
-      coordinates[5][1] - coordinates[2][1],
-      coordinates[5][2] - coordinates[2][2] );
+  vec2.set(coordinates[5][0] - coordinates[2][0], coordinates[5][1] - coordinates[2][1],
+    coordinates[5][2] - coordinates[2][2]);
 
-  vec3.set( coordinates[1][0] - coordinates[2][0],
-      coordinates[1][1] - coordinates[2][1],
-      coordinates[1][2] - coordinates[2][2] );
+  vec3.set(coordinates[1][0] - coordinates[2][0], coordinates[1][1] - coordinates[2][1],
+    coordinates[1][2] - coordinates[2][2]);
 
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
 
-  //node 3
-  vec1.set( coordinates[0][0] - coordinates[3][0],
-      coordinates[0][1] - coordinates[3][1],
-      coordinates[0][2] - coordinates[3][2] );
+  // node 3
+  vec1.set(coordinates[0][0] - coordinates[3][0], coordinates[0][1] - coordinates[3][1],
+    coordinates[0][2] - coordinates[3][2]);
 
-  vec2.set( coordinates[4][0] - coordinates[3][0],
-      coordinates[4][1] - coordinates[3][1],
-      coordinates[4][2] - coordinates[3][2] );
+  vec2.set(coordinates[4][0] - coordinates[3][0], coordinates[4][1] - coordinates[3][1],
+    coordinates[4][2] - coordinates[3][2]);
 
-  vec3.set( coordinates[5][0] - coordinates[3][0],
-      coordinates[5][1] - coordinates[3][1],
-      coordinates[5][2] - coordinates[3][2] );
+  vec3.set(coordinates[5][0] - coordinates[3][0], coordinates[5][1] - coordinates[3][1],
+    coordinates[5][2] - coordinates[3][2]);
 
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
 
-  //node 4
-  vec1.set( coordinates[1][0] - coordinates[4][0],
-      coordinates[1][1] - coordinates[4][1],
-      coordinates[1][2] - coordinates[4][2] );
+  // node 4
+  vec1.set(coordinates[1][0] - coordinates[4][0], coordinates[1][1] - coordinates[4][1],
+    coordinates[1][2] - coordinates[4][2]);
 
-  vec2.set( coordinates[5][0] - coordinates[4][0],
-      coordinates[5][1] - coordinates[4][1],
-      coordinates[5][2] - coordinates[4][2] );
+  vec2.set(coordinates[5][0] - coordinates[4][0], coordinates[5][1] - coordinates[4][1],
+    coordinates[5][2] - coordinates[4][2]);
 
-  vec3.set( coordinates[3][0] - coordinates[4][0],
-      coordinates[3][1] - coordinates[4][1],
-      coordinates[3][2] - coordinates[4][2] );
+  vec3.set(coordinates[3][0] - coordinates[4][0], coordinates[3][1] - coordinates[4][1],
+    coordinates[3][2] - coordinates[4][2]);
 
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
 
-  //node 5
-  vec1.set( coordinates[3][0] - coordinates[5][0],
-      coordinates[3][1] - coordinates[5][1],
-      coordinates[3][2] - coordinates[5][2] );
+  // node 5
+  vec1.set(coordinates[3][0] - coordinates[5][0], coordinates[3][1] - coordinates[5][1],
+    coordinates[3][2] - coordinates[5][2]);
 
-  vec2.set( coordinates[4][0] - coordinates[5][0],
-      coordinates[4][1] - coordinates[5][1],
-      coordinates[4][2] - coordinates[5][2] );
+  vec2.set(coordinates[4][0] - coordinates[5][0], coordinates[4][1] - coordinates[5][1],
+    coordinates[4][2] - coordinates[5][2]);
 
-  vec3.set( coordinates[2][0] - coordinates[5][0],
-      coordinates[2][1] - coordinates[5][1],
-      coordinates[2][2] - coordinates[5][2] );
+  vec3.set(coordinates[2][0] - coordinates[5][0], coordinates[2][1] - coordinates[5][1],
+    coordinates[2][2] - coordinates[5][2]);
 
   lengths = sqrt(vec1.length_squared() * vec2.length_squared() * vec3.length_squared());
 
   current_jacobian = vec2 % (vec1 * vec3);
-  min_jacobian = std::min(current_jacobian/lengths,min_jacobian);
+  min_jacobian = std::min(current_jacobian / lengths, min_jacobian);
 
-  min_jacobian *= 2/sqrt(3.0);
+  min_jacobian *= 2 / sqrt(3.0);
 
-  if ( min_jacobian > 0 )
-    return (double) std::min( min_jacobian, VERDICT_DBL_MAX );
-  return (double) std::max( min_jacobian, -VERDICT_DBL_MAX );
-
+  if (min_jacobian > 0)
+  {
+    return (double)std::min(min_jacobian, VERDICT_DBL_MAX);
+  }
+  return (double)std::max(min_jacobian, -VERDICT_DBL_MAX);
 }
 
 /*
@@ -1024,157 +1126,144 @@ double wedge_scaled_jacobian( int /*num_nodes*/, double coordinates[][3] )
    Reference : Adapted from section 7.12
    Verdict Function : wedge_shape
    */
-
-double wedge_shape( int /*num_nodes*/, double coordinates[][3] )
+double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
 {
   double current_jacobian = 0, current_shape, norm_jacobi = 0;
   double min_shape = 1.0;
-  VerdictVector vec1,vec2,vec3;
+  VerdictVector vec1, vec2, vec3;
 
   // Node 0
-  vec1.set( coordinates[1][0] - coordinates[0][0],
-      coordinates[1][1] - coordinates[0][1],
-      coordinates[1][2] - coordinates[0][2] );
+  vec1.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+    coordinates[1][2] - coordinates[0][2]);
 
-  vec2.set( coordinates[3][0] - coordinates[0][0],
-      coordinates[3][1] - coordinates[0][1],
-      coordinates[3][2] - coordinates[0][2] );
+  vec2.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+    coordinates[3][2] - coordinates[0][2]);
 
-  vec3.set( coordinates[2][0] - coordinates[0][0],
-      coordinates[2][1] - coordinates[0][1],
-      coordinates[2][2] - coordinates[0][2] );
+  vec3.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
+    coordinates[2][2] - coordinates[0][2]);
 
   current_jacobian = vec2 % (vec1 * vec3);
-  if(current_jacobian > VERDICT_DBL_MIN)
+  if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = std::min(current_shape,min_shape);
+    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
+    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+      (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = std::min(current_shape, min_shape);
   }
   else
   {
     return 0;
   }
 
-  //node 1
-  vec1.set( coordinates[2][0] - coordinates[1][0],
-      coordinates[2][1] - coordinates[1][1],
-      coordinates[2][2] - coordinates[1][2] );
+  // node 1
+  vec1.set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+    coordinates[2][2] - coordinates[1][2]);
 
-  vec2.set( coordinates[4][0] - coordinates[1][0],
-      coordinates[4][1] - coordinates[1][1],
-      coordinates[4][2] - coordinates[1][2] );
+  vec2.set(coordinates[4][0] - coordinates[1][0], coordinates[4][1] - coordinates[1][1],
+    coordinates[4][2] - coordinates[1][2]);
 
-  vec3.set( coordinates[0][0] - coordinates[1][0],
-      coordinates[0][1] - coordinates[1][1],
-      coordinates[0][2] - coordinates[1][2] );
+  vec3.set(coordinates[0][0] - coordinates[1][0], coordinates[0][1] - coordinates[1][1],
+    coordinates[0][2] - coordinates[1][2]);
 
   current_jacobian = vec2 % (vec1 * vec3);
-  if(current_jacobian > VERDICT_DBL_MIN)
+  if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = std::min(current_shape,min_shape);
+    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
+    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+      (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = std::min(current_shape, min_shape);
   }
   else
   {
     return 0;
   }
 
-  //node 2
-  vec1.set( coordinates[0][0] - coordinates[2][0],
-      coordinates[0][1] - coordinates[2][1],
-      coordinates[0][2] - coordinates[2][2] );
+  // node 2
+  vec1.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+    coordinates[0][2] - coordinates[2][2]);
 
-  vec2.set( coordinates[5][0] - coordinates[2][0],
-      coordinates[5][1] - coordinates[2][1],
-      coordinates[5][2] - coordinates[2][2] );
+  vec2.set(coordinates[5][0] - coordinates[2][0], coordinates[5][1] - coordinates[2][1],
+    coordinates[5][2] - coordinates[2][2]);
 
-  vec3.set( coordinates[1][0] - coordinates[2][0],
-      coordinates[1][1] - coordinates[2][1],
-      coordinates[1][2] - coordinates[2][2] );
+  vec3.set(coordinates[1][0] - coordinates[2][0], coordinates[1][1] - coordinates[2][1],
+    coordinates[1][2] - coordinates[2][2]);
 
   current_jacobian = vec2 % (vec1 * vec3);
-  if(current_jacobian > VERDICT_DBL_MIN)
+  if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = std::min(current_shape,min_shape);
+    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
+    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+      (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = std::min(current_shape, min_shape);
   }
   else
   {
     return 0;
   }
 
-  //node 3
-  vec1.set( coordinates[0][0] - coordinates[3][0],
-      coordinates[0][1] - coordinates[3][1],
-      coordinates[0][2] - coordinates[3][2] );
+  // node 3
+  vec1.set(coordinates[0][0] - coordinates[3][0], coordinates[0][1] - coordinates[3][1],
+    coordinates[0][2] - coordinates[3][2]);
 
-  vec2.set( coordinates[4][0] - coordinates[3][0],
-      coordinates[4][1] - coordinates[3][1],
-      coordinates[4][2] - coordinates[3][2] );
+  vec2.set(coordinates[4][0] - coordinates[3][0], coordinates[4][1] - coordinates[3][1],
+    coordinates[4][2] - coordinates[3][2]);
 
-  vec3.set( coordinates[5][0] - coordinates[3][0],
-      coordinates[5][1] - coordinates[3][1],
-      coordinates[5][2] - coordinates[3][2] );
+  vec3.set(coordinates[5][0] - coordinates[3][0], coordinates[5][1] - coordinates[3][1],
+    coordinates[5][2] - coordinates[3][2]);
 
   current_jacobian = vec2 % (vec1 * vec3);
-  if(current_jacobian > VERDICT_DBL_MIN)
+  if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = std::min(current_shape,min_shape);
+    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
+    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+      (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = std::min(current_shape, min_shape);
   }
   else
   {
     return 0;
   }
 
-  //node 4
-  vec1.set( coordinates[1][0] - coordinates[4][0],
-      coordinates[1][1] - coordinates[4][1],
-      coordinates[1][2] - coordinates[4][2] );
+  // node 4
+  vec1.set(coordinates[1][0] - coordinates[4][0], coordinates[1][1] - coordinates[4][1],
+    coordinates[1][2] - coordinates[4][2]);
 
-  vec2.set( coordinates[5][0] - coordinates[4][0],
-      coordinates[5][1] - coordinates[4][1],
-      coordinates[5][2] - coordinates[4][2] );
+  vec2.set(coordinates[5][0] - coordinates[4][0], coordinates[5][1] - coordinates[4][1],
+    coordinates[5][2] - coordinates[4][2]);
 
-  vec3.set( coordinates[3][0] - coordinates[4][0],
-      coordinates[3][1] - coordinates[4][1],
-      coordinates[3][2] - coordinates[4][2] );
+  vec3.set(coordinates[3][0] - coordinates[4][0], coordinates[3][1] - coordinates[4][1],
+    coordinates[3][2] - coordinates[4][2]);
 
   current_jacobian = vec2 % (vec1 * vec3);
-  if(current_jacobian > VERDICT_DBL_MIN)
+  if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = std::min(current_shape,min_shape);
+    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
+    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+      (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = std::min(current_shape, min_shape);
   }
   else
   {
     return 0;
   }
 
-  //node 5
-  vec1.set( coordinates[3][0] - coordinates[5][0],
-      coordinates[3][1] - coordinates[5][1],
-      coordinates[3][2] - coordinates[5][2] );
+  // node 5
+  vec1.set(coordinates[3][0] - coordinates[5][0], coordinates[3][1] - coordinates[5][1],
+    coordinates[3][2] - coordinates[5][2]);
 
-  vec2.set( coordinates[4][0] - coordinates[5][0],
-      coordinates[4][1] - coordinates[5][1],
-      coordinates[4][2] - coordinates[5][2] );
+  vec2.set(coordinates[4][0] - coordinates[5][0], coordinates[4][1] - coordinates[5][1],
+    coordinates[4][2] - coordinates[5][2]);
 
-  vec3.set( coordinates[2][0] - coordinates[5][0],
-      coordinates[2][1] - coordinates[5][1],
-      coordinates[2][2] - coordinates[5][2] );
+  vec3.set(coordinates[2][0] - coordinates[5][0], coordinates[2][1] - coordinates[5][1],
+    coordinates[2][2] - coordinates[5][2]);
 
   current_jacobian = vec2 % (vec1 * vec3);
-  if(current_jacobian > VERDICT_DBL_MIN)
+  if (current_jacobian > VERDICT_DBL_MIN)
   {
-    norm_jacobi = current_jacobian*2.0/sqrt(3.0);
-    current_shape = 3*pow(norm_jacobi,two_thirds)/(vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
-    min_shape = std::min(current_shape,min_shape);
+    norm_jacobi = current_jacobian * 2.0 / sqrt(3.0);
+    current_shape = 3 * pow(norm_jacobi, two_thirds) /
+      (vec1.length_squared() + vec2.length_squared() + vec3.length_squared());
+    min_shape = std::min(current_shape, min_shape);
   }
   else
   {
@@ -1182,9 +1271,10 @@ double wedge_shape( int /*num_nodes*/, double coordinates[][3] )
   }
 
   if (min_shape < VERDICT_DBL_MIN)
+  {
     return 0;
+  }
   return min_shape;
-
 }
 
 /* For wedges, there is not a unique definition of the aspect Frobenius. Rather,
@@ -1203,17 +1293,15 @@ double wedge_shape( int /*num_nodes*/, double coordinates[][3] )
  q for right, unit wedge : 1
  Reference : Adapted from section 7.7
  Verdict Function : wedge_max_aspect_frobenius or wedge_condition
-
  */
-double wedge_condition( int /*num_nodes*/, double coordinates[][3] )
+double wedge_condition(int /*num_nodes*/, const double coordinates[][3])
 {
-  return wedge_max_aspect_frobenius(6,coordinates);
+  return wedge_max_aspect_frobenius(6, coordinates);
 }
 
-void make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3],
-                          double quad1[][3], double quad2[][3], double quad3[][3])
+void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tri2[][3],
+  double quad1[][3], double quad2[][3], double quad3[][3])
 {
-
   // tri1
   tri1[0][0] = coordinates[0][0];
   tri1[0][1] = coordinates[0][1];
@@ -1240,7 +1328,7 @@ void make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3
   tri2[2][1] = coordinates[5][1];
   tri2[2][2] = coordinates[5][2];
 
-  //quad1
+  // quad1
   quad1[0][0] = coordinates[0][0];
   quad1[0][1] = coordinates[0][1];
   quad1[0][2] = coordinates[0][2];
@@ -1257,7 +1345,7 @@ void make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3
   quad1[3][1] = coordinates[3][1];
   quad1[3][2] = coordinates[3][2];
 
-  //quad2
+  // quad2
   quad2[0][0] = coordinates[1][0];
   quad2[0][1] = coordinates[1][1];
   quad2[0][2] = coordinates[1][2];
@@ -1274,7 +1362,7 @@ void make_wedge_faces(double coordinates[][3], double tri1[][3], double tri2[][3
   quad2[3][1] = coordinates[4][1];
   quad2[3][2] = coordinates[4][2];
 
-  //quad3
+  // quad3
   quad3[0][0] = coordinates[2][0];
   quad3[0][1] = coordinates[2][1];
   quad3[0][2] = coordinates[2][2];
