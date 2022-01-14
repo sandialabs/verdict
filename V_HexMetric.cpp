@@ -26,10 +26,6 @@
 #include <algorithm>
 #include <cmath> // for std::isnan
 
-#if defined(__BORLANDC__)
-#pragma warn - 8004 /* "assigned a value that is never used" */
-#endif
-
 namespace VERDICT_NAMESPACE
 {
 extern void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinates[][3]);

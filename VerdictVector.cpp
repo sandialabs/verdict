@@ -24,10 +24,6 @@
 #include <cfloat>
 #include <cmath>
 
-#if defined(__BORLANDC__)
-#pragma warn - 8004 /* "assigned a value that is never used" */
-#endif
-
 namespace VERDICT_NAMESPACE
 {
 
