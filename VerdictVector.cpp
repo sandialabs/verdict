@@ -20,9 +20,10 @@
 
 
 #include "verdict.h"
-#include <math.h>
 #include "VerdictVector.hpp"
-#include <float.h>
+
+#include <cfloat>
+#include <cmath>
 
 #if defined(__BORLANDC__)
 #pragma warn -8004 /* "assigned a value that is never used" */
@@ -32,22 +33,23 @@ namespace VERDICT_NAMESPACE
 {
   
 // scale the length of the vector to be the new_length
-// unused
-//VerdictVector &VerdictVector::length(const double new_length)
-//{
-//  double len = this->length();
-//  xVal *= new_length / len;
-//  yVal *= new_length / len;
-//  zVal *= new_length / len;
-//  return *this;
-//}
+VerdictVector &VerdictVector::length(const double new_length)
+{
+  double len = this->length();
+  xVal *= new_length / len;
+  yVal *= new_length / len;
+  zVal *= new_length / len;
+  return *this;
+}
 
 double VerdictVector::interior_angle(const VerdictVector &otherVector)
 {
   double cosAngle=0., angleRad=0., len1, len2=0.;
   
   if (((len1 = this->length()) > 0) && ((len2 = otherVector.length()) > 0))
+  {
     cosAngle = VerdictVector::Dot(*this , otherVector)/(len1 * len2);
+  }
   else
   {
     assert(len1 > 0);
@@ -65,7 +67,9 @@ double VerdictVector::interior_angle(const VerdictVector &otherVector)
     angleRad = acos(cosAngle);
   }
   else if (cosAngle >= -1.0 && cosAngle <= 1.0)
+  {
     angleRad = acos(cosAngle);
+  }
   else
   {
     assert(cosAngle < 1.0001 && cosAngle > -1.0001);
@@ -74,7 +78,7 @@ double VerdictVector::interior_angle(const VerdictVector &otherVector)
   return( (angleRad * 180.) / VERDICT_PI );
 }
 
-VerdictVector::VerdictVector(const double xyz[3]) 
+VerdictVector::VerdictVector(const double xyz[3])
   : xVal(xyz[0]), yVal(xyz[1]), zVal(xyz[2])
 {}
 
