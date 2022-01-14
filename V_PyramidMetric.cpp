@@ -24,13 +24,12 @@
 #include <algorithm>
 #include <array>
 
-
 namespace VERDICT_NAMESPACE
 {
 extern double quad_equiangle_skew(int num_nodes, const double coordinates[][3]);
 extern double tri_equiangle_skew(int num_nodes, const double coordinates[][3]);
 
-static const double sqrt2_2 = sqrt(2.0) / 2.0;
+static const double sqrt2_2 = std::sqrt(2.0) / 2.0;
 
 // local methods
 void make_pyramid_tets(const double coordinates[][3], double tet1_coords[][3],
@@ -212,7 +211,7 @@ double pyramid_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
     return 0.0;
   }
 
-  double min_jac = (*iter) * 2.0 / sqrt(2.0);
+  double min_jac = (*iter) * 2.0 / std::sqrt(2.0);
   return min_jac < 1.0 ? min_jac : 1.0 - (min_jac - 1.0);
 }
 
@@ -444,7 +443,7 @@ double largest_pyramid_edge(const double coordinates[][3])
   max = std::max(max, l6);
   max = std::max(max, l7);
 
-  return sqrt(max);
+  return std::sqrt(max);
 }
 
 double distance_point_to_pyramid_base(

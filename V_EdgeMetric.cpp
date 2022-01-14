@@ -19,6 +19,7 @@
  */
 
 #include "verdict.h"
+
 #include <cmath>
 
 namespace VERDICT_NAMESPACE
@@ -32,6 +33,6 @@ double edge_length(int /*num_nodes*/, const double coordinates[][3])
   double x = coordinates[1][0] - coordinates[0][0];
   double y = coordinates[1][1] - coordinates[0][1];
   double z = coordinates[1][2] - coordinates[0][2];
-  return (double)(sqrt(x * x + y * y + z * z));
+  return (double)(std::sqrt(x * x + y * y + z * z));
 }
 } // namespace verdict

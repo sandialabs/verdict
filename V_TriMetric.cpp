@@ -27,7 +27,7 @@
 
 namespace VERDICT_NAMESPACE
 {
-static const double sqrt3 = sqrt(3.0);
+static const double sqrt3 = std::sqrt(3.0);
 static const double aspect_ratio_normal_coeff = sqrt3 / 6.;
 static const double two_times_sqrt3 = 2 * sqrt3;
 static const double two_over_sqrt3 = 2. / sqrt3;
@@ -43,7 +43,7 @@ static int tri_get_weight(
   m21 = 0;
   m12 = 0.5;
   m22 = 0.5 * sqrt3;
-  double scale = sqrt(2.0 * average_tri_area / (m11 * m22 - m21 * m12));
+  double scale = std::sqrt(2.0 * average_tri_area / (m11 * m22 - m21 * m12));
 
   m11 *= scale;
   m21 *= scale;
@@ -128,7 +128,7 @@ double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   else
   {
     double edge_ratio;
-    edge_ratio = sqrt(M2 / m2);
+    edge_ratio = std::sqrt(M2 / m2);
 
     if (edge_ratio > 0)
     {
@@ -589,7 +589,7 @@ double tri_relative_size_squared(
     return 0.0;
   }
 
-  double size = pow(deta / detw, 2);
+  double size = std::pow(deta / detw, 2);
 
   double rel_size = std::min(size, 1.0 / size);
 
@@ -718,7 +718,7 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
   for (ja = 0; ja < num_nodes; ja++)
   {
     dot_product = normal_at_nodes[0] % normal_at_nodes[ja];
-    if (fabs(dot_product) < 0.99)
+    if (std::abs(dot_product) < 0.99)
     {
       flat_element = false;
       break;
@@ -729,7 +729,7 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
   double thickness, thickness_gauss;
   double distrt;
   // get_tri_thickness(tri, element_area, thickness );
-  thickness = 0.001 * sqrt(element_area);
+  thickness = 0.001 * std::sqrt(element_area);
 
   // set thickness gauss point location
   double zl = 0.5773502691896;

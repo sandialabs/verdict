@@ -32,7 +32,7 @@ extern void quad_minimum_maximum_angle(double min_max_angles[2], const double co
 
 static const double one_third = 1.0 / 3.0;
 static const double two_thirds = 2.0 / 3.0;
-static const double sqrt3 = sqrt(3.0);
+static const double sqrt3 = std::sqrt(3.0);
 
 //! weights based on the average size of a hex
 static int hex_get_weight(
@@ -47,7 +47,7 @@ static int hex_get_weight(
   v2.set(0, 1, 0);
   v3.set(0, 0, 1);
 
-  double scale = pow(average_size / (VerdictVector::Dot(v1, (v2 * v3))), 0.33333333333);
+  double scale = std::pow(average_size / (VerdictVector::Dot(v1, (v2 * v3))), 0.33333333333);
   v1 *= scale;
   v2 *= scale;
   v3 *= scale;
@@ -320,8 +320,8 @@ static void localize_hex_coordinates(const double coordinates[][3], VerdictVecto
   double DY = point_1256.y() - point_0374.y();
   double DZ = point_1256.z() - point_0374.z();
 
-  double AMAGX = sqrt(DX*DX + DZ*DZ);
-  double AMAGY = sqrt(DX*DX + DY*DY + DZ*DZ);
+  double AMAGX = std::sqrt(DX*DX + DZ*DZ);
+  double AMAGY = std::sqrt(DX*DX + DY*DY + DZ*DZ);
   double FMAGX = AMAGX == 0.0 ? 1.0 : 0.0;
   double FMAGY = AMAGY == 0.0 ? 1.0 : 0.0;
 
@@ -355,7 +355,7 @@ static void localize_hex_coordinates(const double coordinates[][3], VerdictVecto
   DY = delta.y();
   DZ = delta.z();
 
-  AMAGY = sqrt(DY*DY + DZ*DZ);
+  AMAGY = std::sqrt(DY*DY + DZ*DZ);
   FMAGY = AMAGY == 0.0 ? 1.0 : 0.0;
 
   double CX = DY / (AMAGY + FMAGY) + FMAGY;
@@ -378,13 +378,13 @@ static double safe_ratio3( const double numerator,
 
   const double filter_n = max_ratio * 1.0e-16;
   const double filter_d = 1.0e-16;
-  if ( fabs( numerator ) <= filter_n && fabs( denominator ) >= filter_d )
+  if ( std::abs( numerator ) <= filter_n && std::abs( denominator ) >= filter_d )
   {
     return_value = numerator / denominator;
   }
   else
   {
-    return_value = fabs(numerator) / max_ratio >= fabs(denominator) ?
+    return_value = std::abs(numerator) / max_ratio >= std::abs(denominator) ?
       ( (numerator >= 0.0 && denominator >= 0.0) ||
         (numerator < 0.0 && denominator < 0.0) ?
         max_ratio : -max_ratio )
@@ -400,7 +400,7 @@ static double safe_ratio(const double numerator, const double denominator)
   double return_value;
   const double filter_n = VERDICT_DBL_MAX;
   const double filter_d = VERDICT_DBL_MIN;
-  if (fabs(numerator) <= filter_n && fabs(denominator) >= filter_d)
+  if (std::abs(numerator) <= filter_n && std::abs(denominator) >= filter_d)
   {
     return_value = numerator / denominator;
   }
@@ -427,7 +427,7 @@ static double condition_comp(
   double term2 = VerdictVector::Dot((xxi * xet), (xxi * xet)) +
     VerdictVector::Dot((xet * xze), (xet * xze)) + VerdictVector::Dot((xze * xxi), (xze * xxi));
 
-  return sqrt(term1 * term2) / det;
+  return std::sqrt(term1 * term2) / det;
 }
 
 static double oddy_comp(
@@ -451,8 +451,8 @@ static double oddy_comp(
 
     double norm_J_squared = g11 + g22 + g33;
 
-    oddy_metric =
-      (norm_G_squared - one_third * norm_J_squared * norm_J_squared) / pow(rt_g, 4. * one_third);
+    oddy_metric = (norm_G_squared - one_third * norm_J_squared * norm_J_squared) /
+      std::pow(rt_g, 4. * one_third);
   }
   else
   {
@@ -473,84 +473,84 @@ static double hex_edge_length(int max_min, const double coordinates[][3])
     temp[i] = coordinates[1][i] - coordinates[0][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[0] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[0] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[2][i] - coordinates[1][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[1] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[1] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[3][i] - coordinates[2][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[2] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[2] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[0][i] - coordinates[3][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[3] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[3] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[5][i] - coordinates[4][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[4] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[4] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[6][i] - coordinates[5][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[5] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[5] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[7][i] - coordinates[6][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[6] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[6] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[4][i] - coordinates[7][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[7] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[7] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[4][i] - coordinates[0][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[8] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[8] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[5][i] - coordinates[1][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[9] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[9] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[6][i] - coordinates[2][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[10] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[10] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[7][i] - coordinates[3][i];
     temp[i] = temp[i] * temp[i];
   }
-  edge[11] = sqrt(temp[0] + temp[1] + temp[2]);
+  edge[11] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   double _edge = edge[0];
 
@@ -583,28 +583,28 @@ static double diag_length(int max_min, const double coordinates[][3])
     temp[i] = coordinates[6][i] - coordinates[0][i];
     temp[i] = temp[i] * temp[i];
   }
-  diag[0] = sqrt(temp[0] + temp[1] + temp[2]);
+  diag[0] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[4][i] - coordinates[2][i];
     temp[i] = temp[i] * temp[i];
   }
-  diag[1] = sqrt(temp[0] + temp[1] + temp[2]);
+  diag[1] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[7][i] - coordinates[1][i];
     temp[i] = temp[i] * temp[i];
   }
-  diag[2] = sqrt(temp[0] + temp[1] + temp[2]);
+  diag[2] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   for (i = 0; i < 3; i++)
   {
     temp[i] = coordinates[5][i] - coordinates[3][i];
     temp[i] = temp[i] * temp[i];
   }
-  diag[3] = sqrt(temp[0] + temp[1] + temp[2]);
+  diag[3] = std::sqrt(temp[0] + temp[1] + temp[2]);
 
   double diagonal = diag[0];
   if (max_min == 0) // Return min diagonal
@@ -828,7 +828,7 @@ double hex_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   M2 = Mab > Mcd ? Mab : Mcd;
   M2 = M2 > Mef ? M2 : Mef;
 
-  double edge_ratio = sqrt(M2 / m2);
+  double edge_ratio = std::sqrt(M2 / m2);
 
   if (edge_ratio > 0)
   {
@@ -1055,9 +1055,9 @@ double hex_skew(int /*num_nodes*/, const double coordinates[][3])
     return VERDICT_DBL_MAX;
   }
 
-  skew_1 = fabs(VerdictVector::Dot(efg1, efg2));
-  skew_2 = fabs(VerdictVector::Dot(efg1, efg3));
-  skew_3 = fabs(VerdictVector::Dot(efg2, efg3));
+  skew_1 = std::abs(VerdictVector::Dot(efg1, efg2));
+  skew_2 = std::abs(VerdictVector::Dot(efg1, efg3));
+  skew_3 = std::abs(VerdictVector::Dot(efg2, efg3));
 
   double skew = std::max({ skew_1, skew_2, skew_3 });
 
@@ -1086,9 +1086,9 @@ double hex_taper(int /*num_nodes*/, const double coordinates[][3])
   VerdictVector efg13 = calc_hex_efg(13, node_pos);
   VerdictVector efg23 = calc_hex_efg(23, node_pos);
 
-  double taper_1 = fabs(safe_ratio(efg12.length(), std::min(efg1.length(), efg2.length())));
-  double taper_2 = fabs(safe_ratio(efg13.length(), std::min(efg1.length(), efg3.length())));
-  double taper_3 = fabs(safe_ratio(efg23.length(), std::min(efg2.length(), efg3.length())));
+  double taper_1 = std::abs(safe_ratio(efg12.length(), std::min(efg1.length(), efg2.length())));
+  double taper_2 = std::abs(safe_ratio(efg13.length(), std::min(efg1.length(), efg3.length())));
+  double taper_3 = std::abs(safe_ratio(efg23.length(), std::min(efg2.length(), efg3.length())));
 
   double taper = std::max({ taper_1, taper_2, taper_3 });
 
@@ -1469,7 +1469,7 @@ double hex_dimension(int /*num_nodes*/, const double coordinates[][3])
       SQR(gradop[1][3]) + SQR(gradop[2][3]) + SQR(gradop[3][3]) + SQR(gradop[4][3]) +
       SQR(gradop[5][3]) + SQR(gradop[6][3]) + SQR(gradop[7][3]) + SQR(gradop[8][3]));
 
-  return (double)sqrt(aspect);
+  return (double)std::sqrt(aspect);
 }
 
 /*!
@@ -2016,7 +2016,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       VerdictVector xet(jacobian[1]);
       VerdictVector xze(jacobian[2]);
       jacobi = xxi % ( xet * xze );
-      double scale = sqrt(xxi.length_squared() * xet.length_squared() * xze.length_squared());
+      double scale = std::sqrt(xxi.length_squared() * xet.length_squared() * xze.length_squared());
       jacobi /= scale;
       if(jacobi < min_norm_jac)
       {
@@ -2054,7 +2054,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
 
     if (temp_norm_jac < min_norm_jac)
@@ -2086,7 +2086,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2117,7 +2117,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2148,7 +2148,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2179,7 +2179,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2210,7 +2210,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2241,7 +2241,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2272,7 +2272,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2303,7 +2303,7 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
       return (double)VERDICT_DBL_MAX;
     }
 
-    lengths = sqrt(len1_sq * len2_sq * len3_sq);
+    lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
     temp_norm_jac = jacobi / lengths;
     if (temp_norm_jac < min_norm_jac)
     {
@@ -2406,7 +2406,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2430,7 +2430,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2454,7 +2454,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2478,7 +2478,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2502,7 +2502,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2526,7 +2526,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2550,7 +2550,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2574,7 +2574,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
     return 0;
   }
 
-  lengths = sqrt(len1_sq * len2_sq * len3_sq);
+  lengths = std::sqrt(len1_sq * len2_sq * len3_sq);
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det < VERDICT_DBL_MIN)
   {
@@ -2619,7 +2619,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -2640,7 +2640,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -2661,7 +2661,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -2682,7 +2682,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -2703,7 +2703,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -2724,7 +2724,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -2745,7 +2745,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -2766,7 +2766,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
   det = VerdictVector::Dot(xxi, (xet * xze));
   if (det > VERDICT_DBL_MIN)
   {
-    shape = 3 * pow(det, two_thirds) /
+    shape = 3 * std::pow(det, two_thirds) /
       (VerdictVector::Dot(xxi, xxi) + VerdictVector::Dot(xet, xet) + VerdictVector::Dot(xze, xze));
   }
   else
@@ -3036,7 +3036,7 @@ double hex_distortion(int num_nodes, const double coordinates[][3])
       minimum_jacobian = jacobian;
     }
   }
-  if (fabs(element_volume) > 0.0)
+  if (std::abs(element_volume) > 0.0)
   {
     distortion = minimum_jacobian / element_volume * 8.;
   }
@@ -3061,7 +3061,7 @@ double hex_timestep(int num_nodes, const double coordinates[][3], double density
   double char_length = hex_dimension(num_nodes, coordinates);
   double M =
     youngs_modulus * (1 - poissons_ratio) / ((1 - 2 * poissons_ratio) * (1 + poissons_ratio));
-  double denominator = sqrt(M / density);
+  double denominator = std::sqrt(M / density);
 
   return char_length / denominator;
 }

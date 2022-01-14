@@ -21,7 +21,6 @@
 #include "VerdictVector.hpp"
 #include "verdict.h"
 
-#include <cfloat>
 #include <cmath>
 
 namespace VERDICT_NAMESPACE
@@ -54,16 +53,16 @@ double VerdictVector::interior_angle(const VerdictVector& otherVector)
   if ((cosAngle > 1.0) && (cosAngle < 1.0001))
   {
     cosAngle = 1.0;
-    angleRad = acos(cosAngle);
+    angleRad = std::acos(cosAngle);
   }
   else if (cosAngle < -1.0 && cosAngle > -1.0001)
   {
     cosAngle = -1.0;
-    angleRad = acos(cosAngle);
+    angleRad = std::acos(cosAngle);
   }
   else if (cosAngle >= -1.0 && cosAngle <= 1.0)
   {
-    angleRad = acos(cosAngle);
+    angleRad = std::acos(cosAngle);
   }
   else
   {
