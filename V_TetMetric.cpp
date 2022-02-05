@@ -1681,7 +1681,7 @@ double tet_normalized_inradius(int num_nodes, double coordinates[][3] )
   return 0.0;
 }
 
-double tet_mean_ratio( int num_nodes, double coordinates[][3] )
+double tet4_mean_ratio( double coordinates[][3] )
 {
     const VerdictVector side0(coordinates[1][0] - coordinates[0][0],
                               coordinates[1][1] - coordinates[0][1],
@@ -1718,8 +1718,66 @@ double tet_mean_ratio( int num_nodes, double coordinates[][3] )
     const double side4_length_squared = side4.length_squared();
     const double side5_length_squared = side5.length_squared();
 
-    const int sign = tetVolume < 0. ? -1 : 1;
-    return sign * 12. * std::pow(3.*fabs(tetVolume), 2./3.) / (side0_length_squared + side1_length_squared + side2_length_squared + side3_length_squared + side4_length_squared + side5_length_squared);
+    //const int sign = tetVolume < 0. ? -1 : 1;
+    //return sign * 12. * std::pow(3.*fabs(tetVolume), 2./3.) / (side0_length_squared + side1_length_squared + side2_length_squared + side3_length_squared + side4_length_squared + side5_length_squared);
+    double sum = (side0_length_squared + side1_length_squared + side2_length_squared + side3_length_squared + side4_length_squared + side5_length_squared)/6;
+    return 6 * std::pow(2, 0.5) * tetVolume / std::pow(sum, 3. / 2.);    
+}
+
+double tet10_mean_ratio( double coordinates[][3])
+{
+  double min_tet_mean_ratio = VERDICT_DBL_MAX;
+
+  VerdictVector auxillary_node = tet10_auxillary_node_coordinate(coordinates);
+
+  double aux_node_scale = 3.0 * std::pow(3., 0.5) * 0.25;
+
+  for (int i = 0; i <= 11; i++)
+  {
+    int subtet_conn[4];
+    subtet_conn[0] = tet10_subtet_conn[i][0];
+    subtet_conn[1] = tet10_subtet_conn[i][1];
+    subtet_conn[2] = tet10_subtet_conn[i][2];
+    subtet_conn[3] = tet10_subtet_conn[i][3];
+
+    //get the coordinates of the nodes
+    double subtet_coords[4][3];
+    for (int k = 0; k < 4; k++)
+    {
+      int node_index = subtet_conn[k];
+
+      if (10 == node_index)
+      {
+        subtet_coords[k][0] = auxillary_node.x();
+        subtet_coords[k][1] = auxillary_node.y();
+        subtet_coords[k][2] = auxillary_node.z();
+      }
+      else
+      {
+        subtet_coords[k][0] = coordinates[node_index][0];
+        subtet_coords[k][1] = coordinates[node_index][1];
+        subtet_coords[k][2] = coordinates[node_index][2];
+      }
+    }
+
+    double tmp_mean_ratio = tet4_mean_ratio(subtet_coords);
+
+    if (i > 3)
+      tmp_mean_ratio *= aux_node_scale;
+
+    if (tmp_mean_ratio < min_tet_mean_ratio)
+      min_tet_mean_ratio = tmp_mean_ratio;
+  }
+  return min_tet_mean_ratio;
+}
+
+double tet_mean_ratio(int num_nodes, double coordinates[][3])
+{
+  if (num_nodes == 4)
+    return tet4_mean_ratio(coordinates);
+  else if (num_nodes >= 10)
+    return tet10_mean_ratio(coordinates);
+  return 0.0;
 }
 
 } // namespace verdict

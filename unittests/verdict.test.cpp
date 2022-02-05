@@ -1131,7 +1131,7 @@ TEST(verdict, tet_meanRatio_unit_right_angle_tet)
     test_case testcase = {
       "tet_meanRatio_unit_right_angle_tet",
       {
-        { verdict::tet_mean_ratio, 0.839947},
+        { verdict::tet_mean_ratio, 0.769800},
       },
       4,
       {
@@ -1150,7 +1150,7 @@ TEST(verdict, tet_meanRatio_nearly_flat_right_angle_tet)
     test_case testcase = {
       "tet_meanRatio_nearly_flat_right_angle_tet",
       {
-        { verdict::tet_mean_ratio, 0.0584774},
+        { verdict::tet_mean_ratio, 0.01414107},
       },
       4,
       {
@@ -1169,7 +1169,7 @@ TEST(verdict, tet_meanRatio_inverted_nearly_flat_right_angle_tet)
     test_case testcase = {
       "tet_meanRatio_nearly_flat_right_angle_tet",
       {
-        { verdict::tet_mean_ratio, -0.0584774},
+        { verdict::tet_mean_ratio, -0.014141},
       },
       4,
       {
@@ -1182,6 +1182,57 @@ TEST(verdict, tet_meanRatio_inverted_nearly_flat_right_angle_tet)
 
     runtest(testcase);
 }
+
+TEST(verdict, tet10_meanRatio_perfect_tet)
+{
+  test_case testcase = {
+    "tet10_meanRatio_perfect_tet",
+    {
+      { verdict::tet_mean_ratio, 1.0},
+    },
+    10,
+    {
+      { 0, 0, 0 },
+      { 0, 1, 1 },
+      { 1, 0, 1 },
+      { 1, 1, 0 },
+      { 0, 0.5, 0.5 },
+      { 0.5, 0.5, 1 },
+      { 0.5, 0, 0.5 },
+      { 0.5, 0.5, 0 },
+      { 0.5, 1, 0.5 },
+      { 1, 0.5, 0.5 },      
+    }
+  };
+
+  runtest(testcase);
+}
+
+TEST(verdict, tet10_meanRatio_imperfect_tet)
+{
+  test_case testcase = {
+    "tet10_meanRatio_imperfect_tet",
+    {
+      { verdict::tet_mean_ratio, 0.39802657202178215 },
+    },
+    10,
+    {
+      {-0.05, -0.1, 0.125},
+      {0.9, 0.025, -0.075},
+      {-0.1, 1.025, -0.075},
+      {0.125, 0.1, 1.025},
+      {0.525, 0.025, -0.05},
+      {0.5, 0.525, 0.05},
+      {0.125, 0.45, -0.075},
+      {0.1, 0.075, 0.575},
+      {0.475, -0.075, 0.55},
+      {-0.075, 0.6, 0.45},
+    }
+  };
+
+  runtest(testcase);
+}
+
 
 TEST(verdict, tet_normalized_inradius_perfect_tet10)
 {
