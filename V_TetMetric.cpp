@@ -1656,47 +1656,47 @@ double tet_normalized_inradius(int num_nodes, const double coordinates[][3])
   return 0.0;
 }
 
-double tet4_mean_ratio( double coordinates[][3] )
+double tet4_mean_ratio(const double coordinates[][3])
 {
-    const VerdictVector side0(coordinates[1][0] - coordinates[0][0],
-      coordinates[1][1] - coordinates[0][1], coordinates[1][2] - coordinates[0][2]);
+  const VerdictVector side0(coordinates[1][0] - coordinates[0][0],
+    coordinates[1][1] - coordinates[0][1], coordinates[1][2] - coordinates[0][2]);
 
-    const VerdictVector side2(coordinates[0][0] - coordinates[2][0],
-      coordinates[0][1] - coordinates[2][1], coordinates[0][2] - coordinates[2][2]);
+  const VerdictVector side2(coordinates[0][0] - coordinates[2][0],
+    coordinates[0][1] - coordinates[2][1], coordinates[0][2] - coordinates[2][2]);
 
-    const VerdictVector side3(coordinates[3][0] - coordinates[0][0],
-      coordinates[3][1] - coordinates[0][1], coordinates[3][2] - coordinates[0][2]);
+  const VerdictVector side3(coordinates[3][0] - coordinates[0][0],
+    coordinates[3][1] - coordinates[0][1], coordinates[3][2] - coordinates[0][2]);
 
-    const double tetVolume = calculate_tet_volume_using_sides(side0, side2, side3);
-    if( std::abs( tetVolume ) < VERDICT_DBL_MIN )
-    {
-      return 0.0;
-    }
+  const double tetVolume = calculate_tet_volume_using_sides(side0, side2, side3);
+  if (std::abs( tetVolume ) < VERDICT_DBL_MIN)
+  {
+    return 0.0;
+  }
 
-    const VerdictVector side1(coordinates[2][0] - coordinates[1][0],
-      coordinates[2][1] - coordinates[1][1], coordinates[2][2] - coordinates[1][2]);
+  const VerdictVector side1(coordinates[2][0] - coordinates[1][0],
+    coordinates[2][1] - coordinates[1][1], coordinates[2][2] - coordinates[1][2]);
 
-    const VerdictVector side4(coordinates[3][0] - coordinates[1][0],
-      coordinates[3][1] - coordinates[1][1], coordinates[3][2] - coordinates[1][2]);
+  const VerdictVector side4(coordinates[3][0] - coordinates[1][0],
+    coordinates[3][1] - coordinates[1][1], coordinates[3][2] - coordinates[1][2]);
 
-    const VerdictVector side5(coordinates[3][0] - coordinates[2][0],
-      coordinates[3][1] - coordinates[2][1], coordinates[3][2] - coordinates[2][2]);
+  const VerdictVector side5(coordinates[3][0] - coordinates[2][0],
+    coordinates[3][1] - coordinates[2][1], coordinates[3][2] - coordinates[2][2]);
 
-    const double side0_length_squared = side0.length_squared();
-    const double side1_length_squared = side1.length_squared();
-    const double side2_length_squared = side2.length_squared();
-    const double side3_length_squared = side3.length_squared();
-    const double side4_length_squared = side4.length_squared();
-    const double side5_length_squared = side5.length_squared();
+  const double side0_length_squared = side0.length_squared();
+  const double side1_length_squared = side1.length_squared();
+  const double side2_length_squared = side2.length_squared();
+  const double side3_length_squared = side3.length_squared();
+  const double side4_length_squared = side4.length_squared();
+  const double side5_length_squared = side5.length_squared();
 
-    //const int sign = tetVolume < 0. ? -1 : 1;
-    //return sign * 12. * std::pow(3.*fabs(tetVolume), 2./3.) / (side0_length_squared + side1_length_squared + side2_length_squared + side3_length_squared + side4_length_squared + side5_length_squared);
-    double sum = (side0_length_squared + side1_length_squared + side2_length_squared +
-      side3_length_squared + side4_length_squared + side5_length_squared) / 6;
-    return 6 * std::pow(2, 0.5) * tetVolume / std::pow(sum, 3. / 2.);    
+  //const int sign = tetVolume < 0. ? -1 : 1;
+  //return sign * 12. * std::pow(3.*fabs(tetVolume), 2./3.) / (side0_length_squared + side1_length_squared + side2_length_squared + side3_length_squared + side4_length_squared + side5_length_squared);
+  double sum = (side0_length_squared + side1_length_squared + side2_length_squared +
+    side3_length_squared + side4_length_squared + side5_length_squared) / 6;
+  return 6 * std::pow(2, 0.5) * tetVolume / std::pow(sum, 3. / 2.);    
 }
 
-double tet10_mean_ratio( double coordinates[][3])
+double tet10_mean_ratio(const double coordinates[][3])
 {
   double min_tet_mean_ratio = VERDICT_DBL_MAX;
 
@@ -1747,7 +1747,7 @@ double tet10_mean_ratio( double coordinates[][3])
   return min_tet_mean_ratio;
 }
 
-double tet_mean_ratio(int num_nodes, double coordinates[][3])
+double tet_mean_ratio(int num_nodes, const double coordinates[][3])
 {
   if (num_nodes == 4)
   {
