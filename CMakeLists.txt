@@ -126,9 +126,9 @@ install(FILES
 
 # Install library
 install(TARGETS verdict EXPORT ${VERDICT_EXPORT_GROUP}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime # .exe, .dll
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Runtime # .so, .dll
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT VerdictDevelopment #[[.a, .lib]])
+  RUNTIME DESTINATION ${verdict_INSTALL_BIN_DIR} COMPONENT Runtime # .exe, .dll
+  LIBRARY DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT Runtime # .so, .dll
+  ARCHIVE DESTINATION ${verdict_INSTALL_LIB_DIR} COMPONENT VerdictDevelopment #[[.a, .lib]])
 
 # Export Targets file
 export(EXPORT ${VERDICT_EXPORT_GROUP}
