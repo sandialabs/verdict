@@ -94,17 +94,35 @@ endif ()
 #########################
 # Installation commands #
 #########################
+if (NOT verdict_INSTALL_DOC_DIR)
+  set(verdict_INSTALL_DOC_DIR ${CMAKE_INSTALL_DOCDIR})
+endif ()
+if (NOT verdict_INSTALL_INCLUDE_DIR)
+  set(verdict_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+endif ()
+if (NOT verdict_INSTALL_INCLUDE_SUBDIR)
+  set(verdict_INSTALL_INCLUDE_SUBDIR verdict)
+endif ()
+if (NOT verdict_INSTALL_BIN_DIR)
+  set(verdict_INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR})
+endif ()
+if (NOT verdict_INSTALL_LIB_DIR)
+  set(verdict_INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR})
+endif ()
+if (NOT verdict_INSTALL_CMAKE_DIR)
+  set(verdict_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/verdict)
+endif ()
 
 # Install documentation
 install(FILES
   README.md
-  DESTINATION ${CMAKE_INSTALL_DOCDIR}/verdict/${verdict_VERSION}/ COMPONENT VerdictDevelopment)
+  DESTINATION ${verdict_INSTALL_DOC_DIR}/verdict/${verdict_VERSION}/ COMPONENT VerdictDevelopment)
 
 # Install required header files
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/verdict_config.h
   verdict.h
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT VerdictDevelopment)
+  DESTINATION ${verdict_INSTALL_INCLUDE_DIR} COMPONENT VerdictDevelopment)
 
 # Install library
 install(TARGETS verdict EXPORT ${VERDICT_EXPORT_GROUP}
@@ -121,12 +139,12 @@ export(EXPORT ${VERDICT_EXPORT_GROUP}
 install(EXPORT ${VERDICT_EXPORT_GROUP}
   FILE "VerdictTargets.cmake"
   NAMESPACE Verdict::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/verdict COMPONENT VerdictDevelopment)
+  DESTINATION ${verdict_INSTALL_CMAKE_DIR} COMPONENT VerdictDevelopment)
 
 # Create Config file
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/VerdictConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/VerdictConfig.cmake"
-  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/verdict)
+  INSTALL_DESTINATION ${verdict_INSTALL_CMAKE_DIR})
 
 # Generate the version file for the Config file
 write_basic_package_version_file(
@@ -138,4 +156,4 @@ write_basic_package_version_file(
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/VerdictConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/VerdictConfigVersion.cmake"
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/verdict COMPONENT VerdictDevelopment)
+  DESTINATION ${verdict_INSTALL_CMAKE_DIR} COMPONENT VerdictDevelopment)
