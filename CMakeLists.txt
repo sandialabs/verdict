@@ -53,6 +53,9 @@ configure_file(
 add_library(verdict ${verdict_SOURCES})
 target_include_directories(verdict PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+if(UNIX)
+  target_link_libraries(verdict PRIVATE m)
+endif()
 
 
 # Setting the VERSION and SOVERSION of a library will include
