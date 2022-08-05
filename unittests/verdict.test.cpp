@@ -345,8 +345,19 @@ TEST(verdict, tri_six_nodes)
 
 TEST(verdict, quad_simple1)
 {
-  test_case testcase = { "quad_simple1", { { verdict::quad_skew, 0 } }, 4,
-    { { 0, 0, 0 }, { 1, 0, 0 }, { 1, 7, 0 }, { 0, 7, 0 } } };
+  test_case testcase = { "quad_simple1",
+    {
+      /* 1 */ {verdict::quad_skew, 0},
+      /* 2 */ {verdict::quad_aspect_ratio, 4.0},
+      /* 3 */ {verdict::quad_max_edge_ratio, 7.0}
+    },
+    4,
+    {
+      { 0, 0, 0 },
+      { 1, 0, 0 },
+      { 1, 7, 0 },
+      { 0, 7, 0 }
+  } };
 
   runtest(testcase);
 }
@@ -354,7 +365,7 @@ TEST(verdict, quad_simple1)
 TEST(verdict, quad_simple2)
 {
   test_case testcase = { "quad_simple2",
-    { /*  1 */ { verdict::quad_aspect_ratio, 1.4299641718 },
+    { /*  1 */ { verdict::quad_aspect_ratio, 1.74792 },
       /*  2 */ { verdict::quad_skew, 0.092450032704 },
       /*  3 */ { verdict::quad_taper, 0.74535599250 },
       /*  4 */ { verdict::quad_warpage, 0.008 },
@@ -386,7 +397,7 @@ TEST(verdict, quad_simple2)
 TEST(verdict, quad_chevron)
 {
   test_case testcase = { "quad_chevron",
-    { /*  1 */ { verdict::quad_aspect_ratio, 1.5317000291 },
+    { /*  1 */ { verdict::quad_aspect_ratio, 3.00675 },
       /*  2 */ { verdict::quad_skew, 6.5193481489e-01 },
       /*  3 */ { verdict::quad_taper, 9.8606743061e-01 },
       /*  4 */ { verdict::quad_warpage, -9.9459686559e-01 },
@@ -452,7 +463,7 @@ TEST(verdict, quad_collapsed)
 TEST(verdict, quad_bowtie)
 {
   test_case testcase = { "quad_bowtie",
-    { /*  1 */ { verdict::quad_aspect_ratio, 2.0295276589 },
+    { /*  1 */ { verdict::quad_aspect_ratio, 15.132908 },
       /*  2 */ { verdict::quad_skew, 6.0840291338e-01 },
       /*  3 */ { verdict::quad_taper, 4.9416251426e+00 },
       /*  4 */ { verdict::quad_warpage, -9.9972444493e-01 },

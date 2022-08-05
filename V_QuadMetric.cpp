@@ -459,16 +459,10 @@ double quad_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
   double mb = c1 > d1 ? c1 : d1;
   double hm = ma > mb ? ma : mb;
 
-  VerdictVector ab = edges[0] * edges[1];
-  VerdictVector cd = edges[2] * edges[3];
-  double denominator = ab.length() + cd.length();
+  double corner_areas[4];
+  signed_corner_areas(corner_areas, coordinates);
 
-  if (denominator < VERDICT_DBL_MIN)
-  {
-    return (double)VERDICT_DBL_MAX;
-  }
-
-  double aspect_ratio = .5 * hm * (a1 + b1 + c1 + d1) / denominator;
+  double aspect_ratio = hm * (a1 + b1 + c1 + d1) / (corner_areas[0] + corner_areas[1] + corner_areas[2] + corner_areas[3]);
 
   if (aspect_ratio > 0)
   {
