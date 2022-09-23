@@ -4,6 +4,9 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED 1)
+
 project(verdict VERSION 1.4.0)
 
 # Includes
@@ -126,6 +129,7 @@ install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/verdict_config.h
   verdict.h
   DESTINATION ${verdict_INSTALL_INCLUDE_DIR} COMPONENT VerdictDevelopment)
+target_include_directories(verdict PUBLIC $<INSTALL_INTERFACE:${verdict_INSTALL_INCLUDE_DIR}>)
 
 # Install library
 install(TARGETS verdict EXPORT ${VERDICT_EXPORT_GROUP}
