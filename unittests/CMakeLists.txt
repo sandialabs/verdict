@@ -5,4 +5,4 @@ SET(TEST_SRCS
    )
 
 ADD_EXECUTABLE(unittests_verdict ${TEST_SRCS})
-TARGET_LINK_LIBRARIES(unittests_verdict verdict GTest::GTest GTest::Main)
+TARGET_LINK_LIBRARIES(unittests_verdict verdict GTest::GTest)
