@@ -53,7 +53,7 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/verdict_config.h
   @ONLY)
 
-add_library(verdict ${verdict_SOURCES})
+add_library(verdict ${verdict_SOURCES} ${verdict_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/verdict_config.h)
 target_include_directories(verdict PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 if(UNIX)
