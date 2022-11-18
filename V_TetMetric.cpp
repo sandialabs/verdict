@@ -278,20 +278,16 @@ double tet_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   minimum of the jacobian divided by the lengths of 3 edge vectors
 
  */
-double tet_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
+
+template <typename CoordsContainerType>
+double tet_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
-  const VerdictVector side0(coordinates[1][0] - coordinates[0][0],
-    coordinates[1][1] - coordinates[0][1], coordinates[1][2] - coordinates[0][2]);
-  const VerdictVector side1(coordinates[2][0] - coordinates[1][0],
-    coordinates[2][1] - coordinates[1][1], coordinates[2][2] - coordinates[1][2]);
-  const VerdictVector side2(coordinates[0][0] - coordinates[2][0],
-    coordinates[0][1] - coordinates[2][1], coordinates[0][2] - coordinates[2][2]);
-  const VerdictVector side3(coordinates[3][0] - coordinates[0][0],
-    coordinates[3][1] - coordinates[0][1], coordinates[3][2] - coordinates[0][2]);
-  const VerdictVector side4(coordinates[3][0] - coordinates[1][0],
-    coordinates[3][1] - coordinates[1][1], coordinates[3][2] - coordinates[1][2]);
-  const VerdictVector side5(coordinates[3][0] - coordinates[2][0],
-    coordinates[3][1] - coordinates[2][1], coordinates[3][2] - coordinates[2][2]);
+  const VerdictVector side0{coordinates[0], coordinates[1]};
+  const VerdictVector side1{coordinates[1], coordinates[2]};
+  const VerdictVector side2{coordinates[2], coordinates[0]};
+  const VerdictVector side3{coordinates[0], coordinates[3]};
+  const VerdictVector side4{coordinates[1], coordinates[3]};
+  const VerdictVector side5{coordinates[2], coordinates[3]};
 
   const double jacobi = side3 % (side2 * side0);
 
@@ -303,8 +299,8 @@ double tet_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   const double side4_length_squared = side4.length_squared();
   const double side5_length_squared = side5.length_squared();
 
-  const double length_squared[4] = { side0_length_squared * side2_length_squared *
-      side3_length_squared,
+  const double length_squared[4] = {
+    side0_length_squared * side2_length_squared * side3_length_squared,
     side0_length_squared * side1_length_squared * side4_length_squared,
     side1_length_squared * side2_length_squared * side5_length_squared,
     side3_length_squared * side4_length_squared * side5_length_squared };
@@ -336,6 +332,15 @@ double tet_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   return (double)(sqrt2 * jacobi / length_product);
 }
 
+double tet_scaled_jacobian(int num_nodes, const double coordinates[][3])
+{
+    return tet_scaled_jacobian_impl(num_nodes, coordinates);
+}
+
+double tet_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates)
+{
+    return tet_scaled_jacobian_impl(num_nodes, coordinates);
+}
 /*!
   The radius ratio of a tet
 
@@ -401,19 +406,13 @@ double tet_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
     conditioned. Previously, this would only happen when the volume was small
     and positive, but now ill-conditioned inverted tetrahedra are also included.
  */
-double tet_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
   // Determine side vectors
-  VerdictVector ab, bc, ac, ad, bd, cd;
-
-  ab.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
-    coordinates[1][2] - coordinates[0][2]);
-
-  ac.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
-    coordinates[2][2] - coordinates[0][2]);
-
-  ad.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
-    coordinates[3][2] - coordinates[0][2]);
+  const VerdictVector ab{coordinates[0], coordinates[1]};
+  const VerdictVector ac{coordinates[0], coordinates[2]};
+  const VerdictVector ad{coordinates[0], coordinates[3]};
 
   double detTet = ab % (ac * ad);
 
@@ -422,27 +421,22 @@ double tet_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
     return (double)VERDICT_DBL_MAX;
   }
 
-  bc.set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
-    coordinates[2][2] - coordinates[1][2]);
+  VerdictVector bc{coordinates[1], coordinates[2]};
+  VerdictVector bd{coordinates[1], coordinates[3]};
+  VerdictVector cd{coordinates[2], coordinates[3]};
 
-  bd.set(coordinates[3][0] - coordinates[1][0], coordinates[3][1] - coordinates[1][1],
-    coordinates[3][2] - coordinates[1][2]);
-
-  cd.set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
-    coordinates[3][2] - coordinates[2][2]);
-
-  double ab2 = ab.length_squared();
-  double bc2 = bc.length_squared();
-  double ac2 = ac.length_squared();
-  double ad2 = ad.length_squared();
-  double bd2 = bd.length_squared();
-  double cd2 = cd.length_squared();
+  const double ab2 = ab.length_squared();
+  const double bc2 = bc.length_squared();
+  const double ac2 = ac.length_squared();
+  const double ad2 = ad.length_squared();
+  const double bd2 = bd.length_squared();
+  const double cd2 = cd.length_squared();
 
   double A = ab2 > bc2 ? ab2 : bc2;
   double B = ac2 > ad2 ? ac2 : ad2;
   double C = bd2 > cd2 ? bd2 : cd2;
   double D = A > B ? A : B;
-  double hm = D > C ? std::sqrt(D) : std::sqrt(C);
+  const double hm = D > C ? std::sqrt(D) : std::sqrt(C);
 
   bd = ab * bc;
   A = bd.length();
@@ -456,6 +450,15 @@ double tet_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
   const double aspect_ratio = aspect_ratio_normal_coeff * hm * (A + B + C + D) / std::abs(detTet);
 
   return fix_range(aspect_ratio);
+}
+
+double tet_aspect_ratio(int num_nodes, const double coordinates[][3])
+{
+    return tet_aspect_ratio_impl(num_nodes, coordinates);
+}
+double tet_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+{
+    return tet_aspect_ratio_impl(num_nodes, coordinates);
 }
 
 /*!
@@ -954,25 +957,21 @@ double calculate_tet_volume_using_sides(
 
   1/6 * jacobian at a corner node
  */
-double tet_volume(int num_nodes, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet_volume_impl(int num_nodes, const CoordsContainerType coordinates)
 {
   // Determine side vectors
-  VerdictVector side0, side2, side3;
   if (4 == num_nodes)
   {
-    side2.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
-      coordinates[1][2] - coordinates[0][2]);
-
-    side0.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
-      coordinates[2][2] - coordinates[0][2]);
-
-    side3.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
-      coordinates[3][2] - coordinates[0][2]);
+    const VerdictVector side2{coordinates[0], coordinates[1]};
+    const VerdictVector side0{coordinates[0], coordinates[2]};
+    const VerdictVector side3{coordinates[0], coordinates[3]};
     return calculate_tet_volume_using_sides(side0, side2, side3);
   }
   else
   {
     VerdictVector tet_pts[15];
+    VerdictVector side0, side2, side3;
 
     // create a vector for each point
     for (int k = 0; k < num_nodes; k++)
@@ -981,7 +980,7 @@ double tet_volume(int num_nodes, const double coordinates[][3])
     }
 
     // determine center point of the higher-order nodes
-    VerdictVector centroid(0, 0, 0);
+    VerdictVector centroid(0.0, 0.0, 0.0);
     for (int k = 4; k < num_nodes; k++)
     {
       centroid += VerdictVector(coordinates[k][0], coordinates[k][1], coordinates[k][2]);
@@ -1133,6 +1132,16 @@ double tet_volume(int num_nodes, const double coordinates[][3])
   return 0;
 }
 
+double tet_volume(int num_nodes, const double coordinates[][3])
+{
+    return tet_volume_impl(num_nodes, coordinates);
+}
+
+double tet_volume_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+{
+    return tet_volume_impl(num_nodes, coordinates);
+}
+
 /*!
   the condition of a tet
 
@@ -1143,30 +1152,20 @@ double tet_volume(int num_nodes, const double coordinates[][3])
     conditioned. Previously, this would only happen when the volume was small
     and positive, but now ill-conditioned inverted tetrahedra are also included.
  */
-double tet_condition(int /*num_nodes*/, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
-  double condition, term1, term2, det;
+  const VerdictVector side0{coordinates[0], coordinates[1]};
+  const VerdictVector side2{coordinates[2], coordinates[0]};
+  const VerdictVector side3{coordinates[0], coordinates[3]};
 
-  VerdictVector side0, side2, side3;
+  const VerdictVector c_1 = side0;
+  const VerdictVector c_2 = (-2 * side2 - side0) / sqrt3;
+  const VerdictVector c_3 = (3 * side3 + side2 - side0) / sqrt6;
 
-  side0.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
-    coordinates[1][2] - coordinates[0][2]);
-
-  side2.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
-    coordinates[0][2] - coordinates[2][2]);
-
-  side3.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
-    coordinates[3][2] - coordinates[0][2]);
-
-  VerdictVector c_1, c_2, c_3;
-
-  c_1 = side0;
-  c_2 = (-2 * side2 - side0) / sqrt3;
-  c_3 = (3 * side3 + side2 - side0) / sqrt6;
-
-  term1 = c_1 % c_1 + c_2 % c_2 + c_3 % c_3;
-  term2 = (c_1 * c_2) % (c_1 * c_2) + (c_2 * c_3) % (c_2 * c_3) + (c_1 * c_3) % (c_1 * c_3);
-  det = c_1 % (c_2 * c_3);
+  const double term1 = c_1 % c_1 + c_2 % c_2 + c_3 % c_3;
+  const double term2 = (c_1 * c_2) % (c_1 * c_2) + (c_2 * c_3) % (c_2 * c_3) + (c_1 * c_3) % (c_1 * c_3);
+  const double det = c_1 % (c_2 * c_3);
 
   if (std::abs(det) <= VERDICT_DBL_MIN)
   {
@@ -1174,12 +1173,19 @@ double tet_condition(int /*num_nodes*/, const double coordinates[][3])
   }
   else
   {
-    condition = std::sqrt(term1 * term2) / (3.0 * det);
+    return std::sqrt(term1 * term2) / (3.0 * det);
   }
-
-  return (double)condition;
 }
 
+double tet_condition(int num_nodes, const double coordinates[][3])
+{
+    return tet_condition_impl(num_nodes, coordinates);
+}
+
+double tet_condition_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+{
+    return tet_condition_impl(num_nodes, coordinates);
+}
 /*!
   the jacobian of a tet
 
@@ -1517,9 +1523,10 @@ double tet_timestep(int num_nodes, const double coordinates[][3], double density
   return char_length / denominator;
 }
 
-VerdictVector tet10_auxillary_node_coordinate(const double coordinates[][3])
+template <typename CoordsContainerType>
+VerdictVector tet10_auxillary_node_coordinate(const CoordsContainerType coordinates)
 {
-  VerdictVector aux_node(0, 0, 0);
+  VerdictVector aux_node(0.0, 0.0, 0.0);
   for (int i = 4; i < 10; i++)
   {
     VerdictVector tmp_vec(coordinates[i][0], coordinates[i][1], coordinates[i][2]);
@@ -1656,16 +1663,12 @@ double tet_normalized_inradius(int num_nodes, const double coordinates[][3])
   return 0.0;
 }
 
-double tet4_mean_ratio(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet4_mean_ratio(const CoordsContainerType coordinates)
 {
-  const VerdictVector side0(coordinates[1][0] - coordinates[0][0],
-    coordinates[1][1] - coordinates[0][1], coordinates[1][2] - coordinates[0][2]);
-
-  const VerdictVector side2(coordinates[0][0] - coordinates[2][0],
-    coordinates[0][1] - coordinates[2][1], coordinates[0][2] - coordinates[2][2]);
-
-  const VerdictVector side3(coordinates[3][0] - coordinates[0][0],
-    coordinates[3][1] - coordinates[0][1], coordinates[3][2] - coordinates[0][2]);
+  const VerdictVector side0{coordinates[0], coordinates[1]};
+  const VerdictVector side2{coordinates[2], coordinates[0]};
+  const VerdictVector side3{coordinates[0], coordinates[3]};
 
   const double tetVolume = calculate_tet_volume_using_sides(side0, side2, side3);
   if (std::abs( tetVolume ) < VERDICT_DBL_MIN)
@@ -1673,14 +1676,9 @@ double tet4_mean_ratio(const double coordinates[][3])
     return 0.0;
   }
 
-  const VerdictVector side1(coordinates[2][0] - coordinates[1][0],
-    coordinates[2][1] - coordinates[1][1], coordinates[2][2] - coordinates[1][2]);
-
-  const VerdictVector side4(coordinates[3][0] - coordinates[1][0],
-    coordinates[3][1] - coordinates[1][1], coordinates[3][2] - coordinates[1][2]);
-
-  const VerdictVector side5(coordinates[3][0] - coordinates[2][0],
-    coordinates[3][1] - coordinates[2][1], coordinates[3][2] - coordinates[2][2]);
+  const VerdictVector side1{coordinates[1], coordinates[2]};
+  const VerdictVector side4{coordinates[1], coordinates[3]};
+  const VerdictVector side5{coordinates[2], coordinates[3]};
 
   const double side0_length_squared = side0.length_squared();
   const double side1_length_squared = side1.length_squared();
@@ -1696,7 +1694,8 @@ double tet4_mean_ratio(const double coordinates[][3])
   return 6 * std::pow(2, 0.5) * tetVolume / std::pow(sum, 3. / 2.);    
 }
 
-double tet10_mean_ratio(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet10_mean_ratio(const CoordsContainerType coordinates)
 {
   double min_tet_mean_ratio = VERDICT_DBL_MAX;
 
@@ -1747,7 +1746,8 @@ double tet10_mean_ratio(const double coordinates[][3])
   return min_tet_mean_ratio;
 }
 
-double tet_mean_ratio(int num_nodes, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet_mean_ratio_impl(int num_nodes, const CoordsContainerType coordinates)
 {
   if (num_nodes == 4)
   {
@@ -1758,5 +1758,15 @@ double tet_mean_ratio(int num_nodes, const double coordinates[][3])
     return tet10_mean_ratio(coordinates);
   }
   return 0.0;
+}
+
+double tet_mean_ratio(int num_nodes, const double coordinates[][3])
+{
+   return tet_mean_ratio_impl(num_nodes, coordinates);
+}
+
+double tet_mean_ratio_from_loc_ptrs(int num_nodes, const double * const * coordinates)
+{
+   return tet_mean_ratio_impl(num_nodes, coordinates);
 }
 } // namespace verdict

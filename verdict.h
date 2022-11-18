@@ -283,6 +283,7 @@ VERDICT_EXPORT double tet_radius_ratio(int num_nodes, const double coordinates[]
    length and the inradius of the tetrahedron
    Reference ---  P. Frey and P.-L. George, Meshing, Hermes (2000). */
 VERDICT_EXPORT double tet_aspect_ratio(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tet_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates);
 
 //! Calculates tet aspect gamma metric.
 /**  Srms**3 / (8.479670*V) where Srms = sqrt(Sum(Si**2)/6), Si = edge length.
@@ -310,6 +311,7 @@ VERDICT_EXPORT double tet_collapse_ratio(int num_nodes, const double coordinates
    Reference ---  V. N. Parthasarathy et al, A comparison of tetrahedron
    quality measures, Finite Elem. Anal. Des., Vol 15(1993), 255-261. */
 VERDICT_EXPORT double tet_volume(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tet_volume_from_loc_ptrs(int num_nodes, const double * const *coordinates);
 
 //! Calculates tet condition metric.
 /** Condition number of the Jacobian matrix at any corner.
@@ -317,6 +319,7 @@ VERDICT_EXPORT double tet_volume(int num_nodes, const double coordinates[][3]);
    Optimization of the Jacobian Matrix Norm and Associated Quantities,
    Intl. J. Numer. Meth. Engng. 2000, 48:1165-1185. */
 VERDICT_EXPORT double tet_condition(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tet_condition_from_loc_ptrs(int num_nodes, const double * const *coordinates);
 
 //! Calculates tet jacobian.
 /** Minimum pointwise volume at any corner.
@@ -331,6 +334,7 @@ VERDICT_EXPORT double tet_jacobian(int num_nodes, const double coordinates[][3])
    Optimization of the Jacobian Matrix Norm and Associated Quantities,
    Intl. J. Numer. Meth. Engng. 2000, 48:1165-1185. */
 VERDICT_EXPORT double tet_scaled_jacobian(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tet_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates);
 
 //! Calculates tet mean ratio.
 /** Ratio of tet volume to volume of an equilateral tet with the same RMS edge length
@@ -338,6 +342,7 @@ VERDICT_EXPORT double tet_scaled_jacobian(int num_nodes, const double coordinate
    meshes, IJNME 2010 82:843-867 Reference 2 --- Danial Ibanez - PhD Thesis, Conformal Mesh
    Adaptation on Heterogeneous Supercomputers */
 VERDICT_EXPORT double tet_mean_ratio(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tet_mean_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates);
 
 //! Calculates the minimum normalized inner radius of a tet
 /** Ratio of the minimum subtet inner radius to tet outer radius*/
@@ -615,6 +620,7 @@ VERDICT_EXPORT double tri_edge_ratio(int num_nodes, const double coordinates[][3
     Reference --- P. P. Pebay & T. J. Baker, Analysis of Triangle Quality
     Measures, AMS Math. Comp., 2003, 72(244):1817-1839 */
 VERDICT_EXPORT double tri_aspect_ratio(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension = 3);
 
 //! Calculates triangle metric.
 /** radius ratio
@@ -629,6 +635,7 @@ VERDICT_EXPORT double tri_aspect_frobenius(int num_nodes, const double coordinat
 //! Calculates triangle metric.
 /** Maximum included angle in triangle */
 VERDICT_EXPORT double tri_area(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension = 3);
 
 //! Calculates triangle metric.
 /** Minimum included angle in triangle */
@@ -644,6 +651,7 @@ VERDICT_EXPORT double tri_maximum_angle(int num_nodes, const double coordinates[
    Optimization of the Jacobian Matrix Norm and Associated Quantities,
    Intl. J. Numer. Meth. Engng. 2000, 48:1165-1185. */
 VERDICT_EXPORT double tri_condition(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tri_condition_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension = 3);
 
 //! Calculates triangle metric.
 /** Minimum Jacobian divided by the lengths of 2 edge vectors.
@@ -651,6 +659,7 @@ VERDICT_EXPORT double tri_condition(int num_nodes, const double coordinates[][3]
    Optimization of the Jacobian Matrix Norm and Associated Quantities,
    Intl. J. Numer. Meth. Engng. 2000, 48:1165-1185. */
 VERDICT_EXPORT double tri_scaled_jacobian(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension=3);
 
 //! Calculates triangle metric.
 /** Min( J, 1/J ), where J is determinant of weighted Jacobian matrix.

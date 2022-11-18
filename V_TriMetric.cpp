@@ -149,27 +149,23 @@ double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
      what is now called "v_tri_aspect_frobenius"
 
  */
-double tri_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   // three vectors for each side
-  VerdictVector a(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
-    coordinates[1][2] - coordinates[0][2]);
+  const VerdictVector a{coordinates[0], coordinates[1], dimension};
+  const VerdictVector b{coordinates[1], coordinates[2], dimension};
+  const VerdictVector c{coordinates[2], coordinates[0], dimension};
 
-  VerdictVector b(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
-    coordinates[2][2] - coordinates[1][2]);
-
-  VerdictVector c(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
-    coordinates[0][2] - coordinates[2][2]);
-
-  double a1 = a.length();
-  double b1 = b.length();
-  double c1 = c.length();
+  const double a1 = a.length();
+  const double b1 = b.length();
+  const double c1 = c.length();
 
   double hm = a1 > b1 ? a1 : b1;
   hm = hm > c1 ? hm : c1;
 
-  VerdictVector ab = a * b;
-  double denominator = ab.length();
+  const VerdictVector ab = a * b;
+  const double denominator = ab.length();
 
   if (denominator < VERDICT_DBL_MIN)
   {
@@ -177,9 +173,7 @@ double tri_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
   }
   else
   {
-    double aspect_ratio;
-    aspect_ratio = aspect_ratio_normal_coeff * hm * (a1 + b1 + c1) / denominator;
-
+    const double aspect_ratio = aspect_ratio_normal_coeff * hm * (a1 + b1 + c1) / denominator;
     if (aspect_ratio > 0)
     {
       return (double)std::min(aspect_ratio, VERDICT_DBL_MAX);
@@ -188,6 +182,14 @@ double tri_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
   }
 }
 
+double tri_aspect_ratio(int num_nodes, const double coordinates[][3])
+{
+    return tri_aspect_ratio_impl(num_nodes, coordinates, 3);
+}
+double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+{
+    return tri_aspect_ratio_impl(num_nodes, coordinates, dimension);
+}
 /*!
    the radius ratio of a triangle
 
@@ -279,26 +281,33 @@ double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 
   0.5 * jacobian at a node
  */
-double tri_area(int /*num_nodes*/, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_area_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   // two vectors for two sides
-  VerdictVector side1(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
-    coordinates[1][2] - coordinates[0][2]);
-
-  VerdictVector side3(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
-    coordinates[2][2] - coordinates[0][2]);
+  const VerdictVector side1{coordinates[0], coordinates[1], dimension};
+  const VerdictVector side3{coordinates[0], coordinates[2], dimension};
 
   // the cross product of the two vectors representing two sides of the
   // triangle
-  VerdictVector tmp = side1 * side3;
+  const VerdictVector tmp = side1 * side3;
 
   // return the magnitude of the vector divided by two
-  double area = 0.5 * tmp.length();
+  const double area = 0.5 * tmp.length();
   if (area > 0)
   {
     return (double)std::min(area, VERDICT_DBL_MAX);
   }
   return (double)std::max(area, -VERDICT_DBL_MAX);
+}
+double tri_area(int num_nodes, const double coordinates[][3])
+{
+    return tri_area_impl(num_nodes, coordinates, 3);
+}
+
+double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+{
+    return tri_area_impl(num_nodes, coordinates, dimension);
 }
 
 /*!
@@ -463,25 +472,32 @@ double tri_equiangle_skew(int num_nodes, const double coordinates[][3])
 
   Condition number of the jacobian matrix at any corner
  */
-double tri_condition(int /*num_nodes*/, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
-  VerdictVector v1(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
-    coordinates[1][2] - coordinates[0][2]);
-
-  VerdictVector v2(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
-    coordinates[2][2] - coordinates[0][2]);
-
-  VerdictVector tri_normal = v1 * v2;
-  double areax2 = tri_normal.length();
+  const VerdictVector v1{coordinates[0], coordinates[1], dimension};
+  const VerdictVector v2{coordinates[0], coordinates[2], dimension};
+  const VerdictVector tri_normal = v1 * v2;
+  const double areax2 = tri_normal.length();
 
   if (areax2 == 0.0)
   {
     return (double)VERDICT_DBL_MAX;
   }
 
-  double condition = (double)(((v1 % v1) + (v2 % v2) - (v1 % v2)) / (areax2 * sqrt3));
+  const double condition = (double)(((v1 % v1) + (v2 % v2) - (v1 % v2)) / (areax2 * sqrt3));
 
   return (double)std::min(condition, VERDICT_DBL_MAX);
+}
+
+double tri_condition(int num_nodes, const double coordinates[][3])
+{
+    return tri_condition_impl(num_nodes, coordinates, 3);
+}
+
+double tri_condition_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
+{
+    return tri_condition_impl(num_nodes, coordinates, dimension);
 }
 
 /*!
@@ -489,28 +505,23 @@ double tri_condition(int /*num_nodes*/, const double coordinates[][3])
 
   minimum of the jacobian divided by the lengths of 2 edge vectors
  */
-double tri_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
-  VerdictVector first, second;
-  double jacobian;
+  const VerdictVector edge[3] =
+  {
+      {coordinates[0], coordinates[1], dimension},
+      {coordinates[0], coordinates[2], dimension},
+      {coordinates[1], coordinates[2], dimension},
+  };
 
-  VerdictVector edge[3];
-  edge[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
-    coordinates[1][2] - coordinates[0][2]);
+  const VerdictVector first = edge[1] - edge[0];
+  const VerdictVector second = edge[2] - edge[0];
 
-  edge[1].set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
-    coordinates[2][2] - coordinates[0][2]);
+  const VerdictVector cross = first * second;
+  double jacobian = cross.length();
 
-  edge[2].set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
-    coordinates[2][2] - coordinates[1][2]);
-  first = edge[1] - edge[0];
-  second = edge[2] - edge[0];
-
-  VerdictVector cross = first * second;
-  jacobian = cross.length();
-
-  double max_edge_length_product;
-  max_edge_length_product = std::max(edge[0].length() * edge[1].length(),
+  const double max_edge_length_product = std::max(edge[0].length() * edge[1].length(),
     std::max(edge[1].length() * edge[2].length(), edge[0].length() * edge[2].length()));
 
   if (max_edge_length_product < VERDICT_DBL_MIN)
@@ -526,6 +537,16 @@ double tri_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
     return (double)std::min(jacobian, VERDICT_DBL_MAX);
   }
   return (double)std::max(jacobian, -VERDICT_DBL_MAX);
+}
+
+double tri_scaled_jacobian(int num_nodes, const double coordinates[][3])
+{
+    return tri_scaled_jacobian_impl(num_nodes, coordinates, 3);
+}
+
+double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
+{
+    return tri_scaled_jacobian_impl(num_nodes, coordinates, dimension);
 }
 
 /*!
