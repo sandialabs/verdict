@@ -265,6 +265,23 @@ TEST(verdict, edge_calc_3)
   runtest(testcase);
 }
 
+TEST(verdict, edge_calc_4)
+{
+  test_case testcase = { "edge_calc_4", { { verdict::edge_length, 1.414213562373 } }, 3,
+    { { 0, 0, 0 }, { 1, 0, 0 }, { 0.5, 0.5, 0 } } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, edge_calc_5)
+{
+  test_case testcase = { "edge_calc_5", { { verdict::edge_length, 1.0 } }, 3,
+    { { 0, 0, 0 }, { 1, 0, 0 }, { 0.5, 0, 0 } } };
+
+  runtest(testcase);
+}
+
+
 TEST(verdict, wedge_simple)
 {
   test_case testcase = { "wedge_simple",
@@ -328,7 +345,7 @@ TEST(verdict, tri_singular)
 TEST(verdict, tri_six_nodes)
 {
   test_case testcase = { "tri_six_nodes",
-    { { verdict::tri_area, 0.54772255751 }, { verdict::tri_aspect_ratio, 1.3268079265 },
+    { { verdict::tri_area, 0.5554471166 }, { verdict::tri_aspect_ratio, 1.3268079265 },
       { verdict::tri_condition, 1.1173381066 }, { verdict::tri_distortion, -3.3198288345 },
       { verdict::tri_minimum_angle, 45.406778838 }, { verdict::tri_maximum_angle, 85.823122909 },
       { verdict::tri_shape, 0.89498424344 },
@@ -339,6 +356,42 @@ TEST(verdict, tri_six_nodes)
     6,
     { { 0, 0, 0 }, { 1, 0, 0.2 }, { 0, 1, 0.4 }, { 0, 0.5, 0.1 }, { 0.5, 0.5, 0.3 },
       { 0.5, 0, 0.2 } } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, tri_seven_nodes)
+{
+  test_case testcase = { "tri_seven_nodes",
+    { { verdict::tri_area, 0.5477225575 }, { verdict::tri_aspect_ratio, 1.3268079265 },
+      { verdict::tri_condition, 1.117338106 }, { verdict::tri_distortion, 0.0 },
+      { verdict::tri_minimum_angle, 45.406778838 }, { verdict::tri_maximum_angle, 85.823122909 },
+      { verdict::tri_shape, 0.89498424344 },
+    /*  8 */ { verdict::tri_edge_ratio, 1.4005493428 },
+    /*  9 */ { verdict::tri_aspect_frobenius, 1.1173381066 },
+    /* 10 */ { verdict::tri_equiangle_skew, 0.24322035270 },
+    /* 11 */ { verdict::tri_normalized_inradius, 0.0 } },
+  7,
+  { { 0, 0, 0 }, { 1, 0, 0.2 }, { 0, 1, 0.4 }, { 0.5, 0.0, 0.1 }, { 0.5, 0.5, 0.3 },
+    { 0.0, 0.5, 0.2 }, { 0.3333333333, 0.3333333333, 0.2 } } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, tri_seven_nodes_ho_nodes_moved)
+{
+  test_case testcase = { "tri_seven_nodes_ho_nodes_moved",
+    { { verdict::tri_area, 0.6215416837 }, { verdict::tri_aspect_ratio, 1.3268079265 },
+      { verdict::tri_condition, 1.117338106 }, { verdict::tri_distortion, 0.0 },
+      { verdict::tri_minimum_angle, 45.406778838 }, { verdict::tri_maximum_angle, 85.823122909 },
+      { verdict::tri_shape, 0.89498424344 },
+    /*  8 */ { verdict::tri_edge_ratio, 1.4005493428 },
+    /*  9 */ { verdict::tri_aspect_frobenius, 1.1173381066 },
+    /* 10 */ { verdict::tri_equiangle_skew, 0.24322035270 },
+    /* 11 */ { verdict::tri_normalized_inradius, 0.0 } },
+  7,
+  { { 0, 0, 0 }, { 1, 0, 0.2 }, { 0, 1, 0.4 }, { 0.6, -0.1, 0.0 }, { 0.5, 0.6, 0.3 },
+    { 0.1, 0.5, 0.2 }, { 0.3333333333, 0.3333333333, 0.1 } } };
 
   runtest(testcase);
 }
@@ -488,6 +541,116 @@ TEST(verdict, quad_bowtie)
       { 3, -2.5, -1.15 }, // 3
       { 4.5, 4.3, -0.9 }, // 0
     } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, quad5_area)
+{
+  test_case testcase = { "quad5_area",
+    {  { verdict::quad_area, 21.5843025975 },  },
+  5,
+  {
+    { -1, -1, -1 },     
+    { 3, -2.5, -1.15 }, 
+    { 6, 2, -1.1 },     
+    { 4.5, 4.3, -0.9 }, 
+    {3.125, 0.7, -1.0375 }
+  } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, quad5_area_b)
+{
+  test_case testcase = { "quad5_area_b",
+    {  { verdict::quad_area, 21.7405993317 },  },
+  5,
+  {
+    { -1, -1, -1 },
+    { 3, -2.5, -1.15 },
+    { 6, 2, -1.1 },
+    { 4.5, 4.3, -0.9 },
+    {3.125, 0.7, -0.7875 }
+  } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, quad8_area)
+{
+  test_case testcase = { "quad8_area",
+    {  { verdict::quad_area, 21.5843485480 },  },
+  8,
+  {
+    { -1, -1, -1 },
+    { 3, -2.5, -1.15 },
+    { 6, 2, -1.1 },
+    { 4.5, 4.3, -0.9 },
+    {1, -1.75, -1.075},
+    {4.5, -0.25, -1.125},
+    {5.25, 3.15, -1},
+    {1.75, 1.65, -0.95}
+  } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, quad8_area_b)
+{
+  test_case testcase = { "quad8_area_b",
+    {  { verdict::quad_area, 21.3830774682 },  },
+  8,
+  {
+    { -1, -1, -1 },
+    { 3, -2.5, -1.15 },
+    { 6, 2, -1.1 },
+    { 4.5, 4.3, -0.9 },    
+    {1, -1.75, -0.875},
+    {4.7, -0.25, -1.125},
+    {5.45, 3.35, -1 },
+    {2.15, 1.65, -0.95}
+  } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, quad9_area)
+{
+  test_case testcase = { "quad9_area",
+    {  { verdict::quad_area, 21.5843025975 },  },
+  9,
+  {
+    { -1, -1, -1 },
+    { 3, -2.5, -1.15 },
+    { 6, 2, -1.1 },
+    { 4.5, 4.3, -0.9 },    
+    {1, -1.75, -1.075},
+    {4.5, -0.25, -1.125},
+    {5.25, 3.15, -1 },
+    {1.75, 1.65, -0.95},
+    {3.125, 0.7, -1.0375 }
+  } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, quad9_area_b)
+{
+  test_case testcase = { "quad9_area_b",
+    {  { verdict::quad_area, 21.6059362945 },  },
+  9,
+  {
+   { -1, -1, -1 },
+    { 3, -2.5, -1.15 },
+    { 6, 2, -1.1 },
+    { 4.5, 4.3, -0.9 },
+    {1, -1.75, -0.875},
+    {4.7, -0.25, -1.125},
+    {5.45, 3.35, -1 },
+    {2.15, 1.65, -0.95},
+    {3.125, 0.7, -1.2875 }
+  } };
 
   runtest(testcase);
 }

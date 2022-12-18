@@ -282,23 +282,114 @@ double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
   0.5 * jacobian at a node
  */
 template <typename CoordsContainerType>
-double tri_area_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+double tri_area_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
 {
-  // two vectors for two sides
-  const VerdictVector side1{coordinates[0], coordinates[1], dimension};
-  const VerdictVector side3{coordinates[0], coordinates[2], dimension};
-
-  // the cross product of the two vectors representing two sides of the
-  // triangle
-  const VerdictVector tmp = side1 * side3;
-
-  // return the magnitude of the vector divided by two
-  const double area = 0.5 * tmp.length();
-  if (area > 0)
+  if (3 == num_nodes)
   {
-    return (double)std::min(area, VERDICT_DBL_MAX);
+    // two vectors for two sides
+    const VerdictVector side1{ coordinates[0], coordinates[1], dimension };
+    const VerdictVector side3{ coordinates[0], coordinates[2], dimension };
+
+    // the cross product of the two vectors representing two sides of the
+    // triangle
+    const VerdictVector tmp = side1 * side3;
+
+    // return the magnitude of the vector divided by two
+    const double area = 0.5 * tmp.length();
+    if (area > 0)
+    {
+      return (double)std::min(area, VERDICT_DBL_MAX);
+    }
+    return (double)std::max(area, -VERDICT_DBL_MAX);
   }
-  return (double)std::max(area, -VERDICT_DBL_MAX);
+  else
+  {
+    const double *tmp_coords[3];
+    double tri_area = 0.0;
+
+    if (6 == num_nodes)
+    {
+      // 035
+      tmp_coords[0] = coordinates[0];
+      tmp_coords[1] = coordinates[3];
+      tmp_coords[2] = coordinates[5];      
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 314
+      tmp_coords[0] = coordinates[3];
+      tmp_coords[1] = coordinates[1];
+      tmp_coords[2] = coordinates[4];      
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 425
+      tmp_coords[0] = coordinates[4];
+      tmp_coords[1] = coordinates[2];
+      tmp_coords[2] = coordinates[5];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 345
+      tmp_coords[0] = coordinates[3];
+      tmp_coords[1] = coordinates[4];     
+      tmp_coords[2] = coordinates[5];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+    }    
+    else if (7 == num_nodes)
+    {
+      //center node 6
+      tmp_coords[2] = coordinates[6];
+      
+      // 036
+      tmp_coords[0] = coordinates[0];
+      tmp_coords[1] = coordinates[3];      
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 316
+      tmp_coords[0] = coordinates[3];
+      tmp_coords[1] = coordinates[1];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 146
+      tmp_coords[0] = coordinates[1];
+      tmp_coords[1] = coordinates[4];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 426
+      tmp_coords[0] = coordinates[4];
+      tmp_coords[1] = coordinates[2];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);      
+
+      // 256
+      tmp_coords[0] = coordinates[2];
+      tmp_coords[1] = coordinates[5];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 506
+      tmp_coords[0] = coordinates[5];
+      tmp_coords[1] = coordinates[0];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+    }    
+    else if( 4 == num_nodes )
+    {
+      //center node 3
+      tmp_coords[2] = coordinates[3];      
+
+      // 013
+      tmp_coords[0] = coordinates[0];
+      tmp_coords[1] = coordinates[1];      
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 123
+      tmp_coords[0] = coordinates[1];
+      tmp_coords[1] = coordinates[2];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+
+      // 203
+      tmp_coords[0] = coordinates[2];
+      tmp_coords[1] = coordinates[0];
+      tri_area += tri_area_impl(3, tmp_coords, dimension);
+    }    
+    return tri_area;
+  }
 }
 double tri_area(int num_nodes, const double coordinates[][3])
 {
