@@ -341,6 +341,37 @@ TEST(verdict, tri_singular)
   runtest(testcase);
 }
 
+TEST(verdict, tri4_area)
+{
+  test_case testcase = { "tri4_area",
+    {  { verdict::tri_area, 0.8660254037844 },  },
+  4,
+  {
+    { -0.5, 0.5, 0.5  },
+    { 0.5, -0.5, 0.5  },
+    { -0.5, -0.5, -0.5  },
+    { -0.166667, -0.166667, 0.166667 }    
+  } };
+
+  runtest(testcase);
+}
+
+TEST(verdict, tri4_area_b)
+{
+  test_case testcase = { "tri4_area_b",
+    {  { verdict::tri_area, 0.9006928267085 },  },
+  4,
+  {
+    { -0.5, 0.5, 0.5  },
+    { 0.5, -0.5, 0.5  },
+    { -0.5, -0.5, -0.5  },
+    { -0.0666666666667, -0.0666666666667, 0.166667 }
+  } };
+
+  runtest(testcase);
+}
+
+
 // tri_distortion is not well covered, we need to test it with a six noded triangle */
 TEST(verdict, tri_six_nodes)
 {
