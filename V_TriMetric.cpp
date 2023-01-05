@@ -761,10 +761,11 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
     return (double)distortion;
   }
 
-  else if (num_nodes == 6)
+  else if (num_nodes >= 6)
   {
     total_number_of_gauss_points = 6;
     number_of_gauss_points = 6;
+    num_nodes = 6; //seven nodes not handled 
   }
 
   distortion = VERDICT_DBL_MAX;

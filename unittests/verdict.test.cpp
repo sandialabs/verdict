@@ -395,7 +395,7 @@ TEST(verdict, tri_seven_nodes)
 {
   test_case testcase = { "tri_seven_nodes",
     { { verdict::tri_area, 0.5477225575 }, { verdict::tri_aspect_ratio, 1.3268079265 },
-      { verdict::tri_condition, 1.117338106 }, { verdict::tri_distortion, 0.0 },
+      { verdict::tri_condition, 1.117338106 }, { verdict::tri_distortion, 1.0000001069 },
       { verdict::tri_minimum_angle, 45.406778838 }, { verdict::tri_maximum_angle, 85.823122909 },
       { verdict::tri_shape, 0.89498424344 },
     /*  8 */ { verdict::tri_edge_ratio, 1.4005493428 },
@@ -413,7 +413,7 @@ TEST(verdict, tri_seven_nodes_ho_nodes_moved)
 {
   test_case testcase = { "tri_seven_nodes_ho_nodes_moved",
     { { verdict::tri_area, 0.6215416837 }, { verdict::tri_aspect_ratio, 1.3268079265 },
-      { verdict::tri_condition, 1.117338106 }, { verdict::tri_distortion, 0.0 },
+      { verdict::tri_condition, 1.117338106 }, { verdict::tri_distortion, 0.6514797121 },
       { verdict::tri_minimum_angle, 45.406778838 }, { verdict::tri_maximum_angle, 85.823122909 },
       { verdict::tri_shape, 0.89498424344 },
     /*  8 */ { verdict::tri_edge_ratio, 1.4005493428 },
