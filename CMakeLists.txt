@@ -17,8 +17,7 @@ if (POLICY CMP0063)
   cmake_policy(SET CMP0063 NEW)
 endif ()
 
-set(verdict_VERSION_FLAT "${CMAKE_PROJECT_VERSION_MAJOR}${CMAKE_PROJECT_VERSION_MINOR}${CMAKE_PROJECT_VERSION_PATCH}")
-set(verdict_VERSION "${CMAKE_PROJECT_VERSION}")
+set(verdict_VERSION_FLAT "${verdict_VERSION_MAJOR}${verdict_VERSION_MINOR}${verdict_VERSION_PATCH}")
 
 option(VERDICT_BUILD_DOC "Build the 2007 Verdict User Manual" OFF)
 option(VERDICT_MANGLE "Mangle verdict names for inclusion in a larger library?" OFF)
@@ -68,7 +67,7 @@ endif()
 if (NOT VERDICT_NO_LIBRARY_VERSION)
   set_target_properties(verdict PROPERTIES
     VERSION "${verdict_VERSION}"
-    SOVERSION "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}")
+    SOVERSION "${verdict_VERSION_MAJOR}.${verdict_VERSION_MINOR}")
 endif ()
 if (NOT VERDICT_EXPORT_GROUP)
   set(VERDICT_EXPORT_GROUP VerdictExport)
