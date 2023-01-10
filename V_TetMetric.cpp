@@ -1537,7 +1537,8 @@ VerdictVector tet10_auxillary_node_coordinate(const CoordsContainerType coordina
   return aux_node;
 }
 
-double tet10_min_inradius(const double coordinates[][3], int begin_index, int end_index)
+template <typename CoordsContainerType>
+double tet10_min_inradius(const CoordsContainerType coordinates, int begin_index, int end_index)
 {
   double min_tetinradius = VERDICT_DBL_MAX;
 
@@ -1589,7 +1590,9 @@ double tet10_characteristic_length(const double coordinates[][3])
 
   return min_tetinradius;
 }
-double calculate_tet4_outer_radius(const double coordinates[][3])
+
+template <typename CoordsContainerType>
+double calculate_tet4_outer_radius(const CoordsContainerType coordinates)
 {
   verdict::VerdictVector nE[4];
   for (int i{ 0 }; i < 4; i++)
@@ -1611,7 +1614,8 @@ double calculate_tet4_outer_radius(const double coordinates[][3])
   return outer_radius;
 }
 
-double tet10_normalized_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet10_normalized_inradius(const CoordsContainerType coordinates)
 {
   double min_inradius_for_subtet_with_parent_node = tet10_min_inradius(coordinates, 0, 3);
   double min_inradius_for_subtet_with_no_parent_node = tet10_min_inradius(coordinates, 4, 11);
@@ -1628,7 +1632,8 @@ double tet10_normalized_inradius(const double coordinates[][3])
   return fix_range(norm_inrad);
 }
 
-double tet4_normalized_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet4_normalized_inradius(const CoordsContainerType coordinates)
 {
   double tet10_coords[10][3];
   for (int i = 0; i < 4; i++)
@@ -1650,7 +1655,8 @@ double tet4_normalized_inradius(const double coordinates[][3])
   return tet10_normalized_inradius(tet10_coords);
 }
 
-double tet_normalized_inradius(int num_nodes, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tet_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates)
 {
   if (num_nodes == 4)
   {
@@ -1661,6 +1667,16 @@ double tet_normalized_inradius(int num_nodes, const double coordinates[][3])
     return tet10_normalized_inradius(coordinates);
   }
   return 0.0;
+}
+
+double tet_normalized_inradius(int num_nodes, const double coordinates[][3])
+{
+    return tet_normalized_inradius_impl(num_nodes, coordinates);
+}
+
+double tet_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+{
+    return tet_normalized_inradius_impl(num_nodes, coordinates);
 }
 
 template <typename CoordsContainerType>

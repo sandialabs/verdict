@@ -348,6 +348,7 @@ VERDICT_EXPORT double tet_mean_ratio_from_loc_ptrs(int num_nodes, const double *
 /** Ratio of the minimum subtet inner radius to tet outer radius*/
 /* Currently supports tetra 10 and 4.*/
 VERDICT_EXPORT double tet_normalized_inradius(int num_nodes, const double coordinates[][3]);
+VERDICT_EXPORT double tet_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates);
 
 //! Calculates tet shape metric.
 /** 3/Mean Ratio of weighted Jacobian matrix.
