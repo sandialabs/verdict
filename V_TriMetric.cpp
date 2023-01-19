@@ -942,7 +942,8 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
   return (double)std::max(distortion, -VERDICT_DBL_MAX);
 }
 
-double tri_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_inradius(const CoordsContainerType coordinates)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -962,7 +963,8 @@ double tri_inradius(const double coordinates[][3])
   return ir;
 }
 
-double tri6_min_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri6_min_inradius(const CoordsContainerType coordinates)
 {
   static int SUBTRI_NODES[4][3] = { { 0, 3, 5 }, { 3, 1, 4 }, { 5, 4, 2 }, { 3, 4, 5 } };
   double min_inrad = VERDICT_DBL_MAX;
@@ -985,7 +987,8 @@ double tri6_min_inradius(const double coordinates[][3])
   return min_inrad;
 }
 
-double calculate_tri3_outer_radius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double calculate_tri3_outer_radius(const CoordsContainerType coordinates)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -1008,7 +1011,8 @@ double calculate_tri3_outer_radius(const double coordinates[][3])
   return cr;
 }
 
-double tri6_normalized_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri6_normalized_inradius(const CoordsContainerType coordinates)
 {
   double min_inradius_for_subtri = tri6_min_inradius(coordinates);
   double outer_radius = calculate_tri3_outer_radius(coordinates);
@@ -1017,7 +1021,8 @@ double tri6_normalized_inradius(const double coordinates[][3])
   return normalized_inradius;
 }
 
-double tri3_normalized_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri3_normalized_inradius(const CoordsContainerType coordinates)
 {
   double tri6_coords[6][3];
   for (int i = 0; i < 3; i++)
@@ -1042,7 +1047,8 @@ double tri3_normalized_inradius(const double coordinates[][3])
 //! Calculates the minimum normalized inner radius of a tri6
 /** Ratio of the minimum subtri inner radius to tri outer radius*/
 /* Currently, supports tri 6 and 3.*/
-double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates)
 {
   if (num_nodes == 3)
   {
@@ -1054,4 +1060,15 @@ double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
   }
   return 0.0;
 }
+
+double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
+{
+    return tri_normalized_inradius_impl(num_nodes, coordinates);
+}
+
+double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+{
+    return tri_normalized_inradius_impl(num_nodes, coordinates);
+}
+
 } // namespace verdict
