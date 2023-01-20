@@ -1012,6 +1012,23 @@ double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const 
   return cr;
 }
 
+static double fix_range(double v)
+{
+  if (std::isnan(v))
+  {
+    return VERDICT_DBL_MAX;
+  }
+  if (v >= VERDICT_DBL_MAX)
+  {
+    return VERDICT_DBL_MAX;
+  }
+  if (v <= -VERDICT_DBL_MAX)
+  {
+    return -VERDICT_DBL_MAX;
+  }
+  return v;
+}
+
 template <typename CoordsContainerType>
 double tri6_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
 {
@@ -1019,7 +1036,7 @@ double tri6_normalized_inradius(const CoordsContainerType coordinates, const int
   double outer_radius = calculate_tri3_outer_radius(coordinates, dimension);
   double normalized_inradius = 4.0 * min_inradius_for_subtri / outer_radius;
 
-  return normalized_inradius;
+  return fix_range(normalized_inradius);
 }
 
 template <typename CoordsContainerType>

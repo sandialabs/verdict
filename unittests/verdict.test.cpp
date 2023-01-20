@@ -1129,6 +1129,23 @@ TEST(verdict, tet_normalized_inradius_deformed_tet10)
   runtest(testcase);
 }
 
+TEST(verdict, tri_normalized_inradius_collapsed_tri6)
+{
+  test_case testcase = { "tri_normalized_inradius_good_tri6",
+    { { verdict::tri_normalized_inradius, verdict::VERDICT_DBL_MAX } }, 6,
+    {
+     {0.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0},
+    } };
+
+  runtest(testcase);
+}
+
+
 TEST(verdict, tet8_volume)
 {
   test_case testcase = { "Volume of tet8 element",
