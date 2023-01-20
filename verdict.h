@@ -694,7 +694,7 @@ VERDICT_EXPORT double tri_equiangle_skew(int num_nodes, const double coordinates
 /** Ratio of the minimum subtet inner radius to tet outer radius*/
 /* Currently supports tri 6 and 3.*/
 VERDICT_EXPORT double tri_normalized_inradius(int num_nodes, const double coordinates[][3]);
-VERDICT_EXPORT double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates);
+VERDICT_EXPORT double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension=3);
 } // namespace verdict
 
 #endif /* __verdict_h */
