@@ -24,6 +24,7 @@
 #include "verdict_defines.hpp"
 
 #include <algorithm>
+#include <array>
 
 namespace VERDICT_NAMESPACE
 {
@@ -942,7 +943,8 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
   return (double)std::max(distortion, -VERDICT_DBL_MAX);
 }
 
-double tri_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_inradius(const CoordsContainerType coordinates)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -962,7 +964,8 @@ double tri_inradius(const double coordinates[][3])
   return ir;
 }
 
-double tri6_min_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri6_min_inradius(const CoordsContainerType coordinates, const int dimension)
 {
   static int SUBTRI_NODES[4][3] = { { 0, 3, 5 }, { 3, 1, 4 }, { 5, 4, 2 }, { 3, 4, 5 } };
   double min_inrad = VERDICT_DBL_MAX;
@@ -974,7 +977,7 @@ double tri6_min_inradius(const double coordinates[][3])
       int idx = SUBTRI_NODES[i][j];
       subtri_coords[j][0] = coordinates[idx][0];
       subtri_coords[j][1] = coordinates[idx][1];
-      subtri_coords[j][2] = coordinates[idx][2];
+      subtri_coords[j][2] = dimension == 2 ? 0.0 : coordinates[idx][2];
     }
     double subtri_inrad = tri_inradius(subtri_coords);
     if (subtri_inrad < min_inrad)
@@ -985,7 +988,8 @@ double tri6_min_inradius(const double coordinates[][3])
   return min_inrad;
 }
 
-double calculate_tri3_outer_radius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const int dimension)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -993,8 +997,8 @@ double calculate_tri3_outer_radius(const double coordinates[][3])
   for (int i = 0; i < 3; i++)
   {
     int j = (i + 1) % 3;
-    sides[i].set(coordinates[j][0] - coordinates[i][0], coordinates[j][1] - coordinates[i][1],
-      coordinates[j][2] - coordinates[i][2]);
+    const VerdictVector thisSide{coordinates[i], coordinates[j], dimension};
+    sides[i] = thisSide;
     slen[i] = sides[i].length();
     sp += slen[i];
   }
@@ -1008,50 +1012,80 @@ double calculate_tri3_outer_radius(const double coordinates[][3])
   return cr;
 }
 
-double tri6_normalized_inradius(const double coordinates[][3])
+static double fix_range(double v)
 {
-  double min_inradius_for_subtri = tri6_min_inradius(coordinates);
-  double outer_radius = calculate_tri3_outer_radius(coordinates);
-  double normalized_inradius = 4.0 * min_inradius_for_subtri / outer_radius;
-
-  return normalized_inradius;
+  if (std::isnan(v))
+  {
+    return VERDICT_DBL_MAX;
+  }
+  if (v >= VERDICT_DBL_MAX)
+  {
+    return VERDICT_DBL_MAX;
+  }
+  if (v <= -VERDICT_DBL_MAX)
+  {
+    return -VERDICT_DBL_MAX;
+  }
+  return v;
 }
 
-double tri3_normalized_inradius(const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri6_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
 {
-  double tri6_coords[6][3];
+  double min_inradius_for_subtri = tri6_min_inradius(coordinates, dimension);
+  double outer_radius = calculate_tri3_outer_radius(coordinates, dimension);
+  double normalized_inradius = 4.0 * min_inradius_for_subtri / outer_radius;
+
+  return fix_range(normalized_inradius);
+}
+
+template <typename CoordsContainerType>
+double tri3_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
+{
+  std::array<const double*, 6> tri6_coords;
   for (int i = 0; i < 3; i++)
-  {
-    tri6_coords[i][0] = coordinates[i][0];
-    tri6_coords[i][1] = coordinates[i][1];
-    tri6_coords[i][2] = coordinates[i][2];
-  }
+    tri6_coords[i] = coordinates[i];
 
   static int eidx[3][2] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+  double tri6_midnode_coords[3][3];
   for (int i = 3; i < 6; i++)
   {
     int i0 = eidx[i - 3][0];
     int i1 = eidx[i - 3][1];
-    tri6_coords[i][0] = (coordinates[i0][0] + coordinates[i1][0]) * 0.5;
-    tri6_coords[i][1] = (coordinates[i0][1] + coordinates[i1][1]) * 0.5;
-    tri6_coords[i][2] = (coordinates[i0][2] + coordinates[i1][2]) * 0.5;
+
+    tri6_midnode_coords[i-3][0] = (coordinates[i0][0] + coordinates[i1][0]) * 0.5;
+    tri6_midnode_coords[i-3][1] = (coordinates[i0][1] + coordinates[i1][1]) * 0.5;
+    tri6_midnode_coords[i-3][2] = (coordinates[i0][2] + coordinates[i1][2]) * 0.5;
+    tri6_coords[i] = tri6_midnode_coords[i-3];
   }
-  return tri6_normalized_inradius(tri6_coords);
+  return tri6_normalized_inradius(tri6_coords.data(), dimension);
 }
 
 //! Calculates the minimum normalized inner radius of a tri6
 /** Ratio of the minimum subtri inner radius to tri outer radius*/
 /* Currently, supports tri 6 and 3.*/
-double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
+template <typename CoordsContainerType>
+double tri_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
 {
   if (num_nodes == 3)
   {
-    return tri3_normalized_inradius(coordinates);
+    return tri3_normalized_inradius(coordinates, dimension);
   }
   else if (num_nodes == 6)
   {
-    return tri6_normalized_inradius(coordinates);
+    return tri6_normalized_inradius(coordinates, dimension);
   }
   return 0.0;
 }
+
+double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
+{
+    return tri_normalized_inradius_impl(num_nodes, coordinates, 3);
+}
+
+double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+{
+    return tri_normalized_inradius_impl(num_nodes, coordinates, dimension);
+}
+
 } // namespace verdict
