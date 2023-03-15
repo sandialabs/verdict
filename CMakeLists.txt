@@ -138,7 +138,7 @@ install(TARGETS verdict EXPORT ${VERDICT_EXPORT_GROUP}
 
 # Export Targets file
 export(EXPORT ${VERDICT_EXPORT_GROUP}
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/VerdictTargets.cmake"
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/VerdictTargets.cmake"
   NAMESPACE Verdict::)
 
 # Install Targets file
