@@ -181,10 +181,14 @@ TEST(verdict, tet_incircle_flat)
   runtest(testcase);
 }
 
-TEST(verdict, tet_incircle_inverted)
+TEST(verdict, tet_inverted)
 {
-  test_case testcase = { "tet_incircle_inverted",
-    { { verdict::tet_inradius, -0.5 + 1. / std::sqrt(12) } }, 4,
+  test_case testcase = { "tet_inverted",
+    {
+      { verdict::tet_inradius, -0.5 + 1. / std::sqrt(12) },
+      { verdict::tet_normalized_inradius, -0.758021 },
+    },
+    4,
     { { 0, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, -1 } } };
 
   runtest(testcase);
