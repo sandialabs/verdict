@@ -1606,7 +1606,7 @@ double calculate_tet4_outer_radius(const CoordsContainerType coordinates)
   double AC = (nE[3] - nE[2]).length();
   double BC = (nE[3] - nE[1]).length();
   double CC = (nE[2] - nE[1]).length();
-  double VP = ((nE[1] - nE[0]) * (nE[2] - nE[0])) % (nE[3] - nE[0]) / 6;
+  double VP = fabs(((nE[1] - nE[0]) * (nE[2] - nE[0])) % (nE[3] - nE[0]) / 6);
   double outer_radius = std::sqrt((aC * AC + bC * BC + cC * CC) * (aC * AC + bC * BC - cC * CC) *
                           (aC * AC - bC * BC + cC * CC) * (-aC * AC + bC * BC + cC * CC)) /
     24 / VP;
