@@ -36,62 +36,62 @@ class VerdictVector
 {
 public:
   //- Heading: Constructors and Destructor
-  VerdictVector(); //- Default constructor.
+  constexpr VerdictVector(); //- Default constructor.
 
-  VerdictVector(const double x, const double y, const double z);
+  constexpr VerdictVector(const double x, const double y, const double z);
   //- Constructor: create vector from three components
 
-  VerdictVector(const double xyz[3]);
+  constexpr VerdictVector(const double xyz[3]);
   //- Constructor: create vector from tuple
 
-  VerdictVector(const VerdictVector& tail, const VerdictVector& head);
-  VerdictVector(const double *tail, const double *head, int dimension);
-  VerdictVector(const double *tail, const double *head);
+  constexpr VerdictVector(const VerdictVector& tail, const VerdictVector& head);
+  constexpr VerdictVector(const double *tail, const double *head, int dimension);
+  constexpr VerdictVector(const double *tail, const double *head);
   //- Constructor for a VerdictVector starting at tail and pointing
   //- to head.
 
-  template <typename ARG1, typename ARG2, typename ARG3> VerdictVector(ARG1, ARG2, ARG3) = delete;
+  template <typename ARG1, typename ARG2, typename ARG3> constexpr VerdictVector(ARG1, ARG2, ARG3) = delete;
   //- define this template to avoid ambiguity between the (double, double, double) and (double *, double *, int) constructors
 
-  VerdictVector(const VerdictVector& copy_from); //- Copy Constructor
+  constexpr VerdictVector(const VerdictVector& copy_from); //- Copy Constructor
 
   //- Heading: Set and Inquire Functions
-  void set(const double xv, const double yv, const double zv);
+  constexpr void set(const double xv, const double yv, const double zv);
   //- Change vector components to {x}, {y}, and {z}
 
-  void set(const double xyz[3]);
+  constexpr void set(const double xyz[3]);
   //- Change vector components to xyz[0], xyz[1], xyz[2]
 
-  void set(const VerdictVector& tail, const VerdictVector& head);
+  constexpr void set(const VerdictVector& tail, const VerdictVector& head);
   //- Change vector to go from tail to head.
 
-  void set(const VerdictVector& to_copy);
+  constexpr void set(const VerdictVector& to_copy);
   //- Same as operator=(const VerdictVector&)
 
-  double x() const; //- Return x component of vector
+  constexpr double x() const; //- Return x component of vector
 
-  double y() const; //- Return y component of vector
+  constexpr double y() const; //- Return y component of vector
 
-  double z() const; //- Return z component of vector
+  constexpr double z() const; //- Return z component of vector
 
-  void get_xyz(double& x, double& y, double& z); //- Get x, y, z components
-  void get_xyz(double xyz[3]);                   //- Get xyz tuple
+  constexpr void get_xyz(double& x, double& y, double& z); //- Get x, y, z components
+  constexpr void get_xyz(double xyz[3]);                   //- Get xyz tuple
 
-  double& r(); //- Return r component of vector, if (r,theta) format
+  constexpr double& r(); //- Return r component of vector, if (r,theta) format
 
-  double& theta(); //- Return theta component of vector, if (r,theta) format
+  constexpr double& theta(); //- Return theta component of vector, if (r,theta) format
 
-  void x(const double xv); //- Set x component of vector
+  constexpr void x(const double xv); //- Set x component of vector
 
-  void y(const double yv); //- Set y component of vector
+  constexpr void y(const double yv); //- Set y component of vector
 
-  void z(const double zv); //- Set z component of vector
+  constexpr void z(const double zv); //- Set z component of vector
 
-  void r(const double xv); //- Set r component of vector, if (r,theta) format
+  constexpr void r(const double xv); //- Set r component of vector, if (r,theta) format
 
-  void theta(const double yv); //- Set theta component of vector, if (r,theta) format
+  constexpr void theta(const double yv); //- Set theta component of vector, if (r,theta) format
 
-  double normalize();
+  inline double normalize();
   //- Normalize (set magnitude equal to 1) vector - return the magnitude
 
   VerdictVector& length(const double new_length);
@@ -103,7 +103,7 @@ public:
   //- Calculate the length of the vector.
   //- Use {length_squared()} if only comparing lengths, not adding.
 
-  double length_squared() const;
+  constexpr double length_squared() const;
   //- Calculate the squared length of the vector.
   //- Faster than {length()} since it eliminates the square root if
   //- only comparing other lengths.
@@ -112,65 +112,65 @@ public:
   //- Calculate the interior angle: acos((a%b)/(|a||b|))
   //- Returns angle in degrees.
 
-  void perpendicular_z();
+  constexpr void perpendicular_z();
   //- Transform this vector to a perpendicular one, leaving
   //- z-component alone. Rotates clockwise about the z-axis by pi/2.
 
   //- Heading: Operator Overloads  *****************************
-  VerdictVector& operator+=(const VerdictVector& vec);
+  constexpr VerdictVector& operator+=(const VerdictVector& vec);
   //- Compound Assignment: addition: {this = this + vec}
 
-  VerdictVector& operator-=(const VerdictVector& vec);
+  constexpr VerdictVector& operator-=(const VerdictVector& vec);
   //- Compound Assignment: subtraction: {this = this - vec}
 
-  VerdictVector& operator*=(const VerdictVector& vec);
+  constexpr VerdictVector& operator*=(const VerdictVector& vec);
   //- Compound Assignment: cross product: {this = this * vec},
   //- non-commutative
 
-  VerdictVector& operator*=(const double scalar);
+  constexpr VerdictVector& operator*=(const double scalar);
   //- Compound Assignment: multiplication: {this = this * scalar}
 
-  VerdictVector& operator/=(const double scalar);
+  constexpr VerdictVector& operator/=(const double scalar);
   //- Compound Assignment: division: {this = this / scalar}
 
-  VerdictVector operator-() const;
+  constexpr VerdictVector operator-() const;
   //- unary negation.
 
   friend VerdictVector operator~(const VerdictVector& vec);
   //- normalize. Returns a new vector which is a copy of {vec},
   //- scaled such that {|vec|=1}. Uses overloaded bitwise NOT operator.
 
-  friend VerdictVector operator+(const VerdictVector& v1, const VerdictVector& v2);
+  friend constexpr VerdictVector operator+(const VerdictVector& v1, const VerdictVector& v2);
   //- vector addition
 
-  friend VerdictVector operator-(const VerdictVector& v1, const VerdictVector& v2);
+  friend constexpr VerdictVector operator-(const VerdictVector& v1, const VerdictVector& v2);
   //- vector subtraction
 
-  friend VerdictVector operator*(const VerdictVector& v1, const VerdictVector& v2);
+  friend constexpr VerdictVector operator*(const VerdictVector& v1, const VerdictVector& v2);
   //- vector cross product, non-commutative
 
-  friend VerdictVector operator*(const VerdictVector& v1, const double sclr);
+  friend constexpr VerdictVector operator*(const VerdictVector& v1, const double sclr);
   //- vector * scalar
 
-  friend VerdictVector operator*(const double sclr, const VerdictVector& v1);
+  friend constexpr VerdictVector operator*(const double sclr, const VerdictVector& v1);
   //- scalar * vector
 
-  friend double operator%(const VerdictVector& v1, const VerdictVector& v2);
+  friend constexpr double operator%(const VerdictVector& v1, const VerdictVector& v2);
   //- dot product
 
-  static double Dot(const VerdictVector& v1, const VerdictVector& v2);
+  static constexpr double Dot(const VerdictVector& v1, const VerdictVector& v2);
   //- dot product
 
-  friend VerdictVector operator/(const VerdictVector& v1, const double sclr);
+  friend constexpr VerdictVector operator/(const VerdictVector& v1, const double sclr);
   //- vector / scalar
 
-  friend int operator==(const VerdictVector& v1, const VerdictVector& v2);
+  friend constexpr int operator==(const VerdictVector& v1, const VerdictVector& v2);
   //- Equality operator
 
-  friend int operator!=(const VerdictVector& v1, const VerdictVector& v2);
+  friend constexpr int operator!=(const VerdictVector& v1, const VerdictVector& v2);
   //- Inequality operator
 
-  VerdictVector& operator=(const VerdictVector& from);
+  constexpr VerdictVector& operator=(const VerdictVector& from);
 
 private:
   double xVal; //- x component of vector.
@@ -178,59 +178,59 @@ private:
   double zVal; //- z component of vector.
 };
 
-inline double VerdictVector::x() const
+constexpr double VerdictVector::x() const
 {
   return xVal;
 }
-inline double VerdictVector::y() const
+constexpr double VerdictVector::y() const
 {
   return yVal;
 }
-inline double VerdictVector::z() const
+constexpr double VerdictVector::z() const
 {
   return zVal;
 }
-inline void VerdictVector::get_xyz(double xyz[3])
+constexpr void VerdictVector::get_xyz(double xyz[3])
 {
   xyz[0] = xVal;
   xyz[1] = yVal;
   xyz[2] = zVal;
 }
-inline void VerdictVector::get_xyz(double& xv, double& yv, double& zv)
+constexpr void VerdictVector::get_xyz(double& xv, double& yv, double& zv)
 {
   xv = xVal;
   yv = yVal;
   zv = zVal;
 }
-inline double& VerdictVector::r()
+constexpr double& VerdictVector::r()
 {
   return xVal;
 }
-inline double& VerdictVector::theta()
+constexpr double& VerdictVector::theta()
 {
   return yVal;
 }
-inline void VerdictVector::x(const double xv)
+constexpr void VerdictVector::x(const double xv)
 {
   xVal = xv;
 }
-inline void VerdictVector::y(const double yv)
+constexpr void VerdictVector::y(const double yv)
 {
   yVal = yv;
 }
-inline void VerdictVector::z(const double zv)
+constexpr void VerdictVector::z(const double zv)
 {
   zVal = zv;
 }
-inline void VerdictVector::r(const double xv)
+constexpr void VerdictVector::r(const double xv)
 {
   xVal = xv;
 }
-inline void VerdictVector::theta(const double yv)
+constexpr void VerdictVector::theta(const double yv)
 {
   yVal = yv;
 }
-inline VerdictVector& VerdictVector::operator+=(const VerdictVector& vector)
+constexpr VerdictVector& VerdictVector::operator+=(const VerdictVector& vector)
 {
   xVal += vector.x();
   yVal += vector.y();
@@ -238,7 +238,7 @@ inline VerdictVector& VerdictVector::operator+=(const VerdictVector& vector)
   return *this;
 }
 
-inline VerdictVector& VerdictVector::operator-=(const VerdictVector& vector)
+constexpr VerdictVector& VerdictVector::operator-=(const VerdictVector& vector)
 {
   xVal -= vector.x();
   yVal -= vector.y();
@@ -246,92 +246,98 @@ inline VerdictVector& VerdictVector::operator-=(const VerdictVector& vector)
   return *this;
 }
 
-inline VerdictVector& VerdictVector::operator*=(const VerdictVector& vector)
+constexpr VerdictVector& VerdictVector::operator*=(const VerdictVector& vector)
 {
-  double xcross, ycross, zcross;
-  xcross = yVal * vector.z() - zVal * vector.y();
-  ycross = zVal * vector.x() - xVal * vector.z();
-  zcross = xVal * vector.y() - yVal * vector.x();
+  const double xcross = yVal * vector.z() - zVal * vector.y();
+  const double ycross = zVal * vector.x() - xVal * vector.z();
+  const double zcross = xVal * vector.y() - yVal * vector.x();
   xVal = xcross;
   yVal = ycross;
   zVal = zcross;
   return *this;
 }
 
-inline VerdictVector::VerdictVector(const VerdictVector& copy_from)
+constexpr VerdictVector::VerdictVector(const VerdictVector& copy_from)
   : xVal(copy_from.xVal)
   , yVal(copy_from.yVal)
   , zVal(copy_from.zVal)
 {
 }
 
-inline VerdictVector::VerdictVector()
+constexpr VerdictVector::VerdictVector()
   : xVal(0)
   , yVal(0)
   , zVal(0)
 {
 }
 
-inline VerdictVector::VerdictVector(const double *tail, const double *head, int dimension)
+constexpr VerdictVector::VerdictVector(const double *tail, const double *head, int dimension)
   : xVal{head[0] - tail[0]}
   , yVal{head[1] - tail[1]}
   , zVal{dimension == 2 ? 0.0 : head[2] - tail[2]}
 {
 }
 
-inline VerdictVector::VerdictVector(const double *tail, const double *head)
+constexpr VerdictVector::VerdictVector(const double *tail, const double *head)
   : xVal{head[0] - tail[0]}
   , yVal{head[1] - tail[1]}
   , zVal{head[2] - tail[2]}
 {
 }
 
-inline VerdictVector::VerdictVector(const VerdictVector& tail, const VerdictVector& head)
+constexpr VerdictVector::VerdictVector(const VerdictVector& tail, const VerdictVector& head)
   : xVal(head.xVal - tail.xVal)
   , yVal(head.yVal - tail.yVal)
   , zVal(head.zVal - tail.zVal)
 {
 }
 
-inline VerdictVector::VerdictVector(const double xIn, const double yIn, const double zIn)
+constexpr VerdictVector::VerdictVector(const double xIn, const double yIn, const double zIn)
   : xVal(xIn)
   , yVal(yIn)
   , zVal(zIn)
 {
 }
 
+constexpr VerdictVector::VerdictVector(const double xyz[3])
+  : xVal(xyz[0])
+  , yVal(xyz[1])
+  , zVal(xyz[2])
+{
+}
+
 // This sets the vector to be perpendicular to it's current direction.
 // NOTE:
 //      This is a 2D function.  It only works in the XY Plane.
-inline void VerdictVector::perpendicular_z()
+constexpr void VerdictVector::perpendicular_z()
 {
   double temp = x();
   x(y());
   y(-temp);
 }
 
-inline void VerdictVector::set(const double xv, const double yv, const double zv)
+constexpr void VerdictVector::set(const double xv, const double yv, const double zv)
 {
   xVal = xv;
   yVal = yv;
   zVal = zv;
 }
 
-inline void VerdictVector::set(const double xyz[3])
+constexpr void VerdictVector::set(const double xyz[3])
 {
   xVal = xyz[0];
   yVal = xyz[1];
   zVal = xyz[2];
 }
 
-inline void VerdictVector::set(const VerdictVector& tail, const VerdictVector& head)
+constexpr void VerdictVector::set(const VerdictVector& tail, const VerdictVector& head)
 {
   xVal = head.xVal - tail.xVal;
   yVal = head.yVal - tail.yVal;
   zVal = head.zVal - tail.zVal;
 }
 
-inline VerdictVector& VerdictVector::operator=(const VerdictVector& from)
+constexpr VerdictVector& VerdictVector::operator=(const VerdictVector& from)
 {
   xVal = from.xVal;
   yVal = from.yVal;
@@ -339,13 +345,13 @@ inline VerdictVector& VerdictVector::operator=(const VerdictVector& from)
   return *this;
 }
 
-inline void VerdictVector::set(const VerdictVector& to_copy)
+constexpr void VerdictVector::set(const VerdictVector& to_copy)
 {
   *this = to_copy;
 }
 
 // Scale all values by scalar.
-inline VerdictVector& VerdictVector::operator*=(const double scalar)
+constexpr VerdictVector& VerdictVector::operator*=(const double scalar)
 {
   xVal *= scalar;
   yVal *= scalar;
@@ -354,7 +360,7 @@ inline VerdictVector& VerdictVector::operator*=(const double scalar)
 }
 
 // Scales all values by 1/scalar
-inline VerdictVector& VerdictVector::operator/=(const double scalar)
+constexpr VerdictVector& VerdictVector::operator/=(const double scalar)
 {
   assert(scalar != 0);
   xVal /= scalar;
@@ -377,12 +383,12 @@ inline VerdictVector operator~(const VerdictVector& vec)
 }
 
 // Unary minus.  Negates all values in vector.
-inline VerdictVector VerdictVector::operator-() const
+constexpr VerdictVector VerdictVector::operator-() const
 {
   return VerdictVector(-xVal, -yVal, -zVal);
 }
 
-inline VerdictVector operator+(const VerdictVector& vector1, const VerdictVector& vector2)
+constexpr VerdictVector operator+(const VerdictVector& vector1, const VerdictVector& vector2)
 {
   double xv = vector1.x() + vector2.x();
   double yv = vector1.y() + vector2.y();
@@ -391,7 +397,7 @@ inline VerdictVector operator+(const VerdictVector& vector1, const VerdictVector
   //  return VerdictVector(vector1) += vector2;
 }
 
-inline VerdictVector operator-(const VerdictVector& vector1, const VerdictVector& vector2)
+constexpr VerdictVector operator-(const VerdictVector& vector1, const VerdictVector& vector2)
 {
   double xv = vector1.x() - vector2.x();
   double yv = vector1.y() - vector2.y();
@@ -402,40 +408,40 @@ inline VerdictVector operator-(const VerdictVector& vector1, const VerdictVector
 
 // Cross products.
 // vector1 cross vector2
-inline VerdictVector operator*(const VerdictVector& vector1, const VerdictVector& vector2)
+constexpr VerdictVector operator*(const VerdictVector& vector1, const VerdictVector& vector2)
 {
   return VerdictVector(vector1) *= vector2;
 }
 
 // Returns a scaled vector.
-inline VerdictVector operator*(const VerdictVector& vector1, const double scalar)
+constexpr VerdictVector operator*(const VerdictVector& vector1, const double scalar)
 {
   return VerdictVector(vector1) *= scalar;
 }
 
 // Returns a scaled vector
-inline VerdictVector operator*(const double scalar, const VerdictVector& vector1)
+constexpr VerdictVector operator*(const double scalar, const VerdictVector& vector1)
 {
   return VerdictVector(vector1) *= scalar;
 }
 
 // Returns a vector scaled by 1/scalar
-inline VerdictVector operator/(const VerdictVector& vector1, const double scalar)
+constexpr VerdictVector operator/(const VerdictVector& vector1, const double scalar)
 {
   return VerdictVector(vector1) /= scalar;
 }
 
-inline int operator==(const VerdictVector& v1, const VerdictVector& v2)
+constexpr int operator==(const VerdictVector& v1, const VerdictVector& v2)
 {
   return (v1.xVal == v2.xVal && v1.yVal == v2.yVal && v1.zVal == v2.zVal);
 }
 
-inline int operator!=(const VerdictVector& v1, const VerdictVector& v2)
+constexpr int operator!=(const VerdictVector& v1, const VerdictVector& v2)
 {
   return (v1.xVal != v2.xVal || v1.yVal != v2.yVal || v1.zVal != v2.zVal);
 }
 
-inline double VerdictVector::length_squared() const
+constexpr double VerdictVector::length_squared() const
 {
   return (xVal * xVal + yVal * yVal + zVal * zVal);
 }
@@ -458,11 +464,11 @@ inline double VerdictVector::normalize()
 }
 
 // Dot Product.
-inline double operator%(const VerdictVector& vector1, const VerdictVector& vector2)
+constexpr double operator%(const VerdictVector& vector1, const VerdictVector& vector2)
 {
   return VerdictVector::Dot(vector1, vector2);
 }
-inline double VerdictVector::Dot(const VerdictVector& vector1, const VerdictVector& vector2)
+constexpr double VerdictVector::Dot(const VerdictVector& vector1, const VerdictVector& vector2)
 {
   return (vector1.xVal * vector2.xVal + vector1.yVal * vector2.yVal + vector1.zVal * vector2.zVal);
 }

@@ -23,20 +23,20 @@
 #include "verdict.h"
 #include "verdict_defines.hpp"
 
-#include <algorithm>
+#include <algorithm> // for std::min
 #include <cmath> // for std::isnan
 
 namespace VERDICT_NAMESPACE
 {
-static const double one_third = 1.0 / 3.0;
-static const double two_thirds = 2.0 / 3.0;
-static const double one_fourth = 1.0 / 4.0;
-static const double four_ninths = 4.0 / 9.0;
+static constexpr double one_third = 1.0 / 3.0;
+static constexpr double two_thirds = 2.0 / 3.0;
+static constexpr double one_fourth = 1.0 / 4.0;
+static constexpr double four_ninths = 4.0 / 9.0;
 static const double sqrt2 = std::sqrt(2.0);
 static const double sqrt3 = std::sqrt(3.0);
 static const double sqrt6 = std::sqrt(6.0);
 static const double three_times_1plussqrt3 = 3.0 * (1 + sqrt3);
-static const double normal_coeff = 180. * .3183098861837906715377675267450287;
+static constexpr double normal_coeff = 180. * .3183098861837906715377675267450287;
 static const double aspect_ratio_normal_coeff = sqrt6 / 12.;
 double tet10_characteristic_length(const double coordinates[][3]);
 
@@ -326,10 +326,10 @@ double tet_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coo
 
   if (length_product < VERDICT_DBL_MIN)
   {
-    return (double)VERDICT_DBL_MAX;
+    return VERDICT_DBL_MAX;
   }
 
-  return (double)(sqrt2 * jacobi / length_product);
+  return sqrt2 * jacobi / length_product;
 }
 
 double tet_scaled_jacobian(int num_nodes, const double coordinates[][3])
@@ -1160,10 +1160,10 @@ double tet_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinat
   const VerdictVector side3{coordinates[0], coordinates[3]};
 
   const VerdictVector c_1 = side0;
-  const VerdictVector c_2 = (-2 * side2 - side0) / sqrt3;
-  const VerdictVector c_3 = (3 * side3 + side2 - side0) / sqrt6;
+  const VerdictVector c_2 = (-2. * side2 - side0) / sqrt3;
+  const VerdictVector c_3 = (3. * side3 + side2 - side0) / sqrt6;
 
-  const double term1 = c_1 % c_1 + c_2 % c_2 + c_3 % c_3;
+  const double term1 = (c_1 % c_1) + (c_2 % c_2) + (c_3 % c_3);
   const double term2 = (c_1 * c_2) % (c_1 * c_2) + (c_2 * c_3) % (c_2 * c_3) + (c_1 * c_3) % (c_1 * c_3);
   const double det = c_1 % (c_2 * c_3);
 
@@ -1173,7 +1173,7 @@ double tet_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinat
   }
   else
   {
-    return std::sqrt(term1 * term2) / (3.0 * det);
+    return std::sqrt(term1) * std::sqrt(term2) / (3.0 * det);
   }
 }
 

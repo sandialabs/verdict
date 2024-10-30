@@ -72,11 +72,4 @@ double VerdictVector::interior_angle(const VerdictVector& otherVector)
   return ((angleRad * 180.) / VERDICT_PI);
 }
 
-VerdictVector::VerdictVector(const double xyz[3])
-  : xVal(xyz[0])
-  , yVal(xyz[1])
-  , zVal(xyz[2])
-{
-}
-
 } // namespace verdict
