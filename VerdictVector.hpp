@@ -356,7 +356,9 @@ VERDICT_HOST_DEVICE inline VerdictVector& VerdictVector::operator*=(const double
 // Scales all values by 1/scalar
 VERDICT_HOST_DEVICE inline VerdictVector& VerdictVector::operator/=(const double scalar)
 {
+#if !defined(__HIP_DEVICE_COMPILE__)
   assert(scalar != 0);
+#endif
   xVal /= scalar;
   yVal /= scalar;
   zVal /= scalar;

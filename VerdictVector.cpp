@@ -46,8 +46,10 @@ VERDICT_HOST_DEVICE double VerdictVector::interior_angle(const VerdictVector& ot
   }
   else
   {
+#if !defined(__HIP_DEVICE_COMPILE__)
     assert(len1 > 0);
     assert(len2 > 0);
+#endif
   }
 
   if ((cosAngle > 1.0) && (cosAngle < 1.0001))
@@ -66,7 +68,9 @@ VERDICT_HOST_DEVICE double VerdictVector::interior_angle(const VerdictVector& ot
   }
   else
   {
+#if !defined(__HIP_DEVICE_COMPILE__)
     assert(cosAngle < 1.0001 && cosAngle > -1.0001);
+#endif
   }
 
   return ((angleRad * 180.) / VERDICT_PI);
