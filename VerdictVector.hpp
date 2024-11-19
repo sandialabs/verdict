@@ -442,7 +442,7 @@ VERDICT_HOST_DEVICE inline double VerdictVector::length_squared() const
 
 VERDICT_HOST_DEVICE inline double VerdictVector::length() const
 {
-  return sqrt(length_squared())
+  return sqrt(length_squared());
 }
 
 VERDICT_HOST_DEVICE inline double VerdictVector::normalize()
