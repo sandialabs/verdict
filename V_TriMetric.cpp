@@ -23,28 +23,38 @@
 #include "verdict.h"
 #include "verdict_defines.hpp"
 
-#include <algorithm>
-#include <array>
+#include <math.h>
 
 namespace VERDICT_NAMESPACE
 {
-static const double sqrt3 = std::sqrt(3.0);
-static const double aspect_ratio_normal_coeff = sqrt3 / 6.;
-static const double two_times_sqrt3 = 2 * sqrt3;
-static const double two_over_sqrt3 = 2. / sqrt3;
+
+VERDICT_HOST_DEVICE static double aspect_ratio_normal_coeff()
+{
+  return sqrt(3.0) / 6.0;
+}
+
+VERDICT_HOST_DEVICE static double two_times_sqrt3()
+{
+  return 2.0 * sqrt(3.0);
+}
+
+VERDICT_HOST_DEVICE static double two_over_sqrt3()
+{
+  return 2.0 / sqrt(3.0);
+}
 
 /*!
   get weights based on the average area of a set of
   tris
 */
-static int tri_get_weight(
+VERDICT_HOST_DEVICE static int tri_get_weight(
   double& m11, double& m21, double& m12, double& m22, double average_tri_area)
 {
   m11 = 1;
   m21 = 0;
   m12 = 0.5;
-  m22 = 0.5 * sqrt3;
-  double scale = std::sqrt(2.0 * average_tri_area / (m11 * m22 - m21 * m12));
+  m22 = 0.5 * sqrt(3.0);
+  double scale = sqrt(2.0 * average_tri_area / (m11 * m22 - m21 * m12));
 
   m11 *= scale;
   m21 *= scale;
@@ -62,7 +72,7 @@ static int tri_get_weight(
      minimum edge lengths
 
 */
-double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   // three vectors for each side
   VerdictVector a(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
@@ -129,13 +139,13 @@ double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   else
   {
     double edge_ratio;
-    edge_ratio = std::sqrt(M2 / m2);
+    edge_ratio = sqrt(M2 / m2);
 
     if (edge_ratio > 0)
     {
-      return (double)std::min(edge_ratio, VERDICT_DBL_MAX);
+      return fmin(edge_ratio, VERDICT_DBL_MAX);
     }
-    return (double)std::max(edge_ratio, -VERDICT_DBL_MAX);
+    return fmax(edge_ratio, -VERDICT_DBL_MAX);
   }
 }
 
@@ -151,7 +161,7 @@ double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 
  */
 template <typename CoordsContainerType>
-double tri_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   // three vectors for each side
   const VerdictVector a{coordinates[0], coordinates[1], dimension};
@@ -174,23 +184,25 @@ double tri_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordi
   }
   else
   {
-    const double aspect_ratio = aspect_ratio_normal_coeff * hm * (a1 + b1 + c1) / denominator;
+    const double aspect_ratio = aspect_ratio_normal_coeff() * hm * (a1 + b1 + c1) / denominator;
     if (aspect_ratio > 0)
     {
-      return (double)std::min(aspect_ratio, VERDICT_DBL_MAX);
+      return fmin(aspect_ratio, VERDICT_DBL_MAX);
     }
-    return (double)std::max(aspect_ratio, -VERDICT_DBL_MAX);
+    return fmax(aspect_ratio, -VERDICT_DBL_MAX);
   }
 }
 
-double tri_aspect_ratio(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_aspect_ratio(int num_nodes, const double coordinates[][3])
 {
     return tri_aspect_ratio_impl(num_nodes, coordinates, 3);
 }
-double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+
+VERDICT_HOST_DEVICE double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
 {
     return tri_aspect_ratio_impl(num_nodes, coordinates, dimension);
 }
+
 /*!
    the radius ratio of a triangle
 
@@ -201,7 +213,7 @@ double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coord
      as the "aspect beta".
 
  */
-double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   // three vectors for each side
   VerdictVector a(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
@@ -230,9 +242,9 @@ double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 
   if (radius_ratio > 0)
   {
-    return (double)std::min(radius_ratio, VERDICT_DBL_MAX);
+    return fmin(radius_ratio, VERDICT_DBL_MAX);
   }
-  return (double)std::max(radius_ratio, -VERDICT_DBL_MAX);
+  return fmax(radius_ratio, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -245,7 +257,7 @@ double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
      this method was called "aspect ratio" in earlier incarnations of VERDICT
 
  */
-double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
 
   // three vectors for each side
@@ -269,12 +281,12 @@ double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
     return (double)VERDICT_DBL_MAX;
   }
 
-  double aspect = (double)(srms / (two_times_sqrt3 * (areaX2)));
+  double aspect = (double)(srms / (two_times_sqrt3() * (areaX2)));
   if (aspect > 0)
   {
-    return (double)std::min(aspect, VERDICT_DBL_MAX);
+    return fmin(aspect, VERDICT_DBL_MAX);
   }
-  return (double)std::max(aspect, -VERDICT_DBL_MAX);
+  return fmax(aspect, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -283,7 +295,7 @@ double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
   0.5 * jacobian at a node
  */
 template <typename CoordsContainerType>
-double tri_area_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_area_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
 {
   if (3 == num_nodes)
   {
@@ -299,9 +311,9 @@ double tri_area_impl(int num_nodes, const CoordsContainerType coordinates, const
     const double area = 0.5 * tmp.length();
     if (area > 0)
     {
-      return (double)std::min(area, VERDICT_DBL_MAX);
+      return fmin(area, VERDICT_DBL_MAX);
     }
-    return (double)std::max(area, -VERDICT_DBL_MAX);
+    return fmax(area, -VERDICT_DBL_MAX);
   }
   else
   {
@@ -392,12 +404,13 @@ double tri_area_impl(int num_nodes, const CoordsContainerType coordinates, const
     return tri_area;
   }
 }
-double tri_area(int num_nodes, const double coordinates[][3])
+
+VERDICT_HOST_DEVICE double tri_area(int num_nodes, const double coordinates[][3])
 {
     return tri_area_impl(num_nodes, coordinates, 3);
 }
 
-double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
 {
     return tri_area_impl(num_nodes, coordinates, dimension);
 }
@@ -408,7 +421,7 @@ double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, 
   The minimum angle of a tri is the minimum angle between
   two adjacents sides out of all three corners of the triangle.
  */
-double tri_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
 {
   // vectors for all the sides
   VerdictVector sides[4];
@@ -466,9 +479,9 @@ double tri_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
 
   if (min_angle > 0)
   {
-    return (double)std::min(min_angle, VERDICT_DBL_MAX);
+    return fmin(min_angle, VERDICT_DBL_MAX);
   }
-  return (double)std::max(min_angle, -VERDICT_DBL_MAX);
+  return fmax(min_angle, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -477,7 +490,7 @@ double tri_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
   The maximum angle of a tri is the maximum angle between
   two adjacents sides out of all three corners of the triangle.
  */
-double tri_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
 {
 
   // vectors for all the sides
@@ -536,12 +549,12 @@ double tri_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
 
   if (max_angle > 0)
   {
-    return (double)std::min(max_angle, VERDICT_DBL_MAX);
+    return fmin(max_angle, VERDICT_DBL_MAX);
   }
-  return (double)std::max(max_angle, -VERDICT_DBL_MAX);
+  return fmax(max_angle, -VERDICT_DBL_MAX);
 }
 
-double tri_equiangle_skew(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_equiangle_skew(int num_nodes, const double coordinates[][3])
 {
   double min_angle = 360.0;
   double max_angle = 0.0;
@@ -565,7 +578,7 @@ double tri_equiangle_skew(int num_nodes, const double coordinates[][3])
   Condition number of the jacobian matrix at any corner
  */
 template <typename CoordsContainerType>
-double tri_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   const VerdictVector v1{coordinates[0], coordinates[1], dimension};
   const VerdictVector v2{coordinates[0], coordinates[2], dimension};
@@ -577,17 +590,17 @@ double tri_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinat
     return (double)VERDICT_DBL_MAX;
   }
 
-  const double condition = (double)(((v1 % v1) + (v2 % v2) - (v1 % v2)) / (areax2 * sqrt3));
+  const double condition = (double)(((v1 % v1) + (v2 % v2) - (v1 % v2)) / (areax2 * sqrt(3.0)));
 
-  return (double)std::min(condition, VERDICT_DBL_MAX);
+  return fmin(condition, VERDICT_DBL_MAX);
 }
 
-double tri_condition(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_condition(int num_nodes, const double coordinates[][3])
 {
     return tri_condition_impl(num_nodes, coordinates, 3);
 }
 
-double tri_condition_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_condition_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
 {
     return tri_condition_impl(num_nodes, coordinates, dimension);
 }
@@ -598,7 +611,7 @@ double tri_condition_from_loc_ptrs(int num_nodes, const double * const * coordin
   minimum of the jacobian divided by the lengths of 2 edge vectors
  */
 template <typename CoordsContainerType>
-double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   const VerdictVector edge[3] =
   {
@@ -613,30 +626,30 @@ double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coo
   const VerdictVector cross = first * second;
   double jacobian = cross.length();
 
-  const double max_edge_length_product = std::max(edge[0].length() * edge[1].length(),
-    std::max(edge[1].length() * edge[2].length(), edge[0].length() * edge[2].length()));
+  const double max_edge_length_product = fmax(edge[0].length() * edge[1].length(),
+    fmax(edge[1].length() * edge[2].length(), edge[0].length() * edge[2].length()));
 
   if (max_edge_length_product < VERDICT_DBL_MIN)
   {
     return (double)0.0;
   }
 
-  jacobian *= two_over_sqrt3;
+  jacobian *= two_over_sqrt3();
   jacobian /= max_edge_length_product;
 
   if (jacobian > 0)
   {
-    return (double)std::min(jacobian, VERDICT_DBL_MAX);
+    return fmin(jacobian, VERDICT_DBL_MAX);
   }
-  return (double)std::max(jacobian, -VERDICT_DBL_MAX);
+  return fmax(jacobian, -VERDICT_DBL_MAX);
 }
 
-double tri_scaled_jacobian(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_scaled_jacobian(int num_nodes, const double coordinates[][3])
 {
     return tri_scaled_jacobian_impl(num_nodes, coordinates, 3);
 }
 
-double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
 {
     return tri_scaled_jacobian_impl(num_nodes, coordinates, dimension);
 }
@@ -646,7 +659,7 @@ double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * c
 
   2 / condition number of weighted jacobian matrix
  */
-double tri_shape(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_shape(int num_nodes, const double coordinates[][3])
 {
   double condition = tri_condition(num_nodes, coordinates);
 
@@ -662,9 +675,9 @@ double tri_shape(int num_nodes, const double coordinates[][3])
 
   if (shape > 0)
   {
-    return (double)std::min(shape, VERDICT_DBL_MAX);
+    return fmin(shape, VERDICT_DBL_MAX);
   }
-  return (double)std::max(shape, -VERDICT_DBL_MAX);
+  return fmax(shape, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -672,7 +685,7 @@ double tri_shape(int num_nodes, const double coordinates[][3])
 
   Min(J,1/J) where J is the determinant of the weighted jacobian matrix.
 */
-double tri_relative_size_squared(
+VERDICT_HOST_DEVICE double tri_relative_size_squared(
   int /*num_nodes*/, const double coordinates[][3], double average_tri_area)
 {
   double w11, w21, w12, w22;
@@ -702,15 +715,16 @@ double tri_relative_size_squared(
     return 0.0;
   }
 
-  double size = std::pow(deta / detw, 2);
+  double size = deta / detw;
+  size = size * size;
 
-  double rel_size = std::min(size, 1.0 / size);
+  double rel_size = fmin(size, 1.0 / size);
 
   if (rel_size > 0)
   {
-    return (double)std::min(rel_size, VERDICT_DBL_MAX);
+    return fmin(rel_size, VERDICT_DBL_MAX);
   }
-  return (double)std::max(rel_size, -VERDICT_DBL_MAX);
+  return fmax(rel_size, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -718,7 +732,7 @@ double tri_relative_size_squared(
 
   Product of the Shape and Relative Size
  */
-double tri_shape_and_size(int num_nodes, const double coordinates[][3], double average_tri_area)
+VERDICT_HOST_DEVICE double tri_shape_and_size(int num_nodes, const double coordinates[][3], double average_tri_area)
 {
   double size, shape;
 
@@ -729,9 +743,9 @@ double tri_shape_and_size(int num_nodes, const double coordinates[][3], double a
 
   if (shape_and_size > 0)
   {
-    return (double)std::min(shape_and_size, VERDICT_DBL_MAX);
+    return fmin(shape_and_size, VERDICT_DBL_MAX);
   }
-  return (double)std::max(shape_and_size, -VERDICT_DBL_MAX);
+  return fmax(shape_and_size, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -739,7 +753,7 @@ double tri_shape_and_size(int num_nodes, const double coordinates[][3], double a
 
   TODO:  make a short definition of the distortion and comment below
  */
-double tri_distortion(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_distortion(int num_nodes, const double coordinates[][3])
 {
 
   double distortion;
@@ -832,7 +846,7 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
   for (ja = 0; ja < num_nodes; ja++)
   {
     dot_product = normal_at_nodes[0] % normal_at_nodes[ja];
-    if (std::abs(dot_product) < 0.99)
+    if (fabs(dot_product) < 0.99)
     {
       flat_element = false;
       break;
@@ -843,7 +857,7 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
   double thickness, thickness_gauss;
   double distrt;
   // get_tri_thickness(tri, element_area, thickness );
-  thickness = 0.001 * std::sqrt(element_area);
+  thickness = 0.001 * sqrt(element_area);
 
   // set thickness gauss point location
   double zl = 0.5773502691896;
@@ -938,13 +952,13 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
 
   if (distortion > 0)
   {
-    return (double)std::min(distortion, VERDICT_DBL_MAX);
+    return fmin(distortion, VERDICT_DBL_MAX);
   }
-  return (double)std::max(distortion, -VERDICT_DBL_MAX);
+  return fmax(distortion, -VERDICT_DBL_MAX);
 }
 
 template <typename CoordsContainerType>
-double tri_inradius(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE double tri_inradius(const CoordsContainerType coordinates)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -965,7 +979,7 @@ double tri_inradius(const CoordsContainerType coordinates)
 }
 
 template <typename CoordsContainerType>
-double tri6_min_inradius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri6_min_inradius(const CoordsContainerType coordinates, const int dimension)
 {
   static int SUBTRI_NODES[4][3] = { { 0, 3, 5 }, { 3, 1, 4 }, { 5, 4, 2 }, { 3, 4, 5 } };
   double min_inrad = VERDICT_DBL_MAX;
@@ -989,7 +1003,7 @@ double tri6_min_inradius(const CoordsContainerType coordinates, const int dimens
 }
 
 template <typename CoordsContainerType>
-double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const int dimension)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -1012,9 +1026,9 @@ double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const 
   return cr;
 }
 
-static double fix_range(double v)
+VERDICT_HOST_DEVICE static double fix_range(double v)
 {
-  if (std::isnan(v))
+  if (isnan(v))
   {
     return VERDICT_DBL_MAX;
   }
@@ -1030,7 +1044,7 @@ static double fix_range(double v)
 }
 
 template <typename CoordsContainerType>
-double tri6_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri6_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
 {
   double min_inradius_for_subtri = tri6_min_inradius(coordinates, dimension);
   double outer_radius = calculate_tri3_outer_radius(coordinates, dimension);
@@ -1040,9 +1054,9 @@ double tri6_normalized_inradius(const CoordsContainerType coordinates, const int
 }
 
 template <typename CoordsContainerType>
-double tri3_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri3_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
 {
-  std::array<const double*, 6> tri6_coords;
+  const double* tri6_coords[6];
   for (int i = 0; i < 3; i++)
     tri6_coords[i] = coordinates[i];
 
@@ -1058,14 +1072,14 @@ double tri3_normalized_inradius(const CoordsContainerType coordinates, const int
     tri6_midnode_coords[i-3][2] = (coordinates[i0][2] + coordinates[i1][2]) * 0.5;
     tri6_coords[i] = tri6_midnode_coords[i-3];
   }
-  return tri6_normalized_inradius(tri6_coords.data(), dimension);
+  return tri6_normalized_inradius(tri6_coords, dimension);
 }
 
 //! Calculates the minimum normalized inner radius of a tri6
 /** Ratio of the minimum subtri inner radius to tri outer radius*/
 /* Currently, supports tri 6 and 3.*/
 template <typename CoordsContainerType>
-double tri_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
 {
   if (num_nodes == 3)
   {
@@ -1078,12 +1092,12 @@ double tri_normalized_inradius_impl(int num_nodes, const CoordsContainerType coo
   return 0.0;
 }
 
-double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
 {
     return tri_normalized_inradius_impl(num_nodes, coordinates, 3);
 }
 
-double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
 {
     return tri_normalized_inradius_impl(num_nodes, coordinates, dimension);
 }

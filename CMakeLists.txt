@@ -4,10 +4,30 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED 1)
+set(CMAKE_CXX_STANDARD 11 CACHE STRING "")
+set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "")
 
-project(verdict VERSION 1.4.2)
+project(verdict
+        LANGUAGES CXX
+        VERSION 1.4.2)
+
+# Enable CUDA if requested
+option(VERDICT_ENABLE_CUDA "Build Verdict with CUDA support." OFF)
+
+if (VERDICT_ENABLE_CUDA)
+  enable_language(CUDA)
+endif ()
+
+# Enable HIP if requested
+option(VERDICT_ENABLE_HIP "Build Verdict with HIP support." OFF)
+
+if (VERDICT_ENABLE_HIP)
+  if(${CMAKE_VERSION} VERSION_LESS 3.21.0)
+    message(FATAL_ERROR "HIP support requires CMake 3.21 or above.")
+  endif()
+
+  enable_language(HIP)
+endif()
 
 # Includes
 include(GNUInstallDirs)
@@ -19,6 +39,7 @@ endif ()
 
 set(verdict_VERSION_FLAT "${verdict_VERSION_MAJOR}${verdict_VERSION_MINOR}${verdict_VERSION_PATCH}")
 
+option(BUILD_SHARED_LIBS "Build Verdict with shared libraries." OFF)
 option(VERDICT_BUILD_DOC "Build the 2007 Verdict User Manual" OFF)
 option(VERDICT_MANGLE "Mangle verdict names for inclusion in a larger library?" OFF)
 if (VERDICT_MANGLE)
@@ -30,6 +51,7 @@ mark_as_advanced(VERDICT_MANGLE)
 option(VERDICT_ENABLE_TESTING "Should tests of the VERDICT library be built?" ON)
 
 set(verdict_HEADERS
+  V_GaussIntegration.hpp
   verdict.h
   VerdictVector.hpp
   verdict_defines.hpp)
@@ -37,7 +59,6 @@ set(verdict_HEADERS
 set(verdict_SOURCES
   V_EdgeMetric.cpp
   V_GaussIntegration.cpp
-  V_GaussIntegration.hpp
   V_HexMetric.cpp
   V_KnifeMetric.cpp
   V_PyramidMetric.cpp
@@ -46,6 +67,12 @@ set(verdict_SOURCES
   V_TriMetric.cpp
   V_WedgeMetric.cpp
   VerdictVector.cpp)
+
+if (VERDICT_ENABLE_CUDA)
+  set_source_files_properties(${verdict_SOURCES} PROPERTIES LANGUAGE CUDA)
+elseif (VERDICT_ENABLE_HIP)
+  set_source_files_properties(${verdict_SOURCES} PROPERTIES LANGUAGE HIP)
+endif ()
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/verdict_config.h.in

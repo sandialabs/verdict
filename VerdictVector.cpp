@@ -21,13 +21,13 @@
 #include "VerdictVector.hpp"
 #include "verdict.h"
 
-#include <cmath>
+#include <math.h>
 
 namespace VERDICT_NAMESPACE
 {
 
 // scale the length of the vector to be the new_length
-VerdictVector& VerdictVector::length(const double new_length)
+VERDICT_HOST_DEVICE VerdictVector& VerdictVector::length(const double new_length)
 {
   double len = this->length();
   xVal *= new_length / len;
@@ -36,7 +36,7 @@ VerdictVector& VerdictVector::length(const double new_length)
   return *this;
 }
 
-double VerdictVector::interior_angle(const VerdictVector& otherVector)
+VERDICT_HOST_DEVICE double VerdictVector::interior_angle(const VerdictVector& otherVector)
 {
   double cosAngle = 0., angleRad = 0., len1, len2 = 0.;
 
@@ -53,16 +53,16 @@ double VerdictVector::interior_angle(const VerdictVector& otherVector)
   if ((cosAngle > 1.0) && (cosAngle < 1.0001))
   {
     cosAngle = 1.0;
-    angleRad = std::acos(cosAngle);
+    angleRad = acos(cosAngle);
   }
   else if (cosAngle < -1.0 && cosAngle > -1.0001)
   {
     cosAngle = -1.0;
-    angleRad = std::acos(cosAngle);
+    angleRad = acos(cosAngle);
   }
   else if (cosAngle >= -1.0 && cosAngle <= 1.0)
   {
-    angleRad = std::acos(cosAngle);
+    angleRad = acos(cosAngle);
   }
   else
   {
@@ -72,7 +72,7 @@ double VerdictVector::interior_angle(const VerdictVector& otherVector)
   return ((angleRad * 180.) / VERDICT_PI);
 }
 
-VerdictVector::VerdictVector(const double xyz[3])
+VERDICT_HOST_DEVICE VerdictVector::VerdictVector(const double xyz[3])
   : xVal(xyz[0])
   , yVal(xyz[1])
   , zVal(xyz[2])
