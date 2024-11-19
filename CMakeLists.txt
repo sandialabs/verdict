@@ -80,12 +80,20 @@ configure_file(
   @ONLY)
 
 add_library(verdict ${verdict_SOURCES} ${verdict_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/verdict_config.h)
+
 target_include_directories(verdict PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-if(UNIX)
+
+if (UNIX)
   target_link_libraries(verdict PRIVATE m)
 endif()
 
+if (VERDICT_ENABLE_CUDA)
+  set_target_properties(verdict PROPERTIES CUDA_SEPARABLE_COMPILATION On)
+elseif (VERDICT_ENABLE_HIP)
+  target_compile_options(verdict PUBLIC -fgpu-rdc)
+  target_link_options(verdict PUBLIC -fgpu-rdc)
+endif ()
 
 # Setting the VERSION and SOVERSION of a library will include
 # version information either in the library, or in the library
