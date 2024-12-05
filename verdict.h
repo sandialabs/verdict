@@ -28,6 +28,12 @@
 #include <limits>
 #include "verdict_config.h"
 
+#if defined(__CUDACC__) || defined(__HIPCC__)
+#define VERDICT_HOST_DEVICE __host__ __device__
+#else
+#define VERDICT_HOST_DEVICE
+#endif
+
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define VERDICT_ABI_IMPORT __declspec(dllimport)
 #define VERDICT_ABI_EXPORT __declspec(dllexport)
@@ -41,12 +47,12 @@
 
 #if defined(VERDICT_SHARED_LIB)
 #ifdef verdict_EXPORTS
-#define VERDICT_EXPORT VERDICT_ABI_EXPORT
+#define VERDICT_EXPORT VERDICT_ABI_EXPORT VERDICT_HOST_DEVICE
 #else
-#define VERDICT_EXPORT VERDICT_ABI_IMPORT
+#define VERDICT_EXPORT VERDICT_ABI_IMPORT VERDICT_HOST_DEVICE
 #endif
 #else
-#define VERDICT_EXPORT
+#define VERDICT_EXPORT VERDICT_HOST_DEVICE
 #endif
 
 #ifndef VERDICT_NAMESPACE

@@ -4,7 +4,25 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-project(verdict VERSION 1.4.3)
+project(verdict LANGUAGES CXX VERSION 1.4.3)
+
+# Enable CUDA if requested
+option(VERDICT_ENABLE_CUDA "Build Verdict with CUDA support." OFF)
+
+if (VERDICT_ENABLE_CUDA)
+  enable_language(CUDA)
+endif ()
+
+# Enable HIP if requested
+option(VERDICT_ENABLE_HIP "Build Verdict with HIP support." OFF)
+
+if (VERDICT_ENABLE_HIP)
+  if(${CMAKE_VERSION} VERSION_LESS 3.21.0)
+    message(FATAL_ERROR "HIP support requires CMake 3.21 or above.")
+  endif()
+
+  enable_language(HIP)
+endif()
 
 # Includes
 include(GNUInstallDirs)
@@ -44,6 +62,12 @@ set(verdict_SOURCES
   V_TriMetric.cpp
   V_WedgeMetric.cpp
   VerdictVector.cpp)
+
+if (VERDICT_ENABLE_CUDA)
+  set_source_files_properties(${verdict_SOURCES} PROPERTIES LANGUAGE CUDA)
+elseif (VERDICT_ENABLE_HIP)
+  set_source_files_properties(${verdict_SOURCES} PROPERTIES LANGUAGE HIP)
+endif ()
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/verdict_config.h.in

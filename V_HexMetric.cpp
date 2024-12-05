@@ -28,10 +28,10 @@
 
 namespace VERDICT_NAMESPACE
 {
-extern void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinates[][3]);
+VERDICT_HOST_DEVICE extern void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinates[][3]);
 
 //! weights based on the average size of a hex
-static int hex_get_weight(
+VERDICT_HOST_DEVICE static int hex_get_weight(
   VerdictVector& v1, VerdictVector& v2, VerdictVector& v3, double average_size)
 {
   if (average_size == 0)
@@ -51,55 +51,71 @@ static int hex_get_weight(
   return 1;
 }
 
-static const double HEX27_node_local_coord[27][3] = { { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 },
-  { -1, 1, -1 }, { -1, -1, 1 }, { 1, -1, 1 }, { 1, 1, 1 }, { -1, 1, 1 }, { 0, -1, -1 },
-  { 1, 0, -1 }, { 0, 1, -1 }, { -1, 0, -1 }, { -1, -1, 0 }, { 1, -1, 0 }, { 1, 1, 0 }, { -1, 1, 0 },
-  { 0, -1, 1 }, { 1, 0, 1 }, { 0, 1, 1 }, { -1, 0, 1 }, { 0, 0, 0 }, { 0, 0, -1 }, { 0, 0, 1 },
-  { -1, 0, 0 }, { 1, 0, 0 }, { 0, -1, 0 }, { 0, 1, 0 } };
+VERDICT_HOST_DEVICE static const double* HEX27_node_local_coord(int i)
+{
+  static constexpr double sHEX27_node_local_coord[27][3] = { { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 },
+    { -1, 1, -1 }, { -1, -1, 1 }, { 1, -1, 1 }, { 1, 1, 1 }, { -1, 1, 1 }, { 0, -1, -1 },
+    { 1, 0, -1 }, { 0, 1, -1 }, { -1, 0, -1 }, { -1, -1, 0 }, { 1, -1, 0 }, { 1, 1, 0 }, { -1, 1, 0 },
+    { 0, -1, 1 }, { 1, 0, 1 }, { 0, 1, 1 }, { -1, 0, 1 }, { 0, 0, 0 }, { 0, 0, -1 }, { 0, 0, 1 },
+    { -1, 0, 0 }, { 1, 0, 0 }, { 0, -1, 0 }, { 0, 1, 0 } };
+  return sHEX27_node_local_coord[i];
+}
 
-static int hex20_subtet_conn[36][4] = { { 0, 12, 8, 20 }, { 4, 16, 12, 20 }, { 16, 5, 13, 20 },
-  { 1, 8, 13, 20 }, { 8, 12, 16, 20 }, { 8, 16, 13, 20 },
+VERDICT_HOST_DEVICE static const int* hex20_subtet_conn(int i)
+{
 
-  { 1, 13, 9, 20 }, { 5, 17, 13, 20 }, { 6, 14, 17, 20 }, { 2, 9, 14, 20 }, { 9, 17, 14, 20 },
-  { 9, 13, 17, 20 },
+  static constexpr int shex20_subtet_conn[36][4] = { { 0, 12, 8, 20 }, { 4, 16, 12, 20 }, { 16, 5, 13, 20 },
+    { 1, 8, 13, 20 }, { 8, 12, 16, 20 }, { 8, 16, 13, 20 },
 
-  { 7, 15, 18, 20 }, { 3, 10, 15, 20 }, { 2, 14, 10, 20 }, { 6, 18, 14, 20 }, { 10, 18, 15, 20 },
-  { 10, 14, 18, 20 },
+    { 1, 13, 9, 20 }, { 5, 17, 13, 20 }, { 6, 14, 17, 20 }, { 2, 9, 14, 20 }, { 9, 17, 14, 20 },
+    { 9, 13, 17, 20 },
 
-  { 7, 19, 15, 20 }, { 4, 12, 19, 20 }, { 0, 11, 12, 20 }, { 3, 15, 11, 20 }, { 11, 19, 12, 20 },
-  { 11, 15, 19, 20 },
+    { 7, 15, 18, 20 }, { 3, 10, 15, 20 }, { 2, 14, 10, 20 }, { 6, 18, 14, 20 }, { 10, 18, 15, 20 },
+    { 10, 14, 18, 20 },
 
-  { 4, 19, 16, 20 }, { 5, 16, 17, 20 }, { 6, 17, 18, 20 }, { 7, 18, 19, 20 }, { 16, 18, 17, 20 },
-  { 16, 19, 18, 20 },
+    { 7, 19, 15, 20 }, { 4, 12, 19, 20 }, { 0, 11, 12, 20 }, { 3, 15, 11, 20 }, { 11, 19, 12, 20 },
+    { 11, 15, 19, 20 },
 
-  { 0, 8, 11, 20 }, { 8, 1, 9, 20 }, { 2, 10, 9, 20 }, { 3, 11, 10, 20 }, { 8, 9, 10, 20 },
-  { 8, 10, 11, 20 } };
+    { 4, 19, 16, 20 }, { 5, 16, 17, 20 }, { 6, 17, 18, 20 }, { 7, 18, 19, 20 }, { 16, 18, 17, 20 },
+    { 16, 19, 18, 20 },
 
-static int hex27_subtet_conn[48][4] = { { 0, 12, 8, 20 }, { 4, 16, 12, 20 }, { 16, 5, 13, 20 },
-  { 1, 8, 13, 20 }, { 25, 8, 12, 20 }, { 25, 12, 16, 20 }, { 25, 16, 13, 20 }, { 25, 13, 8, 20 },
+    { 0, 8, 11, 20 }, { 8, 1, 9, 20 }, { 2, 10, 9, 20 }, { 3, 11, 10, 20 }, { 8, 9, 10, 20 },
+    { 8, 10, 11, 20 } };
 
-  { 1, 13, 9, 20 }, { 5, 17, 13, 20 }, { 6, 14, 17, 20 }, { 2, 9, 14, 20 }, { 24, 9, 13, 20 },
-  { 24, 13, 17, 20 }, { 24, 17, 14, 20 }, { 24, 14, 9, 20 },
+  return shex20_subtet_conn[i];
 
-  { 7, 15, 18, 20 }, { 3, 10, 15, 20 }, { 2, 14, 10, 20 }, { 6, 18, 14, 20 }, { 26, 10, 14, 20 },
-  { 26, 14, 18, 20 }, { 26, 18, 15, 20 }, { 26, 15, 10, 20 },
+}
 
-  { 7, 19, 15, 20 }, { 4, 12, 19, 20 }, { 0, 11, 12, 20 }, { 3, 15, 11, 20 }, { 23, 11, 15, 20 },
-  { 23, 15, 19, 20 }, { 23, 19, 12, 20 }, { 23, 12, 11, 20 },
+VERDICT_HOST_DEVICE static const int* hex27_subtet_conn(int i)
+{
+  static constexpr int shex27_subtet_conn[48][4] = { { 0, 12, 8, 20 }, { 4, 16, 12, 20 }, { 16, 5, 13, 20 },
+    { 1, 8, 13, 20 }, { 25, 8, 12, 20 }, { 25, 12, 16, 20 }, { 25, 16, 13, 20 }, { 25, 13, 8, 20 },
 
-  { 4, 19, 16, 20 }, { 5, 16, 17, 20 }, { 6, 17, 18, 20 }, { 7, 18, 19, 20 }, { 22, 16, 19, 20 },
-  { 22, 19, 18, 20 }, { 22, 18, 17, 20 }, { 22, 17, 16, 20 },
+    { 1, 13, 9, 20 }, { 5, 17, 13, 20 }, { 6, 14, 17, 20 }, { 2, 9, 14, 20 }, { 24, 9, 13, 20 },
+    { 24, 13, 17, 20 }, { 24, 17, 14, 20 }, { 24, 14, 9, 20 },
 
-  { 0, 8, 11, 20 }, { 8, 1, 9, 20 }, { 2, 10, 9, 20 }, { 3, 11, 10, 20 }, { 21, 8, 9, 20 },
-  { 21, 9, 10, 20 }, { 21, 10, 11, 20 }, { 21, 11, 8, 20 } };
+    { 7, 15, 18, 20 }, { 3, 10, 15, 20 }, { 2, 14, 10, 20 }, { 6, 18, 14, 20 }, { 26, 10, 14, 20 },
+    { 26, 14, 18, 20 }, { 26, 18, 15, 20 }, { 26, 15, 10, 20 },
 
-static double compute_tet_volume(VerdictVector& v1, VerdictVector& v2, VerdictVector& v3)
+    { 7, 19, 15, 20 }, { 4, 12, 19, 20 }, { 0, 11, 12, 20 }, { 3, 15, 11, 20 }, { 23, 11, 15, 20 },
+    { 23, 15, 19, 20 }, { 23, 19, 12, 20 }, { 23, 12, 11, 20 },
+
+    { 4, 19, 16, 20 }, { 5, 16, 17, 20 }, { 6, 17, 18, 20 }, { 7, 18, 19, 20 }, { 22, 16, 19, 20 },
+    { 22, 19, 18, 20 }, { 22, 18, 17, 20 }, { 22, 17, 16, 20 },
+
+    { 0, 8, 11, 20 }, { 8, 1, 9, 20 }, { 2, 10, 9, 20 }, { 3, 11, 10, 20 }, { 21, 8, 9, 20 },
+    { 21, 9, 10, 20 }, { 21, 10, 11, 20 }, { 21, 11, 8, 20 } };
+
+  return shex27_subtet_conn[i];
+}
+
+VERDICT_HOST_DEVICE static double compute_tet_volume(VerdictVector& v1, VerdictVector& v2, VerdictVector& v3)
 {
   return (double)((v3 % (v1 * v2)) / 6.0);
 }
 
 // Compute interior node
-VerdictVector hex20_auxillary_node_coordinate(const double coordinates[][3])
+VERDICT_HOST_DEVICE static VerdictVector hex20_auxillary_node_coordinate(const double coordinates[][3])
 {
   VerdictVector aux_node(0.0, 0.0, 0.0);
   for (int i = 0; i < 8; i++)
@@ -112,7 +128,7 @@ VerdictVector hex20_auxillary_node_coordinate(const double coordinates[][3])
   return aux_node;
 }
 
-static void HEX27_gradients_of_the_shape_functions_for_RST(
+VERDICT_HOST_DEVICE static void HEX27_gradients_of_the_shape_functions_for_RST(
   const double rst[3], double dhdr[27], double dhds[27], double dhdt[27])
 {
   double g1r = -0.5 * rst[0] * (1 - rst[0]);
@@ -247,7 +263,7 @@ static void HEX27_gradients_of_the_shape_functions_for_RST(
   }
 
 //! make VerdictVectors from coordinates
-static void make_hex_edges(const double coordinates[][3], VerdictVector edges[12])
+VERDICT_HOST_DEVICE static void make_hex_edges(const double coordinates[][3], VerdictVector edges[12])
 {
   edges[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
@@ -390,7 +406,7 @@ static double safe_ratio3( const double numerator,
 }
 #endif /* Not currently used and not exposed in verdict.h */
 
-static double safe_ratio(const double numerator, const double denominator)
+VERDICT_HOST_DEVICE static double safe_ratio(const double numerator, const double denominator)
 {
 
   double return_value;
@@ -408,7 +424,7 @@ static double safe_ratio(const double numerator, const double denominator)
   return return_value;
 }
 
-static double condition_comp(
+VERDICT_HOST_DEVICE static double condition_comp(
   const VerdictVector& xxi, const VerdictVector& xet, const VerdictVector& xze)
 {
   double det = VerdictVector::Dot(xxi, (xet * xze));
@@ -426,7 +442,7 @@ static double condition_comp(
   return sqrt(term1 * term2) / det;
 }
 
-static double oddy_comp(
+VERDICT_HOST_DEVICE static double oddy_comp(
   const VerdictVector& xxi, const VerdictVector& xet, const VerdictVector& xze)
 {
   double g11, g12, g13, g22, g23, g33, rt_g;
@@ -458,7 +474,7 @@ static double oddy_comp(
 }
 
 //! calculates edge lengths of a hex
-static double hex_edge_length(int max_min, const double coordinates[][3])
+VERDICT_HOST_DEVICE static double hex_edge_length(int max_min, const double coordinates[][3])
 {
   double temp[3], edge[12];
   int i;
@@ -568,7 +584,7 @@ static double hex_edge_length(int max_min, const double coordinates[][3])
   }
 }
 
-static double diag_length(int max_min, const double coordinates[][3])
+VERDICT_HOST_DEVICE static double diag_length(int max_min, const double coordinates[][3])
 {
   double temp[3], diag[4];
   int i;
@@ -622,7 +638,7 @@ static double diag_length(int max_min, const double coordinates[][3])
 }
 
 //! calculates efg values
-static VerdictVector calc_hex_efg(int efg_index, VerdictVector coordinates[8])
+VERDICT_HOST_DEVICE static VerdictVector calc_hex_efg(int efg_index, VerdictVector coordinates[8])
 {
 
   VerdictVector efg;
@@ -1106,17 +1122,14 @@ double hex_volume(int num_nodes, const double coordinates[][3])
 
   if (num_nodes > 9)
   {
-    int(*subtet_conn_array)[4];
     int num_subtets = 0;
     if (27 == num_nodes)
     {
       num_subtets = 48;
-      subtet_conn_array = hex27_subtet_conn;
     }
     else if (20 == num_nodes)
     {
       num_subtets = 36;
-      subtet_conn_array = hex20_subtet_conn;
     }
     else
     {
@@ -1127,19 +1140,29 @@ double hex_volume(int num_nodes, const double coordinates[][3])
 
     for (int k = 0; k < num_subtets; k++)
     {
+      const int* subtet_conn;
+      if(27 == num_nodes)
+      {
+        subtet_conn = hex27_subtet_conn(k);
+      }
+      else if(20 == num_nodes)
+      {
+        subtet_conn = hex20_subtet_conn(k);
+      }
+
       VerdictVector v1(
-        coordinates[subtet_conn_array[k][1]][0] - coordinates[subtet_conn_array[k][0]][0],
-        coordinates[subtet_conn_array[k][1]][1] - coordinates[subtet_conn_array[k][0]][1],
-        coordinates[subtet_conn_array[k][1]][2] - coordinates[subtet_conn_array[k][0]][2]);
+        coordinates[subtet_conn[1]][0] - coordinates[subtet_conn[0]][0],
+        coordinates[subtet_conn[1]][1] - coordinates[subtet_conn[0]][1],
+        coordinates[subtet_conn[1]][2] - coordinates[subtet_conn[0]][2]);
 
       VerdictVector v2(
-        coordinates[subtet_conn_array[k][2]][0] - coordinates[subtet_conn_array[k][0]][0],
-        coordinates[subtet_conn_array[k][2]][1] - coordinates[subtet_conn_array[k][0]][1],
-        coordinates[subtet_conn_array[k][2]][2] - coordinates[subtet_conn_array[k][0]][2]);
+        coordinates[subtet_conn[2]][0] - coordinates[subtet_conn[0]][0],
+        coordinates[subtet_conn[2]][1] - coordinates[subtet_conn[0]][1],
+        coordinates[subtet_conn[2]][2] - coordinates[subtet_conn[0]][2]);
 
-      VerdictVector v3(aux_node.x() - coordinates[subtet_conn_array[k][0]][0],
-        aux_node.y() - coordinates[subtet_conn_array[k][0]][1],
-        aux_node.z() - coordinates[subtet_conn_array[k][0]][2]);
+      VerdictVector v3(aux_node.x() - coordinates[subtet_conn[0]][0],
+        aux_node.y() - coordinates[subtet_conn[0]][1],
+        aux_node.z() - coordinates[subtet_conn[0]][2]);
 
       volume += compute_tet_volume(v1, v2, v3);
     }
@@ -1839,7 +1862,7 @@ double hex_jacobian(int num_nodes, const double coordinates[][3])
 
     for (int i = 0; i < 27; i++)
     {
-      HEX27_gradients_of_the_shape_functions_for_RST(HEX27_node_local_coord[i], dhdr, dhds, dhdt);
+      HEX27_gradients_of_the_shape_functions_for_RST(HEX27_node_local_coord(i), dhdr, dhds, dhdt);
       double jacobian[3][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
 
       for (int j = 0; j < 27; j++)

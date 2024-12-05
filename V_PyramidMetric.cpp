@@ -26,19 +26,19 @@
 
 namespace VERDICT_NAMESPACE
 {
-extern double quad_equiangle_skew(int num_nodes, const double coordinates[][3]);
-extern double tri_equiangle_skew(int num_nodes, const double coordinates[][3]);
+VERDICT_HOST_DEVICE extern double quad_equiangle_skew(int num_nodes, const double coordinates[][3]);
+VERDICT_HOST_DEVICE extern double tri_equiangle_skew(int num_nodes, const double coordinates[][3]);
 
 
 // local methods
-void make_pyramid_tets(const double coordinates[][3], double tet1_coords[][3],
+VERDICT_HOST_DEVICE static void make_pyramid_tets(const double coordinates[][3], double tet1_coords[][3],
   double tet2_coords[][3], double tet3_coords[][3], double tet4_coords[][3]);
-void make_pyramid_faces(const double coordinates[][3], double base[][3], double tri1[][3],
+VERDICT_HOST_DEVICE static void make_pyramid_faces(const double coordinates[][3], double base[][3], double tri1[][3],
   double tri2[][3], double tri3[][3], double tri4[][3]);
-void make_pyramid_edges(VerdictVector edges[8], const double coordinates[][3]);
-double distance_point_to_pyramid_base(
+VERDICT_HOST_DEVICE static void make_pyramid_edges(VerdictVector edges[8], const double coordinates[][3]);
+VERDICT_HOST_DEVICE static double distance_point_to_pyramid_base(
   int num_nodes, const double coordinates[][3], double& cos_angle);
-double largest_pyramid_edge(const double coordinates[][3]);
+VERDICT_HOST_DEVICE static double largest_pyramid_edge(const double coordinates[][3]);
 
 /*
   the pyramid element

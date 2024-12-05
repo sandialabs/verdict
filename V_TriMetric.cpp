@@ -33,7 +33,7 @@ static constexpr double two_over_sqrt3 = 2. / sqrt3;
   get weights based on the average area of a set of
   tris
 */
-static int tri_get_weight(
+VERDICT_HOST_DEVICE static int tri_get_weight(
   double& m11, double& m21, double& m12, double& m22, double average_tri_area)
 {
   m11 = 1;
@@ -147,7 +147,7 @@ double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 
  */
 template <typename CoordsContainerType>
-double tri_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   // three vectors for each side
   const VerdictVector a{coordinates[0], coordinates[1], dimension};
@@ -279,7 +279,7 @@ double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
   0.5 * jacobian at a node
  */
 template <typename CoordsContainerType>
-double tri_area_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri_area_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
 {
   if (3 == num_nodes)
   {
@@ -561,7 +561,7 @@ double tri_equiangle_skew(int num_nodes, const double coordinates[][3])
   Condition number of the jacobian matrix at any corner
  */
 template <typename CoordsContainerType>
-double tri_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   const VerdictVector v1{coordinates[0], coordinates[1], dimension};
   const VerdictVector v2{coordinates[0], coordinates[2], dimension};
@@ -594,7 +594,7 @@ double tri_condition_from_loc_ptrs(int num_nodes, const double * const * coordin
   minimum of the jacobian divided by the lengths of 2 edge vectors
  */
 template <typename CoordsContainerType>
-double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   const VerdictVector edge[3] =
   {
@@ -941,7 +941,7 @@ double tri_distortion(int num_nodes, const double coordinates[][3])
 }
 
 template <typename CoordsContainerType>
-double tri_inradius(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tri_inradius(const CoordsContainerType coordinates)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -962,7 +962,7 @@ double tri_inradius(const CoordsContainerType coordinates)
 }
 
 template <typename CoordsContainerType>
-double tri6_min_inradius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri6_min_inradius(const CoordsContainerType coordinates, const int dimension)
 {
   static int SUBTRI_NODES[4][3] = { { 0, 3, 5 }, { 3, 1, 4 }, { 5, 4, 2 }, { 3, 4, 5 } };
   double min_inrad = VERDICT_DBL_MAX;
@@ -986,7 +986,7 @@ double tri6_min_inradius(const CoordsContainerType coordinates, const int dimens
 }
 
 template <typename CoordsContainerType>
-double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const int dimension)
 {
   double sp = 0.0;
   VerdictVector sides[3];
@@ -1009,7 +1009,7 @@ double calculate_tri3_outer_radius(const CoordsContainerType coordinates, const 
   return cr;
 }
 
-static double fix_range(double v)
+VERDICT_HOST_DEVICE static double fix_range(double v)
 {
   if (isnan(v))
   {
@@ -1027,7 +1027,7 @@ static double fix_range(double v)
 }
 
 template <typename CoordsContainerType>
-double tri6_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri6_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
 {
   double min_inradius_for_subtri = tri6_min_inradius(coordinates, dimension);
   double outer_radius = calculate_tri3_outer_radius(coordinates, dimension);
@@ -1037,7 +1037,7 @@ double tri6_normalized_inradius(const CoordsContainerType coordinates, const int
 }
 
 template <typename CoordsContainerType>
-double tri3_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri3_normalized_inradius(const CoordsContainerType coordinates, const int dimension)
 {
   const double* tri6_coords[6];
   for (int i = 0; i < 3; i++)
@@ -1062,7 +1062,7 @@ double tri3_normalized_inradius(const CoordsContainerType coordinates, const int
 /** Ratio of the minimum subtri inner radius to tri outer radius*/
 /* Currently, supports tri 6 and 3.*/
 template <typename CoordsContainerType>
-double tri_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates, const int dimension)
 {
   if (num_nodes == 3)
   {
