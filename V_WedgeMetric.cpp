@@ -30,7 +30,7 @@ extern double tri_equiangle_skew(int num_nodes, const double coordinates[][3]);
 extern double quad_equiangle_skew(int num_nodes, const double coordinates[][3]);
 
 // local methods
-void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tri2[][3],
+VERDICT_HOST_DEVICE void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tri2[][3],
   double quad1[][3], double quad2[][3], double quad3[][3]);
 
 /*
@@ -49,13 +49,17 @@ void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tr
 
  */
 
-static const double WEDGE21_node_local_coord[21][3] = { { 0, 0, -1 }, { 1.0, 0, -1 },
-  { 0, 1.0, -1 }, { 0, 0, 1.0 }, { 1.0, 0, 1.0 }, { 0, 1.0, 1.0 }, { 0.5, 0, -1 }, { 0.5, 0.5, -1 },
-  { 0, 0.5, -1 }, { 0.0, 0.0, 0 }, { 1.0, 0, 0 }, { 0, 1.0, 0 }, { 0.5, 0, 1.0 }, { 0.5, 0.5, 1.0 },
-  { 0, 0.5, 1.0 }, { one_third, one_third, 0 }, { one_third, one_third, -1 },
-  { one_third, one_third, 1.0 }, { 0.5, 0.5, 0 }, { 0, 0.5, 0 }, { 0.5, 0, 0 } };
+VERDICT_HOST_DEVICE static const double* WEDGE21_node_local_coord(int i)
+{
+  static constexpr double sWEDGE21_node_local_coord[21][3] = { { 0, 0, -1 }, { 1.0, 0, -1 },
+    { 0, 1.0, -1 }, { 0, 0, 1.0 }, { 1.0, 0, 1.0 }, { 0, 1.0, 1.0 }, { 0.5, 0, -1 }, { 0.5, 0.5, -1 },
+    { 0, 0.5, -1 }, { 0.0, 0.0, 0 }, { 1.0, 0, 0 }, { 0, 1.0, 0 }, { 0.5, 0, 1.0 }, { 0.5, 0.5, 1.0 },
+    { 0, 0.5, 1.0 }, { one_third, one_third, 0 }, { one_third, one_third, -1 },
+    { one_third, one_third, 1.0 }, { 0.5, 0.5, 0 }, { 0, 0.5, 0 }, { 0.5, 0, 0 } };
+  return sWEDGE21_node_local_coord[i];
+}
 
-static void WEDGE21_gradients_of_the_shape_functions_for_RST(
+VERDICT_HOST_DEVICE static void WEDGE21_gradients_of_the_shape_functions_for_RST(
   const double rst[3], double dhdr[21], double dhds[21], double dhdt[21])
 {
   double RSM = 1.0 - rst[0] - rst[1];
@@ -516,7 +520,7 @@ double wedge_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   return (double)fmin(edge_ratio, VERDICT_DBL_MAX);
 }
 
-static void aspects(int num_nodes, const double coordinates[][3], double& aspect1, double& aspect2,
+VERDICT_HOST_DEVICE static void aspects(int num_nodes, const double coordinates[][3], double& aspect1, double& aspect2,
   double& aspect3, double& aspect4, double& aspect5, double& aspect6)
 {
   if (num_nodes < 6)
@@ -744,7 +748,7 @@ double wedge_jacobian(int num_nodes, const double coordinates[][3])
     for (int i = 0; i < 15; i++)
     {
       WEDGE21_gradients_of_the_shape_functions_for_RST(
-        WEDGE21_node_local_coord[i], dhdr, dhds, dhdt);
+        WEDGE21_node_local_coord(i), dhdr, dhds, dhdt);
       double jacobian[3][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
 
       for (int j = 0; j < 21; j++)

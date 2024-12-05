@@ -30,13 +30,17 @@ namespace VERDICT_NAMESPACE
 static constexpr double three_times_1plussqrt3 = 3.0 * (1 + sqrt3);
 static constexpr double normal_coeff = 180. * .3183098861837906715377675267450287;
 static constexpr double aspect_ratio_normal_coeff = sqrt6 / 12.;
-double tet10_characteristic_length(const double coordinates[][3]);
+VERDICT_HOST_DEVICE double tet10_characteristic_length(const double coordinates[][3]);
 
-static const int tet10_subtet_conn[12][4] = { { 0, 4, 6, 7 }, { 1, 5, 4, 8 }, { 2, 6, 5, 9 },
-  { 3, 8, 7, 9 }, { 4, 8, 5, 10 }, { 5, 8, 9, 10 }, { 9, 8, 7, 10 }, { 7, 8, 4, 10 },
-  { 4, 5, 6, 10 }, { 5, 9, 6, 10 }, { 9, 7, 6, 10 }, { 7, 4, 6, 10 } };
+VERDICT_HOST_DEVICE static const int* tet10_subtet_conn(int i)
+{
+  static constexpr int stet10_subtet_conn[12][4] = { { 0, 4, 6, 7 }, { 1, 5, 4, 8 }, { 2, 6, 5, 9 },
+    { 3, 8, 7, 9 }, { 4, 8, 5, 10 }, { 5, 8, 9, 10 }, { 9, 8, 7, 10 }, { 7, 8, 4, 10 },
+    { 4, 5, 6, 10 }, { 5, 9, 6, 10 }, { 9, 7, 6, 10 }, { 7, 4, 6, 10 } };
+  return stet10_subtet_conn[i];
+}
 
-static double fix_range(double v)
+VERDICT_HOST_DEVICE static double fix_range(double v)
 {
   if (isnan(v))
   {
@@ -163,7 +167,7 @@ double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   get the weights based on the average size
   of a tet
  */
-static int tet_get_weight(
+VERDICT_HOST_DEVICE static int tet_get_weight(
   VerdictVector& w1, VerdictVector& w2, VerdictVector& w3, double average_tet_volume)
 {
   w1.set(1, 0, 0);
@@ -272,7 +276,7 @@ double tet_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
  */
 
 template <typename CoordsContainerType>
-double tet_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
   const VerdictVector side0{coordinates[0], coordinates[1]};
   const VerdictVector side1{coordinates[1], coordinates[2]};
@@ -399,7 +403,7 @@ double tet_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
     and positive, but now ill-conditioned inverted tetrahedra are also included.
  */
 template <typename CoordsContainerType>
-double tet_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
   // Determine side vectors
   const VerdictVector ab{coordinates[0], coordinates[1]};
@@ -807,13 +811,17 @@ double tet_squish_index(int /*num_nodes*/, const double coordinates[][3])
   return maxSquishIndex;
 }
 
-static const double TET15_node_local_coord[15][3] = { { 0, 0, 0 }, { 1.0, 0, 0 }, { 0, 1.0, 0 },
-  { 0, 0, 1.0 }, { .5, 0, 0 }, { .5, .5, 0 }, { 0, .5, 0 }, { 0, 0, .5 }, { .5, 0, .5 },
-  { 0, .5, .5 }, { one_third, one_third, 0 }, { one_third, 0, one_third },
-  { one_third, one_third, one_third }, { 0, one_third, one_third },
-  { one_fourth, one_fourth, one_fourth } };
+VERDICT_HOST_DEVICE static const double* TET15_node_local_coord(int i)
+{
+  static const double sTET15_node_local_coord[15][3] = { { 0, 0, 0 }, { 1.0, 0, 0 }, { 0, 1.0, 0 },
+    { 0, 0, 1.0 }, { .5, 0, 0 }, { .5, .5, 0 }, { 0, .5, 0 }, { 0, 0, .5 }, { .5, 0, .5 },
+    { 0, .5, .5 }, { one_third, one_third, 0 }, { one_third, 0, one_third },
+    { one_third, one_third, one_third }, { 0, one_third, one_third },
+    { one_fourth, one_fourth, one_fourth } };
+  return sTET15_node_local_coord[i];
+};
 
-static void TET15_gradients_of_the_shape_functions_for_R_S_T(
+VERDICT_HOST_DEVICE static void TET15_gradients_of_the_shape_functions_for_R_S_T(
   const double rst[3], double dhdr[15], double dhds[15], double dhdt[15])
 {
   // dh/dr;
@@ -938,7 +946,7 @@ static void TET15_gradients_of_the_shape_functions_for_R_S_T(
     one_third * (dhdt[14] + dhdt[12] + dhdt[13]) - .25 * dhdt[10];
 }
 
-double calculate_tet_volume_using_sides(
+VERDICT_HOST_DEVICE static double calculate_tet_volume_using_sides(
   const VerdictVector& side0, const VerdictVector& side2, const VerdictVector& side3)
 {
   return (double)((side3 % (side2 * side0)) / 6.0);
@@ -950,7 +958,7 @@ double calculate_tet_volume_using_sides(
   1/6 * jacobian at a corner node
  */
 template <typename CoordsContainerType>
-double tet_volume_impl(int num_nodes, const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet_volume_impl(int num_nodes, const CoordsContainerType coordinates)
 {
   // Determine side vectors
   if (4 == num_nodes)
@@ -1145,7 +1153,7 @@ double tet_volume_from_loc_ptrs(int num_nodes, const double * const *coordinates
     and positive, but now ill-conditioned inverted tetrahedra are also included.
  */
 template <typename CoordsContainerType>
-double tet_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
   const VerdictVector side0{coordinates[0], coordinates[1]};
   const VerdictVector side2{coordinates[2], coordinates[0]};
@@ -1194,7 +1202,7 @@ double tet_jacobian(int num_nodes, const double coordinates[][3])
 
     for (int i = 0; i < 15; i++)
     {
-      TET15_gradients_of_the_shape_functions_for_R_S_T(TET15_node_local_coord[i], dhdr, dhds, dhdt);
+      TET15_gradients_of_the_shape_functions_for_R_S_T(TET15_node_local_coord(i), dhdr, dhds, dhdt);
       double jacobian[3][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
 
       for (int j = 0; j < 15; j++)
@@ -1516,7 +1524,7 @@ double tet_timestep(int num_nodes, const double coordinates[][3], double density
 }
 
 template <typename CoordsContainerType>
-VerdictVector tet10_auxillary_node_coordinate(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE VerdictVector tet10_auxillary_node_coordinate(const CoordsContainerType coordinates)
 {
   VerdictVector aux_node(0.0, 0.0, 0.0);
   for (int i = 4; i < 10; i++)
@@ -1530,7 +1538,7 @@ VerdictVector tet10_auxillary_node_coordinate(const CoordsContainerType coordina
 }
 
 template <typename CoordsContainerType>
-double tet10_min_inradius(const CoordsContainerType coordinates, int begin_index, int end_index)
+VERDICT_HOST_DEVICE static double tet10_min_inradius(const CoordsContainerType coordinates, int begin_index, int end_index)
 {
   double min_tetinradius = VERDICT_DBL_MAX;
 
@@ -1538,12 +1546,7 @@ double tet10_min_inradius(const CoordsContainerType coordinates, int begin_index
 
   for (int i = begin_index; i <= end_index; i++)
   {
-    int subtet_conn[4];
-    subtet_conn[0] = tet10_subtet_conn[i][0];
-    subtet_conn[1] = tet10_subtet_conn[i][1];
-    subtet_conn[2] = tet10_subtet_conn[i][2];
-    subtet_conn[3] = tet10_subtet_conn[i][3];
-
+    const int* subtet_conn = tet10_subtet_conn(i);
     // get the coordinates of the nodes
     double subtet_coords[4][3];
     for (int k = 0; k < 4; k++)
@@ -1584,7 +1587,7 @@ double tet10_characteristic_length(const double coordinates[][3])
 }
 
 template <typename CoordsContainerType>
-double calculate_tet4_outer_radius(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double calculate_tet4_outer_radius(const CoordsContainerType coordinates)
 {
   verdict::VerdictVector nE[4];
   for (int i{ 0 }; i < 4; i++)
@@ -1607,7 +1610,7 @@ double calculate_tet4_outer_radius(const CoordsContainerType coordinates)
 }
 
 template <typename CoordsContainerType>
-double tet10_normalized_inradius(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet10_normalized_inradius(const CoordsContainerType coordinates)
 {
   double min_inradius_for_subtet_with_parent_node = tet10_min_inradius(coordinates, 0, 3);
   double min_inradius_for_subtet_with_no_parent_node = tet10_min_inradius(coordinates, 4, 11);
@@ -1625,7 +1628,7 @@ double tet10_normalized_inradius(const CoordsContainerType coordinates)
 }
 
 template <typename CoordsContainerType>
-double tet4_normalized_inradius(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet4_normalized_inradius(const CoordsContainerType coordinates)
 {
   double tet10_coords[10][3];
   for (int i = 0; i < 4; i++)
@@ -1648,7 +1651,7 @@ double tet4_normalized_inradius(const CoordsContainerType coordinates)
 }
 
 template <typename CoordsContainerType>
-double tet_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet_normalized_inradius_impl(int num_nodes, const CoordsContainerType coordinates)
 {
   if (num_nodes == 4)
   {
@@ -1672,7 +1675,7 @@ double tet_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const
 }
 
 template <typename CoordsContainerType>
-double tet4_mean_ratio(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet4_mean_ratio(const CoordsContainerType coordinates)
 {
   const VerdictVector side0{coordinates[0], coordinates[1]};
   const VerdictVector side2{coordinates[2], coordinates[0]};
@@ -1703,7 +1706,7 @@ double tet4_mean_ratio(const CoordsContainerType coordinates)
 }
 
 template <typename CoordsContainerType>
-double tet10_mean_ratio(const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet10_mean_ratio(const CoordsContainerType coordinates)
 {
   double min_tet_mean_ratio = VERDICT_DBL_MAX;
 
@@ -1713,11 +1716,7 @@ double tet10_mean_ratio(const CoordsContainerType coordinates)
 
   for (int i = 0; i <= 11; i++)
   {
-    int subtet_conn[4];
-    subtet_conn[0] = tet10_subtet_conn[i][0];
-    subtet_conn[1] = tet10_subtet_conn[i][1];
-    subtet_conn[2] = tet10_subtet_conn[i][2];
-    subtet_conn[3] = tet10_subtet_conn[i][3];
+    const int* subtet_conn = tet10_subtet_conn(i);
 
     //get the coordinates of the nodes
     double subtet_coords[4][3];
@@ -1755,7 +1754,7 @@ double tet10_mean_ratio(const CoordsContainerType coordinates)
 }
 
 template <typename CoordsContainerType>
-double tet_mean_ratio_impl(int num_nodes, const CoordsContainerType coordinates)
+VERDICT_HOST_DEVICE static double tet_mean_ratio_impl(int num_nodes, const CoordsContainerType coordinates)
 {
   if (num_nodes == 4)
   {

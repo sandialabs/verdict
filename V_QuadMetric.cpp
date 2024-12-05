@@ -30,7 +30,7 @@ static constexpr double radius_ratio_normal_coeff = 1. / (2. * sqrt2);
 /*!
   weights based on the average size of a quad
  */
-static int quad_get_weight(
+VERDICT_HOST_DEVICE static int quad_get_weight(
   double& m11, double& m21, double& m12, double& m22, double average_quad_size)
 {
 
@@ -50,7 +50,7 @@ static int quad_get_weight(
 }
 
 //! returns whether the quad is collapsed or not
-static VerdictBoolean is_collapsed_quad(const double coordinates[][3])
+VERDICT_HOST_DEVICE static VerdictBoolean is_collapsed_quad(const double coordinates[][3])
 {
   if (coordinates[3][0] == coordinates[2][0] && coordinates[3][1] == coordinates[2][1] &&
     coordinates[3][2] == coordinates[2][2])
@@ -63,7 +63,7 @@ static VerdictBoolean is_collapsed_quad(const double coordinates[][3])
   }
 }
 
-static void make_quad_edges(VerdictVector edges[4], const double coordinates[][3])
+VERDICT_HOST_DEVICE static void make_quad_edges(VerdictVector edges[4], const double coordinates[][3])
 {
 
   edges[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
@@ -76,7 +76,7 @@ static void make_quad_edges(VerdictVector edges[4], const double coordinates[][3
     coordinates[0][2] - coordinates[3][2]);
 }
 
-static void signed_corner_areas(double areas[4], const double coordinates[][3])
+VERDICT_HOST_DEVICE static void signed_corner_areas(double areas[4], const double coordinates[][3])
 {
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
@@ -201,7 +201,7 @@ static void localize_quad_for_ef( VerdictVector node_pos[4] )
 /*!
   returns the normal vector of a quad
  */
-static VerdictVector quad_normal(const double coordinates[][3])
+VERDICT_HOST_DEVICE static VerdictVector quad_normal(const double coordinates[][3])
 {
   // get normal at node 0
   VerdictVector edge0, edge1;
@@ -261,7 +261,7 @@ static VerdictVector quad_normal(const double coordinates[][3])
   }
 }
 
-void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinates[][3])
+VERDICT_HOST_DEVICE void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinates[][3])
 {
   // if this is a collapsed quad, just pass it on to
   // the tri_largest_angle routine

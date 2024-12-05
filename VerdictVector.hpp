@@ -36,141 +36,141 @@ class VerdictVector
 {
 public:
   //- Heading: Constructors and Destructor
-  constexpr VerdictVector(); //- Default constructor.
+  VERDICT_HOST_DEVICE constexpr VerdictVector(); //- Default constructor.
 
-  constexpr VerdictVector(const double x, const double y, const double z);
+  VERDICT_HOST_DEVICE constexpr VerdictVector(const double x, const double y, const double z);
   //- Constructor: create vector from three components
 
-  constexpr VerdictVector(const double xyz[3]);
+  VERDICT_HOST_DEVICE constexpr VerdictVector(const double xyz[3]);
   //- Constructor: create vector from tuple
 
-  constexpr VerdictVector(const VerdictVector& tail, const VerdictVector& head);
-  constexpr VerdictVector(const double *tail, const double *head, int dimension);
-  constexpr VerdictVector(const double *tail, const double *head);
+  VERDICT_HOST_DEVICE constexpr VerdictVector(const VerdictVector& tail, const VerdictVector& head);
+  VERDICT_HOST_DEVICE constexpr VerdictVector(const double *tail, const double *head, int dimension);
+  VERDICT_HOST_DEVICE constexpr VerdictVector(const double *tail, const double *head);
   //- Constructor for a VerdictVector starting at tail and pointing
   //- to head.
 
   template <typename ARG1, typename ARG2, typename ARG3> constexpr VerdictVector(ARG1, ARG2, ARG3) = delete;
   //- define this template to avoid ambiguity between the (double, double, double) and (double *, double *, int) constructors
 
-  constexpr VerdictVector(const VerdictVector& copy_from); //- Copy Constructor
+  VERDICT_HOST_DEVICE constexpr VerdictVector(const VerdictVector& copy_from); //- Copy Constructor
 
   //- Heading: Set and Inquire Functions
-  constexpr void set(const double xv, const double yv, const double zv);
+  VERDICT_HOST_DEVICE constexpr void set(const double xv, const double yv, const double zv);
   //- Change vector components to {x}, {y}, and {z}
 
-  constexpr void set(const double xyz[3]);
+  VERDICT_HOST_DEVICE constexpr void set(const double xyz[3]);
   //- Change vector components to xyz[0], xyz[1], xyz[2]
 
-  constexpr void set(const VerdictVector& tail, const VerdictVector& head);
+  VERDICT_HOST_DEVICE constexpr void set(const VerdictVector& tail, const VerdictVector& head);
   //- Change vector to go from tail to head.
 
-  constexpr void set(const VerdictVector& to_copy);
+  VERDICT_HOST_DEVICE constexpr void set(const VerdictVector& to_copy);
   //- Same as operator=(const VerdictVector&)
 
-  constexpr double x() const; //- Return x component of vector
+  VERDICT_HOST_DEVICE constexpr double x() const; //- Return x component of vector
 
-  constexpr double y() const; //- Return y component of vector
+  VERDICT_HOST_DEVICE constexpr double y() const; //- Return y component of vector
 
-  constexpr double z() const; //- Return z component of vector
+  VERDICT_HOST_DEVICE constexpr double z() const; //- Return z component of vector
 
-  constexpr void get_xyz(double& x, double& y, double& z); //- Get x, y, z components
-  constexpr void get_xyz(double xyz[3]);                   //- Get xyz tuple
+  VERDICT_HOST_DEVICE constexpr void get_xyz(double& x, double& y, double& z); //- Get x, y, z components
+  VERDICT_HOST_DEVICE constexpr void get_xyz(double xyz[3]);                   //- Get xyz tuple
 
-  constexpr double& r(); //- Return r component of vector, if (r,theta) format
+  VERDICT_HOST_DEVICE constexpr double& r(); //- Return r component of vector, if (r,theta) format
 
-  constexpr double& theta(); //- Return theta component of vector, if (r,theta) format
+  VERDICT_HOST_DEVICE constexpr double& theta(); //- Return theta component of vector, if (r,theta) format
 
-  constexpr void x(const double xv); //- Set x component of vector
+  VERDICT_HOST_DEVICE constexpr void x(const double xv); //- Set x component of vector
 
-  constexpr void y(const double yv); //- Set y component of vector
+  VERDICT_HOST_DEVICE constexpr void y(const double yv); //- Set y component of vector
 
-  constexpr void z(const double zv); //- Set z component of vector
+  VERDICT_HOST_DEVICE constexpr void z(const double zv); //- Set z component of vector
 
-  constexpr void r(const double xv); //- Set r component of vector, if (r,theta) format
+  VERDICT_HOST_DEVICE constexpr void r(const double xv); //- Set r component of vector, if (r,theta) format
 
-  constexpr void theta(const double yv); //- Set theta component of vector, if (r,theta) format
+  VERDICT_HOST_DEVICE constexpr void theta(const double yv); //- Set theta component of vector, if (r,theta) format
 
-  inline double normalize();
+  VERDICT_HOST_DEVICE inline double normalize();
   //- Normalize (set magnitude equal to 1) vector - return the magnitude
 
-  VerdictVector& length(const double new_length);
+  VERDICT_HOST_DEVICE VerdictVector& length(const double new_length);
   //- Change length of vector to {new_length}. Can be used to move a
   //- location a specified distance from the origin in the current
   //- orientation.
 
-  double length() const;
+  VERDICT_HOST_DEVICE double length() const;
   //- Calculate the length of the vector.
   //- Use {length_squared()} if only comparing lengths, not adding.
 
-  constexpr double length_squared() const;
+  VERDICT_HOST_DEVICE constexpr double length_squared() const;
   //- Calculate the squared length of the vector.
   //- Faster than {length()} since it eliminates the square root if
   //- only comparing other lengths.
 
-  double interior_angle(const VerdictVector& otherVector);
+  VERDICT_HOST_DEVICE double interior_angle(const VerdictVector& otherVector);
   //- Calculate the interior angle: acos((a%b)/(|a||b|))
   //- Returns angle in degrees.
 
-  constexpr void perpendicular_z();
+  VERDICT_HOST_DEVICE constexpr void perpendicular_z();
   //- Transform this vector to a perpendicular one, leaving
   //- z-component alone. Rotates clockwise about the z-axis by pi/2.
 
   //- Heading: Operator Overloads  *****************************
-  constexpr VerdictVector& operator+=(const VerdictVector& vec);
+  VERDICT_HOST_DEVICE constexpr VerdictVector& operator+=(const VerdictVector& vec);
   //- Compound Assignment: addition: {this = this + vec}
 
-  constexpr VerdictVector& operator-=(const VerdictVector& vec);
+  VERDICT_HOST_DEVICE constexpr VerdictVector& operator-=(const VerdictVector& vec);
   //- Compound Assignment: subtraction: {this = this - vec}
 
-  constexpr VerdictVector& operator*=(const VerdictVector& vec);
+  VERDICT_HOST_DEVICE constexpr VerdictVector& operator*=(const VerdictVector& vec);
   //- Compound Assignment: cross product: {this = this * vec},
   //- non-commutative
 
-  constexpr VerdictVector& operator*=(const double scalar);
+  VERDICT_HOST_DEVICE constexpr VerdictVector& operator*=(const double scalar);
   //- Compound Assignment: multiplication: {this = this * scalar}
 
-  constexpr VerdictVector& operator/=(const double scalar);
+  VERDICT_HOST_DEVICE constexpr VerdictVector& operator/=(const double scalar);
   //- Compound Assignment: division: {this = this / scalar}
 
-  constexpr VerdictVector operator-() const;
+  VERDICT_HOST_DEVICE constexpr VerdictVector operator-() const;
   //- unary negation.
 
-  friend VerdictVector operator~(const VerdictVector& vec);
+  VERDICT_HOST_DEVICE friend VerdictVector operator~(const VerdictVector& vec);
   //- normalize. Returns a new vector which is a copy of {vec},
   //- scaled such that {|vec|=1}. Uses overloaded bitwise NOT operator.
 
-  friend constexpr VerdictVector operator+(const VerdictVector& v1, const VerdictVector& v2);
+  VERDICT_HOST_DEVICE friend constexpr VerdictVector operator+(const VerdictVector& v1, const VerdictVector& v2);
   //- vector addition
 
-  friend constexpr VerdictVector operator-(const VerdictVector& v1, const VerdictVector& v2);
+  VERDICT_HOST_DEVICE friend constexpr VerdictVector operator-(const VerdictVector& v1, const VerdictVector& v2);
   //- vector subtraction
 
-  friend constexpr VerdictVector operator*(const VerdictVector& v1, const VerdictVector& v2);
+  VERDICT_HOST_DEVICE friend constexpr VerdictVector operator*(const VerdictVector& v1, const VerdictVector& v2);
   //- vector cross product, non-commutative
 
-  friend constexpr VerdictVector operator*(const VerdictVector& v1, const double sclr);
+  VERDICT_HOST_DEVICE friend constexpr VerdictVector operator*(const VerdictVector& v1, const double sclr);
   //- vector * scalar
 
-  friend constexpr VerdictVector operator*(const double sclr, const VerdictVector& v1);
+  VERDICT_HOST_DEVICE friend constexpr VerdictVector operator*(const double sclr, const VerdictVector& v1);
   //- scalar * vector
 
-  friend constexpr double operator%(const VerdictVector& v1, const VerdictVector& v2);
+  VERDICT_HOST_DEVICE friend constexpr double operator%(const VerdictVector& v1, const VerdictVector& v2);
   //- dot product
 
-  static constexpr double Dot(const VerdictVector& v1, const VerdictVector& v2);
+  VERDICT_HOST_DEVICE static constexpr double Dot(const VerdictVector& v1, const VerdictVector& v2);
   //- dot product
 
-  friend constexpr VerdictVector operator/(const VerdictVector& v1, const double sclr);
+  VERDICT_HOST_DEVICE friend constexpr VerdictVector operator/(const VerdictVector& v1, const double sclr);
   //- vector / scalar
 
-  friend constexpr int operator==(const VerdictVector& v1, const VerdictVector& v2);
+  VERDICT_HOST_DEVICE friend constexpr int operator==(const VerdictVector& v1, const VerdictVector& v2);
   //- Equality operator
 
-  friend constexpr int operator!=(const VerdictVector& v1, const VerdictVector& v2);
+  VERDICT_HOST_DEVICE friend constexpr int operator!=(const VerdictVector& v1, const VerdictVector& v2);
   //- Inequality operator
 
-  constexpr VerdictVector& operator=(const VerdictVector& from);
+  VERDICT_HOST_DEVICE constexpr VerdictVector& operator=(const VerdictVector& from);
 
 private:
   double xVal; //- x component of vector.
