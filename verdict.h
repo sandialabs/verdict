@@ -24,7 +24,7 @@
 #ifndef __verdict_h
 #define __verdict_h
 
-#include <cmath>
+#include <math.h>
 #include <limits>
 #include "verdict_config.h"
 
@@ -118,9 +118,9 @@ using namespace VERDICT_NAMESPACE;
 
 namespace VERDICT_NAMESPACE
 {
-constexpr double VERDICT_DBL_MIN = 1.0E-30;
-constexpr double VERDICT_DBL_MAX = 1.0E+30;
-constexpr double VERDICT_PI = 3.1415926535897932384626;
+static constexpr double VERDICT_DBL_MIN = 1.0E-30;
+static constexpr double VERDICT_DBL_MAX = 1.0E+30;
+static constexpr double VERDICT_PI = 3.1415926535897932384626;
 
 /* quality functions for hex elements */
 

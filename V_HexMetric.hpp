@@ -24,7 +24,7 @@
 #include "verdict.h"
 
 #include <cassert>
-#include <cmath>
+#include <math.h>
 
 namespace VERDICT_NAMESPACE
 {

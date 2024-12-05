@@ -23,21 +23,13 @@
 #include "verdict.h"
 #include "verdict_defines.hpp"
 
-#include <algorithm> // for std::min
-#include <cmath> // for std::isnan
+#include <math.h>
 
 namespace VERDICT_NAMESPACE
 {
-static constexpr double one_third = 1.0 / 3.0;
-static constexpr double two_thirds = 2.0 / 3.0;
-static constexpr double one_fourth = 1.0 / 4.0;
-static constexpr double four_ninths = 4.0 / 9.0;
-static const double sqrt2 = std::sqrt(2.0);
-static const double sqrt3 = std::sqrt(3.0);
-static const double sqrt6 = std::sqrt(6.0);
-static const double three_times_1plussqrt3 = 3.0 * (1 + sqrt3);
+static constexpr double three_times_1plussqrt3 = 3.0 * (1 + sqrt3);
 static constexpr double normal_coeff = 180. * .3183098861837906715377675267450287;
-static const double aspect_ratio_normal_coeff = sqrt6 / 12.;
+static constexpr double aspect_ratio_normal_coeff = sqrt6 / 12.;
 double tet10_characteristic_length(const double coordinates[][3]);
 
 static const int tet10_subtet_conn[12][4] = { { 0, 4, 6, 7 }, { 1, 5, 4, 8 }, { 2, 6, 5, 9 },
@@ -46,7 +38,7 @@ static const int tet10_subtet_conn[12][4] = { { 0, 4, 6, 7 }, { 1, 5, 4, 8 }, { 
 
 static double fix_range(double v)
 {
-  if (std::isnan(v))
+  if (isnan(v))
   {
     return VERDICT_DBL_MAX;
   }
@@ -98,12 +90,12 @@ double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   VerdictVector bcd = bc * cd;
   bcd.normalize();
 
-  double alpha = std::acos(-(abc % abd));
-  double beta = std::acos(-(abc % acd));
-  double gamma = std::acos(-(abc % bcd));
-  double delta = std::acos(-(abd % acd));
-  double epsilon = std::acos(-(abd % bcd));
-  double zeta = std::acos(-(acd % bcd));
+  double alpha = acos(-(abc % abd));
+  double beta = acos(-(abc % acd));
+  double gamma = acos(-(abc % bcd));
+  double delta = acos(-(abd % acd));
+  double epsilon = acos(-(abd % bcd));
+  double zeta = acos(-(acd % bcd));
 
   double min_angle = alpha;
   min_angle = min_angle < beta ? min_angle : beta;
@@ -121,7 +113,7 @@ double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   max_angle = max_angle > zeta ? max_angle : zeta;
   max_angle *= normal_coeff;
 
-  double theta = std::acos(1 / 3.0) * normal_coeff; // 70.528779365509308630754000660038;
+  double theta = acos(1 / 3.0) * normal_coeff; // 70.528779365509308630754000660038;
 
   double dihedral_skew_max = (max_angle - theta) / (180 - theta);
   double dihedral_skew_min = (theta - min_angle) / theta;
@@ -130,18 +122,18 @@ double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   max_angle = 0.0;
 
   double angles[12];
-  angles[0] = std::acos(-(ab % bc));
-  angles[1] = std::acos((bc % ac));
-  angles[2] = std::acos((ac % ab));
-  angles[3] = std::acos(-(ab % bd));
-  angles[4] = std::acos((bd % ad));
-  angles[5] = std::acos((ad % ab));
-  angles[6] = std::acos(-(bc % cd));
-  angles[7] = std::acos((cd % bd));
-  angles[8] = std::acos((bd % bc));
-  angles[9] = std::acos((ad % cd));
-  angles[10] = std::acos(-(cd % ac));
-  angles[11] = std::acos((ac % ad));
+  angles[0] = acos(-(ab % bc));
+  angles[1] = acos((bc % ac));
+  angles[2] = acos((ac % ab));
+  angles[3] = acos(-(ab % bd));
+  angles[4] = acos((bd % ad));
+  angles[5] = acos((ad % ab));
+  angles[6] = acos(-(bc % cd));
+  angles[7] = acos((cd % bd));
+  angles[8] = acos((bd % bc));
+  angles[9] = acos((ad % cd));
+  angles[10] = acos(-(cd % ac));
+  angles[11] = acos((ac % ad));
 
   for (int a = 0; a < 12; a++)
   {
@@ -178,7 +170,7 @@ static int tet_get_weight(
   w2.set(0.5, 0.5 * sqrt3, 0);
   w3.set(0.5, sqrt3 / 6.0, sqrt2 / sqrt3);
 
-  double scale = std::pow(6. * average_tet_volume / determinant(w1, w2, w3), 0.3333333333333);
+  double scale = pow(6. * average_tet_volume / determinant(w1, w2, w3), 0.33333333333);
 
   w1 *= scale;
   w2 *= scale;
@@ -267,7 +259,7 @@ double tet_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   M2 = Mab > Mcd ? Mab : Mcd;
   M2 = M2 > Mef ? M2 : Mef;
 
-  const double edge_ratio = std::sqrt(M2 / m2);
+  const double edge_ratio = sqrt(M2 / m2);
 
   return fix_range(edge_ratio);
 }
@@ -318,10 +310,10 @@ double tet_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coo
     which_node = 3;
   }
 
-  double length_product = std::sqrt(length_squared[which_node]);
-  if (length_product < std::abs(jacobi))
+  double length_product = sqrt(length_squared[which_node]);
+  if (length_product < fabs(jacobi))
   {
-    length_product = std::abs(jacobi);
+    length_product = fabs(jacobi);
   }
 
   if (length_product < VERDICT_DBL_MIN)
@@ -384,7 +376,7 @@ double tet_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 
   double volume = tet_volume(4, coordinates);
 
-  if (std::abs(volume) < VERDICT_DBL_MIN)
+  if (fabs(volume) < VERDICT_DBL_MIN)
   {
     return (double)VERDICT_DBL_MAX;
   }
@@ -416,7 +408,7 @@ double tet_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordi
 
   double detTet = ab % (ac * ad);
 
-  if (std::abs(detTet) < VERDICT_DBL_MIN)
+  if (fabs(detTet) < VERDICT_DBL_MIN)
   {
     return (double)VERDICT_DBL_MAX;
   }
@@ -436,7 +428,7 @@ double tet_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordi
   double B = ac2 > ad2 ? ac2 : ad2;
   double C = bd2 > cd2 ? bd2 : cd2;
   double D = A > B ? A : B;
-  const double hm = D > C ? std::sqrt(D) : std::sqrt(C);
+  const double hm = D > C ? sqrt(D) : sqrt(C);
 
   bd = ab * bc;
   A = bd.length();
@@ -447,7 +439,7 @@ double tet_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordi
   bd = bc * cd;
   D = bd.length();
 
-  const double aspect_ratio = aspect_ratio_normal_coeff * hm * (A + B + C + D) / std::abs(detTet);
+  const double aspect_ratio = aspect_ratio_normal_coeff * hm * (A + B + C + D) / fabs(detTet);
 
   return fix_range(aspect_ratio);
 }
@@ -489,7 +481,7 @@ double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
   side5.set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
     coordinates[3][2] - coordinates[2][2]);
 
-  double volume = std::abs(tet_volume(4, coordinates));
+  double volume = fabs(tet_volume(4, coordinates));
 
   if (volume < VERDICT_DBL_MIN)
   {
@@ -498,11 +490,11 @@ double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
   else
   {
     double srms =
-      std::sqrt((side0.length_squared() + side1.length_squared() + side2.length_squared() +
+      sqrt((side0.length_squared() + side1.length_squared() + side2.length_squared() +
                   side3.length_squared() + side4.length_squared() + side5.length_squared()) /
         6.0);
 
-    double aspect_ratio_gamma = std::pow(srms, 3) / (8.48528137423857 * volume);
+    double aspect_ratio_gamma = (srms * srms * srms) / (8.48528137423857 * volume);
     return (double)aspect_ratio_gamma;
   }
 }
@@ -529,7 +521,7 @@ double tet_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
   double denominator = ab % (ac * ad);
   denominator *= denominator;
   denominator *= 2.;
-  denominator = 3. * std::pow(denominator, one_third);
+  denominator = 3. * pow(denominator, one_third);
 
   if (denominator < VERDICT_DBL_MIN)
   {
@@ -588,12 +580,12 @@ double tet_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
   VerdictVector bcd = bc * cd;
   double nbcd = bcd.length();
 
-  double alpha = std::acos((abc % abd) / (nabc * nabd));
-  double beta = std::acos((abc % acd) / (nabc * nacd));
-  double gamma = std::acos((abc % bcd) / (nabc * nbcd));
-  double delta = std::acos((abd % acd) / (nabd * nacd));
-  double epsilon = std::acos((abd % bcd) / (nabd * nbcd));
-  double zeta = std::acos((acd % bcd) / (nacd * nbcd));
+  double alpha = acos((abc % abd) / (nabc * nabd));
+  double beta = acos((abc % acd) / (nabc * nacd));
+  double gamma = acos((abc % bcd) / (nabc * nbcd));
+  double delta = acos((abd % acd) / (nabd * nacd));
+  double epsilon = acos((abd % bcd) / (nabd * nbcd));
+  double zeta = acos((acd % bcd) / (nacd * nbcd));
 
   alpha = alpha < beta ? alpha : beta;
   alpha = alpha < gamma ? alpha : gamma;
@@ -721,8 +713,8 @@ double tet_equivolume_skew(int num_nodes, const double coordinates[][3])
   double circumradius = num.length() / den;
 
   double volume = tet_volume(num_nodes, coordinates);
-  double optimal_length = circumradius / std::sqrt(double(3.0) / 8.0);
-  double optimal_volume = (1.0 / 12.0) * std::sqrt(double(2.0)) * std::pow(optimal_length, 3);
+  double optimal_length = circumradius / sqrt(double(3.0) / 8.0);
+  double optimal_volume = (1.0 / 12.0) * sqrt(double(2.0)) * (optimal_length * optimal_length * optimal_length);
 
   const double eq_v_skew = (optimal_volume - volume) / optimal_volume;
   return fix_range(eq_v_skew);
@@ -1167,13 +1159,13 @@ double tet_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinat
   const double term2 = (c_1 * c_2) % (c_1 * c_2) + (c_2 * c_3) % (c_2 * c_3) + (c_1 * c_3) % (c_1 * c_3);
   const double det = c_1 % (c_2 * c_3);
 
-  if (std::abs(det) <= VERDICT_DBL_MIN)
+  if (fabs(det) <= VERDICT_DBL_MIN)
   {
     return VERDICT_DBL_MAX;
   }
   else
   {
-    return std::sqrt(term1) * std::sqrt(term2) / (3.0 * det);
+    return sqrt(term1) * sqrt(term2) / (3.0 * det);
   }
 }
 
@@ -1219,7 +1211,7 @@ double tet_jacobian(int num_nodes, const double coordinates[][3])
       }
       double det =
         (VerdictVector(jacobian[0]) * VerdictVector(jacobian[1])) % VerdictVector(jacobian[2]);
-      min_determinant = std::min(det, min_determinant);
+      min_determinant = fmin(det, min_determinant);
     }
     return min_determinant;
   }
@@ -1263,7 +1255,7 @@ double tet_shape(int /*num_nodes*/, const double coordinates[][3])
   {
     return (double)0.0;
   }
-  double num = 3 * std::pow(sqrt2 * jacobian, two_thirds);
+  double num = 3 * pow(sqrt2 * jacobian, two_thirds);
   double den = 1.5 * (edge0 % edge0 + edge2 % edge2 + edge3 % edge3) -
     (edge0 % -edge2 + -edge2 % edge3 + edge3 % edge0);
 
@@ -1430,7 +1422,7 @@ double tet_distortion(int num_nodes, const double coordinates[][3])
       minimum_jacobian = jacobian;
     }
   }
-  if (std::abs(element_volume) > 0.0)
+  if (fabs(element_volume) > 0.0)
   {
     distortion = minimum_jacobian / element_volume;
   }
@@ -1518,7 +1510,7 @@ double tet_timestep(int num_nodes, const double coordinates[][3], double density
 
   double M =
     youngs_modulus * (1 - poissons_ratio) / ((1 - 2 * poissons_ratio) * (1 + poissons_ratio));
-  double denominator = std::sqrt(M / density);
+  double denominator = sqrt(M / density);
 
   return char_length / denominator;
 }
@@ -1607,7 +1599,7 @@ double calculate_tet4_outer_radius(const CoordsContainerType coordinates)
   double BC = (nE[3] - nE[1]).length();
   double CC = (nE[2] - nE[1]).length();
   double VP = fabs(((nE[1] - nE[0]) * (nE[2] - nE[0])) % (nE[3] - nE[0]) / 6);
-  double outer_radius = std::sqrt((aC * AC + bC * BC + cC * CC) * (aC * AC + bC * BC - cC * CC) *
+  double outer_radius = sqrt((aC * AC + bC * BC + cC * CC) * (aC * AC + bC * BC - cC * CC) *
                           (aC * AC - bC * BC + cC * CC) * (-aC * AC + bC * BC + cC * CC)) /
     24 / VP;
 
@@ -1627,7 +1619,7 @@ double tet10_normalized_inradius(const CoordsContainerType coordinates)
   double normalized_inradius_for_subtet_with_no_parent_node =
     three_times_1plussqrt3 * min_inradius_for_subtet_with_no_parent_node / outer_radius;
 
-  double norm_inrad = std::min(normalized_inradius_for_subtet_with_parent_node,
+  double norm_inrad = fmin(normalized_inradius_for_subtet_with_parent_node,
     normalized_inradius_for_subtet_with_no_parent_node);
   return fix_range(norm_inrad);
 }
@@ -1687,7 +1679,7 @@ double tet4_mean_ratio(const CoordsContainerType coordinates)
   const VerdictVector side3{coordinates[0], coordinates[3]};
 
   const double tetVolume = calculate_tet_volume_using_sides(side0, side2, side3);
-  if (std::abs( tetVolume ) < VERDICT_DBL_MIN)
+  if (fabs( tetVolume ) < VERDICT_DBL_MIN)
   {
     return 0.0;
   }
@@ -1707,7 +1699,7 @@ double tet4_mean_ratio(const CoordsContainerType coordinates)
   //return sign * 12. * std::pow(3.*fabs(tetVolume), 2./3.) / (side0_length_squared + side1_length_squared + side2_length_squared + side3_length_squared + side4_length_squared + side5_length_squared);
   double sum = (side0_length_squared + side1_length_squared + side2_length_squared +
     side3_length_squared + side4_length_squared + side5_length_squared) / 6;
-  return 6 * std::pow(2, 0.5) * tetVolume / std::pow(sum, 3. / 2.);    
+  return 6 * sqrt2 * tetVolume / pow(sum, 3. / 2.);    
 }
 
 template <typename CoordsContainerType>
@@ -1717,7 +1709,7 @@ double tet10_mean_ratio(const CoordsContainerType coordinates)
 
   VerdictVector auxillary_node = tet10_auxillary_node_coordinate(coordinates);
 
-  double aux_node_scale = 3.0 * std::pow(3., 0.5) * 0.25;
+  double aux_node_scale = 3.0 * sqrt3 * 0.25;
 
   for (int i = 0; i <= 11; i++)
   {

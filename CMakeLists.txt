@@ -4,10 +4,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED 1)
-
-project(verdict VERSION 1.4.2)
+project(verdict VERSION 1.4.3)
 
 # Includes
 include(GNUInstallDirs)
@@ -19,6 +16,7 @@ endif ()
 
 set(verdict_VERSION_FLAT "${verdict_VERSION_MAJOR}${verdict_VERSION_MINOR}${verdict_VERSION_PATCH}")
 
+option(BUILD_SHARED_LIBS "Build Verdict as shared libraries." OFF)
 option(VERDICT_BUILD_DOC "Build the 2007 Verdict User Manual" OFF)
 option(VERDICT_MANGLE "Mangle verdict names for inclusion in a larger library?" OFF)
 if (VERDICT_MANGLE)
@@ -32,12 +30,12 @@ option(VERDICT_ENABLE_TESTING "Should tests of the VERDICT library be built?" ON
 set(verdict_HEADERS
   verdict.h
   VerdictVector.hpp
+  V_GaussIntegration.hpp
   verdict_defines.hpp)
 
 set(verdict_SOURCES
   V_EdgeMetric.cpp
   V_GaussIntegration.cpp
-  V_GaussIntegration.hpp
   V_HexMetric.cpp
   V_KnifeMetric.cpp
   V_PyramidMetric.cpp
@@ -53,6 +51,7 @@ configure_file(
   @ONLY)
 
 add_library(verdict ${verdict_SOURCES} ${verdict_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/verdict_config.h)
+target_compile_features(verdict PRIVATE cxx_std_11)
 target_include_directories(verdict PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 if(UNIX)

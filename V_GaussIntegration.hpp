@@ -25,11 +25,11 @@
 
 namespace VERDICT_NAMESPACE
 {
-#define maxTotalNumberGaussPoints 27
-#define maxNumberNodes 20
-#define maxNumberGaussPoints 3
-#define maxNumberGaussPointsTri 6
-#define maxNumberGaussPointsTet 4
+static constexpr int maxTotalNumberGaussPoints = 27;
+static constexpr int maxNumberNodes = 20;
+static constexpr int maxNumberGaussPoints = 3;
+static constexpr int maxNumberGaussPointsTri = 6;
+static constexpr int maxNumberGaussPointsTet = 4;
 
 struct GaussIntegration
 {

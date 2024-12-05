@@ -28,7 +28,7 @@
 #include "verdict.h"
 
 #include <cassert>
-#include <cmath>
+#include <math.h>
 
 namespace VERDICT_NAMESPACE
 {
@@ -372,7 +372,7 @@ constexpr VerdictVector& VerdictVector::operator/=(const double scalar)
 // Returns the normalized 'this'.
 inline VerdictVector operator~(const VerdictVector& vec)
 {
-  double mag = std::sqrt(vec.xVal * vec.xVal + vec.yVal * vec.yVal + vec.zVal * vec.zVal);
+  double mag = sqrt(vec.xVal * vec.xVal + vec.yVal * vec.yVal + vec.zVal * vec.zVal);
 
   VerdictVector temp = vec;
   if (mag != 0.0)
@@ -448,7 +448,7 @@ constexpr double VerdictVector::length_squared() const
 
 inline double VerdictVector::length() const
 {
-  return (std::sqrt(xVal * xVal + yVal * yVal + zVal * zVal));
+  return (sqrt(xVal * xVal + yVal * yVal + zVal * zVal));
 }
 
 inline double VerdictVector::normalize()

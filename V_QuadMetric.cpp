@@ -23,13 +23,9 @@
 #include "verdict.h"
 #include "verdict_defines.hpp"
 
-#include <algorithm>
-#include <vector>
-
 namespace VERDICT_NAMESPACE
 {
-static const double sqrt2 = std::sqrt(2.0);
-static const double radius_ratio_normal_coeff = 1. / (2. * sqrt2);
+static constexpr double radius_ratio_normal_coeff = 1. / (2. * sqrt2);
 
 /*!
   weights based on the average size of a quad
@@ -43,7 +39,7 @@ static int quad_get_weight(
   m12 = 0;
   m22 = 1;
 
-  double scale = std::sqrt(average_quad_size / (m11 * m22 - m21 * m12));
+  double scale = sqrt(average_quad_size / (m11 * m22 - m21 * m12));
 
   m11 *= scale;
   m21 *= scale;
@@ -306,30 +302,30 @@ void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinat
     return;
   }
 
-  angle = std::acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
-  min_angle = std::min(angle, min_angle);
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
+  min_angle = fmin(angle, min_angle);
+  max_angle = fmax(angle, max_angle);
 
-  angle = std::acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
-  min_angle = std::min(angle, min_angle);
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
+  min_angle = fmin(angle, min_angle);
+  max_angle = fmax(angle, max_angle);
 
-  angle = std::acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
-  min_angle = std::min(angle, min_angle);
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
+  min_angle = fmin(angle, min_angle);
+  max_angle = fmax(angle, max_angle);
 
-  angle = std::acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
-  min_angle = std::min(angle, min_angle);
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
+  min_angle = fmin(angle, min_angle);
+  max_angle = fmax(angle, max_angle);
 
   max_angle = max_angle * 180.0 / VERDICT_PI;
   min_angle = min_angle * 180.0 / VERDICT_PI;
 
   if (min_angle > 0)
   {
-    min_max_angles[0] = (double)std::min(min_angle, VERDICT_DBL_MAX);
+    min_max_angles[0] = (double)fmin(min_angle, VERDICT_DBL_MAX);
   }
-  min_max_angles[0] = (double)std::max(min_angle, -VERDICT_DBL_MAX);
+  min_max_angles[0] = (double)fmax(min_angle, -VERDICT_DBL_MAX);
 
   // if any signed areas are < 0, then you are getting the wrong angle
   double areas[4];
@@ -342,9 +338,9 @@ void quad_minimum_maximum_angle(double min_max_angles[2], const double coordinat
 
   if (max_angle > 0)
   {
-    min_max_angles[1] = (double)std::min(max_angle, VERDICT_DBL_MAX);
+    min_max_angles[1] = (double)fmin(max_angle, VERDICT_DBL_MAX);
   }
-  min_max_angles[1] = (double)std::max(max_angle, -VERDICT_DBL_MAX);
+  min_max_angles[1] = (double)fmax(max_angle, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -394,13 +390,13 @@ double quad_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   }
   else
   {
-    double edge_ratio = std::sqrt(M2 / m2);
+    double edge_ratio = sqrt(M2 / m2);
 
     if (edge_ratio > 0)
     {
-      return (double)std::min(edge_ratio, VERDICT_DBL_MAX);
+      return (double)fmin(edge_ratio, VERDICT_DBL_MAX);
     }
-    return (double)std::max(edge_ratio, -VERDICT_DBL_MAX);
+    return (double)fmax(edge_ratio, -VERDICT_DBL_MAX);
   }
 }
 
@@ -429,13 +425,13 @@ double quad_max_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
     return (double)VERDICT_DBL_MAX;
   }
 
-  double max_edge_ratio = std::max(len1 / len2, len2 / len1);
+  double max_edge_ratio = fmax(len1 / len2, len2 / len1);
 
   if (max_edge_ratio > 0)
   {
-    return (double)std::min(max_edge_ratio, VERDICT_DBL_MAX);
+    return (double)fmin(max_edge_ratio, VERDICT_DBL_MAX);
   }
-  return (double)std::max(max_edge_ratio, -VERDICT_DBL_MAX);
+  return (double)fmax(max_edge_ratio, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -467,9 +463,9 @@ double quad_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
 
   if (aspect_ratio > 0)
   {
-    return (double)std::min(aspect_ratio, VERDICT_DBL_MAX);
+    return (double)fmin(aspect_ratio, VERDICT_DBL_MAX);
   }
-  return (double)std::max(aspect_ratio, -VERDICT_DBL_MAX);
+  return (double)fmax(aspect_ratio, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -524,13 +520,13 @@ double quad_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
     return (double)VERDICT_DBL_MAX;
   }
 
-  double radius_ratio = radius_ratio_normal_coeff * std::sqrt((a2 + b2 + c2 + d2) * h2) / t0;
+  double radius_ratio = radius_ratio_normal_coeff * sqrt((a2 + b2 + c2 + d2) * h2) / t0;
 
   if (radius_ratio > 0)
   {
-    return (double)std::min(radius_ratio, VERDICT_DBL_MAX);
+    return (double)fmin(radius_ratio, VERDICT_DBL_MAX);
   }
-  return (double)std::max(radius_ratio, -VERDICT_DBL_MAX);
+  return (double)fmax(radius_ratio, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -576,9 +572,9 @@ double quad_med_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3
 
   if (med_aspect_frobenius > 0)
   {
-    return (double)std::min(med_aspect_frobenius, VERDICT_DBL_MAX);
+    return (double)fmin(med_aspect_frobenius, VERDICT_DBL_MAX);
   }
-  return (double)std::max(med_aspect_frobenius, -VERDICT_DBL_MAX);
+  return (double)fmax(med_aspect_frobenius, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -630,9 +626,9 @@ double quad_max_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3
 
   if (max_aspect_frobenius > 0)
   {
-    return (double)std::min(max_aspect_frobenius, VERDICT_DBL_MAX);
+    return (double)fmin(max_aspect_frobenius, VERDICT_DBL_MAX);
   }
-  return (double)std::max(max_aspect_frobenius, -VERDICT_DBL_MAX);
+  return (double)fmax(max_aspect_frobenius, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -661,8 +657,8 @@ double quad_skew(int /*num_nodes*/, const double coordinates[][3])
     return 0.0;
   }
 
-  double skew = std::abs(principle_axes[0] % principle_axes[1]);
-  return (double)std::min(skew, VERDICT_DBL_MAX);
+  double skew = fabs(principle_axes[0] % principle_axes[1]);
+  return (double)fmin(skew, VERDICT_DBL_MAX);
 }
 
 /*!
@@ -689,7 +685,7 @@ double quad_taper(int /*num_nodes*/, const double coordinates[][3])
   lengths[1] = principle_axes[1].length();
 
   // get min length
-  lengths[0] = std::min(lengths[0], lengths[1]);
+  lengths[0] = fmin(lengths[0], lengths[1]);
 
   if (lengths[0] < VERDICT_DBL_MIN)
   {
@@ -697,7 +693,7 @@ double quad_taper(int /*num_nodes*/, const double coordinates[][3])
   }
 
   double taper = cross_derivative.length() / lengths[0];
-  return (double)std::min(taper, VERDICT_DBL_MAX);
+  return (double)fmin(taper, VERDICT_DBL_MAX);
 }
 
 /*!
@@ -724,14 +720,14 @@ double quad_warpage(int /*num_nodes*/, const double coordinates[][3])
     return (double)VERDICT_DBL_MIN;
   }
 
-  double warpage = std::pow(
-    std::min(corner_normals[0] % corner_normals[2], corner_normals[1] % corner_normals[3]), 3);
+  double warpage = fmin(corner_normals[0] % corner_normals[2], corner_normals[1] % corner_normals[3]);
+  warpage = warpage * warpage * warpage;
 
   if (warpage > 0)
   {
-    return (double)std::min(warpage, VERDICT_DBL_MAX);
+    return (double)fmin(warpage, VERDICT_DBL_MAX);
   }
-  return (double)std::max(warpage, -VERDICT_DBL_MAX);
+  return (double)fmax(warpage, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -750,9 +746,9 @@ double quad_area(int num_nodes, const double coordinates[][3])
 
     if (area > 0)
     {
-      return (double)std::min(area, VERDICT_DBL_MAX);
+      return (double)fmin(area, VERDICT_DBL_MAX);
     }
-    return (double)std::max(area, -VERDICT_DBL_MAX);
+    return (double)fmax(area, -VERDICT_DBL_MAX);
   }
   else 
   {
@@ -761,14 +757,14 @@ double quad_area(int num_nodes, const double coordinates[][3])
     
     if (5 == num_nodes)
     {
-      std::vector< std::vector<int> > tri_conn = { {0,1}, {1,2}, {2,3}, {3,0} };
+      int tri_conn[4][2] = { {0,1}, {1,2}, {2,3}, {3,0} };
 
       //center node 4
       tmp_coords[2][0] = coordinates[4][0];
       tmp_coords[2][1] = coordinates[4][1];
       tmp_coords[2][2] = coordinates[4][2];
 
-      for (std::vector<int> v : tri_conn)
+      for (auto v : tri_conn)
       {
         tmp_coords[0][0] = coordinates[v[0]][0];
         tmp_coords[0][1] = coordinates[v[0]][1];
@@ -781,10 +777,9 @@ double quad_area(int num_nodes, const double coordinates[][3])
     }
     else if (8 == num_nodes)
     {
-      std::vector< std::vector<int> > tri_conn = 
-        { {0,4,7}, {4,1,5}, {5,2,6}, {6,3,7} };
+      int tri_conn[4][3] = { {0,4,7}, {4,1,5}, {5,2,6}, {6,3,7} };
 
-      for (std::vector<int> v : tri_conn)
+      for (auto v : tri_conn)
       {
         tmp_coords[0][0] = coordinates[v[0]][0];
         tmp_coords[0][1] = coordinates[v[0]][1];
@@ -815,15 +810,14 @@ double quad_area(int num_nodes, const double coordinates[][3])
     }
     else if (9 == num_nodes)
     {
-      std::vector< std::vector<int> > tri_conn =
-      { {0,4}, {4,1}, {1,5}, {5,2}, {2,6}, {6,3}, {3,7}, {7,0} };
+      int tri_conn[8][2] = { {0,4}, {4,1}, {1,5}, {5,2}, {2,6}, {6,3}, {3,7}, {7,0} };
 
       //quad center node
       tmp_coords[2][0] = coordinates[8][0];
       tmp_coords[2][1] = coordinates[8][1];
       tmp_coords[2][2] = coordinates[8][2];
 
-      for (std::vector<int> v : tri_conn)
+      for (auto v : tri_conn)
       {
         tmp_coords[0][0] = coordinates[v[0]][0];
         tmp_coords[0][1] = coordinates[v[0]][1];
@@ -863,7 +857,7 @@ double quad_stretch(int /*num_nodes*/, const double coordinates[][3])
   double diag13 = temp.length_squared();
 
   // 'diag02' is now the max diagonal of the quad
-  diag02 = std::max(diag02, diag13);
+  diag02 = fmax(diag02, diag13);
 
   if (diag02 < VERDICT_DBL_MIN)
   {
@@ -872,11 +866,11 @@ double quad_stretch(int /*num_nodes*/, const double coordinates[][3])
   else
   {
     double stretch = (double)(sqrt2 *
-      std::sqrt(std::min(std::min(lengths_squared[0], lengths_squared[1]),
-                  std::min(lengths_squared[2], lengths_squared[3])) /
+      sqrt(fmin(fmin(lengths_squared[0], lengths_squared[1]),
+                  fmin(lengths_squared[2], lengths_squared[3])) /
         diag02));
 
-    return (double)std::min(stretch, VERDICT_DBL_MAX);
+    return (double)fmin(stretch, VERDICT_DBL_MAX);
   }
 }
 
@@ -921,17 +915,17 @@ double quad_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
     return 0.0;
   }
 
-  angle = std::acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
+  max_angle = fmax(angle, max_angle);
 
-  angle = std::acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
+  max_angle = fmax(angle, max_angle);
 
-  angle = std::acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
+  max_angle = fmax(angle, max_angle);
 
-  angle = std::acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
-  max_angle = std::max(angle, max_angle);
+  angle = acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
+  max_angle = fmax(angle, max_angle);
 
   max_angle = max_angle * 180.0 / VERDICT_PI;
 
@@ -946,9 +940,9 @@ double quad_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
 
   if (max_angle > 0)
   {
-    return (double)std::min(max_angle, VERDICT_DBL_MAX);
+    return (double)fmin(max_angle, VERDICT_DBL_MAX);
   }
-  return (double)std::max(max_angle, -VERDICT_DBL_MAX);
+  return (double)fmax(max_angle, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -992,25 +986,25 @@ double quad_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
     return 360.0;
   }
 
-  angle = std::acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
-  min_angle = std::min(angle, min_angle);
+  angle = acos(-(edges[0] % edges[1]) / (length[0] * length[1]));
+  min_angle = fmin(angle, min_angle);
 
-  angle = std::acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
-  min_angle = std::min(angle, min_angle);
+  angle = acos(-(edges[1] % edges[2]) / (length[1] * length[2]));
+  min_angle = fmin(angle, min_angle);
 
-  angle = std::acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
-  min_angle = std::min(angle, min_angle);
+  angle = acos(-(edges[2] % edges[3]) / (length[2] * length[3]));
+  min_angle = fmin(angle, min_angle);
 
-  angle = std::acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
-  min_angle = std::min(angle, min_angle);
+  angle = acos(-(edges[3] % edges[0]) / (length[3] * length[0]));
+  min_angle = fmin(angle, min_angle);
 
   min_angle = min_angle * 180.0 / VERDICT_PI;
 
   if (min_angle > 0)
   {
-    return (double)std::min(min_angle, VERDICT_DBL_MAX);
+    return (double)fmin(min_angle, VERDICT_DBL_MAX);
   }
-  return (double)std::max(min_angle, -VERDICT_DBL_MAX);
+  return (double)fmax(min_angle, -VERDICT_DBL_MAX);
 }
 
 double quad_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
@@ -1066,14 +1060,14 @@ double quad_oddy(int /*num_nodes*/, const double coordinates[][3])
     {
       cur_oddy = ((g11 - g22) * (g11 - g22) + 4. * g12 * g12) / 2. / g;
     }
-    max_oddy = std::max(max_oddy, cur_oddy);
+    max_oddy = fmax(max_oddy, cur_oddy);
   }
 
   if (max_oddy > 0)
   {
-    return (double)std::min(max_oddy, VERDICT_DBL_MAX);
+    return (double)fmin(max_oddy, VERDICT_DBL_MAX);
   }
-  return (double)std::max(max_oddy, -VERDICT_DBL_MAX);
+  return (double)fmax(max_oddy, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -1115,7 +1109,7 @@ double quad_condition(int /*num_nodes*/, const double coordinates[][3])
     {
       condition = (xxi % xxi + xet % xet) / areas[i];
     }
-    max_condition = std::max(max_condition, condition);
+    max_condition = fmax(max_condition, condition);
   }
 
   if (max_condition >= VERDICT_DBL_MAX)
@@ -1145,12 +1139,12 @@ double quad_jacobian(int /*num_nodes*/, const double coordinates[][3])
   double areas[4];
   signed_corner_areas(areas, coordinates);
 
-  double jacobian = std::min(std::min(areas[0], areas[1]), std::min(areas[2], areas[3]));
+  double jacobian = fmin(fmin(areas[0], areas[1]), fmin(areas[2], areas[3]));
   if (jacobian > 0)
   {
-    return (double)std::min(jacobian, VERDICT_DBL_MAX);
+    return (double)fmin(jacobian, VERDICT_DBL_MAX);
   }
-  return (double)std::max(jacobian, -VERDICT_DBL_MAX);
+  return (double)fmax(jacobian, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -1184,22 +1178,22 @@ double quad_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   }
 
   scaled_jac = corner_areas[0] / (length[0] * length[3]);
-  min_scaled_jac = std::min(scaled_jac, min_scaled_jac);
+  min_scaled_jac = fmin(scaled_jac, min_scaled_jac);
 
   scaled_jac = corner_areas[1] / (length[1] * length[0]);
-  min_scaled_jac = std::min(scaled_jac, min_scaled_jac);
+  min_scaled_jac = fmin(scaled_jac, min_scaled_jac);
 
   scaled_jac = corner_areas[2] / (length[2] * length[1]);
-  min_scaled_jac = std::min(scaled_jac, min_scaled_jac);
+  min_scaled_jac = fmin(scaled_jac, min_scaled_jac);
 
   scaled_jac = corner_areas[3] / (length[3] * length[2]);
-  min_scaled_jac = std::min(scaled_jac, min_scaled_jac);
+  min_scaled_jac = fmin(scaled_jac, min_scaled_jac);
 
   if (min_scaled_jac > 0)
   {
-    return (double)std::min(min_scaled_jac, VERDICT_DBL_MAX);
+    return (double)fmin(min_scaled_jac, VERDICT_DBL_MAX);
   }
-  return (double)std::max(min_scaled_jac, -VERDICT_DBL_MAX);
+  return (double)fmax(min_scaled_jac, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -1217,7 +1211,7 @@ double quad_shear(int /*num_nodes*/, const double coordinates[][3])
   }
   else
   {
-    return (double)std::min(scaled_jacobian, VERDICT_DBL_MAX);
+    return (double)fmin(scaled_jacobian, VERDICT_DBL_MAX);
   }
 }
 
@@ -1248,16 +1242,16 @@ double quad_shape(int /*num_nodes*/, const double coordinates[][3])
   }
 
   shape = corner_areas[0] / (length_squared[0] + length_squared[3]);
-  min_shape = std::min(shape, min_shape);
+  min_shape = fmin(shape, min_shape);
 
   shape = corner_areas[1] / (length_squared[1] + length_squared[0]);
-  min_shape = std::min(shape, min_shape);
+  min_shape = fmin(shape, min_shape);
 
   shape = corner_areas[2] / (length_squared[2] + length_squared[1]);
-  min_shape = std::min(shape, min_shape);
+  min_shape = fmin(shape, min_shape);
 
   shape = corner_areas[3] / (length_squared[3] + length_squared[2]);
-  min_shape = std::min(shape, min_shape);
+  min_shape = fmin(shape, min_shape);
 
   min_shape *= 2;
 
@@ -1268,9 +1262,9 @@ double quad_shape(int /*num_nodes*/, const double coordinates[][3])
 
   if (min_shape > 0)
   {
-    return (double)std::min(min_shape, VERDICT_DBL_MAX);
+    return (double)fmin(min_shape, VERDICT_DBL_MAX);
   }
-  return (double)std::max(min_shape, -VERDICT_DBL_MAX);
+  return (double)fmax(min_shape, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -1294,16 +1288,16 @@ double quad_relative_size_squared(
 
     if (w11 > VERDICT_DBL_MIN)
     {
-      rel_size = std::min(w11, 1 / w11);
+      rel_size = fmin(w11, 1 / w11);
       rel_size *= rel_size;
     }
   }
 
   if (rel_size > 0)
   {
-    return (double)std::min(rel_size, VERDICT_DBL_MAX);
+    return (double)fmin(rel_size, VERDICT_DBL_MAX);
   }
-  return (double)std::max(rel_size, -VERDICT_DBL_MAX);
+  return (double)fmax(rel_size, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -1321,9 +1315,9 @@ double quad_shape_and_size(int num_nodes, const double coordinates[][3], double 
 
   if (shape_and_size > 0)
   {
-    return (double)std::min(shape_and_size, VERDICT_DBL_MAX);
+    return (double)fmin(shape_and_size, VERDICT_DBL_MAX);
   }
-  return (double)std::max(shape_and_size, -VERDICT_DBL_MAX);
+  return (double)fmax(shape_and_size, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -1341,9 +1335,9 @@ double quad_shear_and_size(int num_nodes, const double coordinates[][3], double 
 
   if (shear_and_size > 0)
   {
-    return (double)std::min(shear_and_size, VERDICT_DBL_MAX);
+    return (double)fmin(shear_and_size, VERDICT_DBL_MAX);
   }
-  return (double)std::max(shear_and_size, -VERDICT_DBL_MAX);
+  return (double)fmax(shear_and_size, -VERDICT_DBL_MAX);
 }
 
 /*!
@@ -1396,7 +1390,7 @@ double quad_distortion(int num_nodes, const double coordinates[][3])
 
       sign_jacobian = (face_normal % (first * second)) > 0 ? 1. : -1.;
       cur_jacobian = sign_jacobian * (first * second).length();
-      distortion = std::min(distortion, cur_jacobian);
+      distortion = fmin(distortion, cur_jacobian);
     }
     element_area = (first * second).length() / 2.0;
     distortion /= element_area;
@@ -1462,7 +1456,7 @@ double quad_distortion(int num_nodes, const double coordinates[][3])
     for (ja = 0; ja < num_nodes; ja++)
     {
       dot_product = normal_at_nodes[0] % normal_at_nodes[ja];
-      if (std::abs(dot_product) < 0.99)
+      if (fabs(dot_product) < 0.99)
       {
         flat_element = false;
         break;
@@ -1472,7 +1466,7 @@ double quad_distortion(int num_nodes, const double coordinates[][3])
     // take into consideration the thickness of the element
     double thickness;
     // get_quad_thickness(face, element_area, thickness );
-    thickness = 0.001 * std::sqrt(element_area);
+    thickness = 0.001 * sqrt(element_area);
 
     // set thickness gauss point location
     double zl = 0.5773502691896;
