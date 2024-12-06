@@ -174,7 +174,7 @@ VERDICT_HOST_DEVICE static int tet_get_weight(
   w2.set(0.5, 0.5 * sqrt3, 0);
   w3.set(0.5, sqrt3 / 6.0, sqrt2 / sqrt3);
 
-  double scale = pow(6. * average_tet_volume / determinant(w1, w2, w3), 0.33333333333);
+  double scale = pow(6. * average_tet_volume / determinant(w1, w2, w3), one_third);
 
   w1 *= scale;
   w2 *= scale;

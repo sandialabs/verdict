@@ -43,7 +43,7 @@ VERDICT_HOST_DEVICE static int hex_get_weight(
   v2.set(0, 1, 0);
   v3.set(0, 0, 1);
 
-  double scale = pow(average_size / (VerdictVector::Dot(v1, (v2 * v3))), 0.33333333333);
+  double scale = pow(average_size / (VerdictVector::Dot(v1, (v2 * v3))), one_third);
   v1 *= scale;
   v2 *= scale;
   v3 *= scale;
