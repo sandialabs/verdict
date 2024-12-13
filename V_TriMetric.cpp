@@ -58,7 +58,7 @@ VERDICT_HOST_DEVICE static int tri_get_weight(
      minimum edge lengths
 
 */
-double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   // three vectors for each side
   VerdictVector a(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
@@ -179,11 +179,11 @@ VERDICT_HOST_DEVICE static double tri_aspect_ratio_impl(int /*num_nodes*/, const
   }
 }
 
-double tri_aspect_ratio(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_aspect_ratio(int num_nodes, const double coordinates[][3])
 {
     return tri_aspect_ratio_impl(num_nodes, coordinates, 3);
 }
-double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
 {
     return tri_aspect_ratio_impl(num_nodes, coordinates, dimension);
 }
@@ -197,7 +197,7 @@ double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coord
      as the "aspect beta".
 
  */
-double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   // three vectors for each side
   VerdictVector a(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
@@ -241,7 +241,7 @@ double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
      this method was called "aspect ratio" in earlier incarnations of VERDICT
 
  */
-double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
 
   // three vectors for each side
@@ -388,12 +388,12 @@ VERDICT_HOST_DEVICE static double tri_area_impl(int num_nodes, const CoordsConta
     return tri_area;
   }
 }
-double tri_area(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_area(int num_nodes, const double coordinates[][3])
 {
     return tri_area_impl(num_nodes, coordinates, 3);
 }
 
-double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
 {
     return tri_area_impl(num_nodes, coordinates, dimension);
 }
@@ -404,7 +404,7 @@ double tri_area_from_loc_ptrs(int num_nodes, const double * const *coordinates, 
   The minimum angle of a tri is the minimum angle between
   two adjacents sides out of all three corners of the triangle.
  */
-double tri_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
 {
   // vectors for all the sides
   VerdictVector sides[4];
@@ -473,7 +473,7 @@ double tri_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
   The maximum angle of a tri is the maximum angle between
   two adjacents sides out of all three corners of the triangle.
  */
-double tri_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
 {
 
   // vectors for all the sides
@@ -537,7 +537,7 @@ double tri_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
   return (double)fmax(max_angle, -VERDICT_DBL_MAX);
 }
 
-double tri_equiangle_skew(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_equiangle_skew(int num_nodes, const double coordinates[][3])
 {
   double min_angle = 360.0;
   double max_angle = 0.0;
@@ -578,12 +578,12 @@ VERDICT_HOST_DEVICE static double tri_condition_impl(int /*num_nodes*/, const Co
   return (double)fmin(condition, VERDICT_DBL_MAX);
 }
 
-double tri_condition(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_condition(int num_nodes, const double coordinates[][3])
 {
     return tri_condition_impl(num_nodes, coordinates, 3);
 }
 
-double tri_condition_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_condition_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
 {
     return tri_condition_impl(num_nodes, coordinates, dimension);
 }
@@ -627,12 +627,12 @@ VERDICT_HOST_DEVICE static double tri_scaled_jacobian_impl(int /*num_nodes*/, co
   return (double)fmax(jacobian, -VERDICT_DBL_MAX);
 }
 
-double tri_scaled_jacobian(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_scaled_jacobian(int num_nodes, const double coordinates[][3])
 {
     return tri_scaled_jacobian_impl(num_nodes, coordinates, 3);
 }
 
-double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
 {
     return tri_scaled_jacobian_impl(num_nodes, coordinates, dimension);
 }
@@ -642,7 +642,7 @@ double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * c
 
   2 / condition number of weighted jacobian matrix
  */
-double tri_shape(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_shape(int num_nodes, const double coordinates[][3])
 {
   double condition = tri_condition(num_nodes, coordinates);
 
@@ -668,7 +668,7 @@ double tri_shape(int num_nodes, const double coordinates[][3])
 
   Min(J,1/J) where J is the determinant of the weighted jacobian matrix.
 */
-double tri_relative_size_squared(
+VERDICT_HOST_DEVICE double tri_relative_size_squared(
   int /*num_nodes*/, const double coordinates[][3], double average_tri_area)
 {
   double w11, w21, w12, w22;
@@ -715,7 +715,7 @@ double tri_relative_size_squared(
 
   Product of the Shape and Relative Size
  */
-double tri_shape_and_size(int num_nodes, const double coordinates[][3], double average_tri_area)
+VERDICT_HOST_DEVICE double tri_shape_and_size(int num_nodes, const double coordinates[][3], double average_tri_area)
 {
   double size, shape;
 
@@ -736,7 +736,7 @@ double tri_shape_and_size(int num_nodes, const double coordinates[][3], double a
 
   TODO:  make a short definition of the distortion and comment below
  */
-double tri_distortion(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_distortion(int num_nodes, const double coordinates[][3])
 {
 
   double distortion;
@@ -1075,12 +1075,12 @@ VERDICT_HOST_DEVICE static double tri_normalized_inradius_impl(int num_nodes, co
   return 0.0;
 }
 
-double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tri_normalized_inradius(int num_nodes, const double coordinates[][3])
 {
     return tri_normalized_inradius_impl(num_nodes, coordinates, 3);
 }
 
-double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
+VERDICT_HOST_DEVICE double tri_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates, const int dimension)
 {
     return tri_normalized_inradius_impl(num_nodes, coordinates, dimension);
 }

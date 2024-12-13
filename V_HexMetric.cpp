@@ -735,7 +735,7 @@ VERDICT_HOST_DEVICE static VerdictVector calc_hex_efg(int efg_index, VerdictVect
      Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
      minimum edge lengths
  */
-double hex_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector edges[12];
   make_hex_edges(coordinates, edges);
@@ -854,7 +854,7 @@ double hex_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 
   Maximum edge length ratio at hex center
  */
-double hex_max_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_max_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   double aspect;
   VerdictVector node_pos[8];
@@ -883,7 +883,7 @@ double hex_max_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
   return (double)fmax(aspect, -VERDICT_DBL_MAX);
 }
 
-double hex_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   double quad[4][3];
   double min_angle = 360.0;
@@ -1043,7 +1043,7 @@ double hex_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 
   Maximum ||cosA|| where A is the angle between edges at hex center.
  */
-double hex_skew(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
@@ -1085,7 +1085,7 @@ double hex_skew(int /*num_nodes*/, const double coordinates[][3])
 
   Maximum ratio of lengths derived from opposite edges.
  */
-double hex_taper(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_taper(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
@@ -1116,7 +1116,7 @@ double hex_taper(int /*num_nodes*/, const double coordinates[][3])
   Split the hex into 24 tets.
   sum the volume of each tet.
  */
-double hex_volume(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_volume(int num_nodes, const double coordinates[][3])
 {
   double volume = 0.0;
 
@@ -1233,7 +1233,7 @@ double hex_volume(int num_nodes, const double coordinates[][3])
 
   sqrt(3) * minimum edge length / maximum diagonal length
  */
-double hex_stretch(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_stretch(int /*num_nodes*/, const double coordinates[][3])
 {
   double min_edge = hex_edge_length(0, coordinates);
   double max_diag = diag_length(1, coordinates);
@@ -1252,7 +1252,7 @@ double hex_stretch(int /*num_nodes*/, const double coordinates[][3])
 
   Minimum diagonal length / maximum diagonal length
  */
-double hex_diagonal(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_diagonal(int /*num_nodes*/, const double coordinates[][3])
 {
   double min_diag = diag_length(0, coordinates);
   double max_diag = diag_length(1, coordinates);
@@ -1274,7 +1274,7 @@ double hex_diagonal(int /*num_nodes*/, const double coordinates[][3])
   Pronto-specific characteristic length for stable time step calculation.
   Char_length = Volume / 2 grad Volume
 */
-double hex_dimension(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_dimension(int /*num_nodes*/, const double coordinates[][3])
 {
   double gradop[9][4];
 
@@ -1496,7 +1496,7 @@ double hex_dimension(int /*num_nodes*/, const double coordinates[][3])
 
   General distortion measure based on left Cauchy-Green Tensor
  */
-double hex_oddy(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_oddy(int /*num_nodes*/, const double coordinates[][3])
 {
   double oddy = 0.0, current_oddy;
   VerdictVector xxi, xet, xze;
@@ -1648,7 +1648,7 @@ double hex_oddy(int /*num_nodes*/, const double coordinates[][3])
      this function is calculated by averaging the 8 Frobenius aspects at
      each corner of the hex, when the reference corner is right isosceles.
  */
-double hex_med_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_med_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
@@ -1731,7 +1731,7 @@ double hex_med_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3]
      this function is calculated by taking the maximum of the 8 Frobenius aspects at
      each corner of the hex, when the reference corner is right isosceles.
  */
-double hex_max_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_max_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
@@ -1841,7 +1841,7 @@ double hex_max_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3]
      It will become deprecated at some point.
 
  */
-double hex_condition(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_condition(int /*num_nodes*/, const double coordinates[][3])
 {
   return hex_max_aspect_frobenius(8, coordinates);
 }
@@ -1851,7 +1851,7 @@ double hex_condition(int /*num_nodes*/, const double coordinates[][3])
 
   Minimum pointwise volume of local map at 8 corners & center of hex
  */
-double hex_jacobian(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_jacobian(int num_nodes, const double coordinates[][3])
 {
   if (num_nodes == 27)
   {
@@ -2003,7 +2003,7 @@ double hex_jacobian(int num_nodes, const double coordinates[][3])
 
   Minimum Jacobian divided by the lengths of the 3 edge vectors
  */
-double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
 {
   double jacobi, min_norm_jac = VERDICT_DBL_MAX;
 
@@ -2345,12 +2345,12 @@ double hex_scaled_jacobian(int num_nodes, const double coordinates[][3])
   Nodal jacobian ratio of a hex
   Minimum nodal jacobian divided by the maximum.  Detects element skewness.
  */
-double hex_nodal_jacobian_ratio(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_nodal_jacobian_ratio(int num_nodes, const double coordinates[][3])
 {
   return verdict::hex_nodal_jacobian_ratio2(num_nodes, (double*)coordinates);
 }
 
-double hex_nodal_jacobian_ratio2(int /*num_nodes*/, const double* coordinates)
+VERDICT_HOST_DEVICE double hex_nodal_jacobian_ratio2(int /*num_nodes*/, const double* coordinates)
 {
   double Jdet8x[8];
   verdict::hex_nodal_jacobians(coordinates, Jdet8x);
@@ -2386,7 +2386,7 @@ double hex_nodal_jacobian_ratio2(int /*num_nodes*/, const double* coordinates)
 
   3/Condition number of Jacobian Skew matrix
  */
-double hex_shear(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_shear(int /*num_nodes*/, const double coordinates[][3])
 {
   double shear;
   double min_shear = 1.0;
@@ -2605,7 +2605,7 @@ double hex_shear(int /*num_nodes*/, const double coordinates[][3])
 
   3/Condition number of weighted Jacobian matrix
  */
-double hex_shape(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_shape(int /*num_nodes*/, const double coordinates[][3])
 {
   double det, shape;
   double min_shape = 1.0;
@@ -2800,7 +2800,7 @@ double hex_shape(int /*num_nodes*/, const double coordinates[][3])
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
  */
-double hex_relative_size_squared(
+VERDICT_HOST_DEVICE double hex_relative_size_squared(
   int /*num_nodes*/, const double coordinates[][3], double average_hex_volume)
 {
   double size = 0;
@@ -2907,7 +2907,7 @@ double hex_relative_size_squared(
 
   Product of Shape and Relative Size
  */
-double hex_shape_and_size(int num_nodes, const double coordinates[][3], double average_hex_volume)
+VERDICT_HOST_DEVICE double hex_shape_and_size(int num_nodes, const double coordinates[][3], double average_hex_volume)
 {
   double size = hex_relative_size_squared(num_nodes, coordinates, average_hex_volume);
   double shape = hex_shape(num_nodes, coordinates);
@@ -2926,7 +2926,7 @@ double hex_shape_and_size(int num_nodes, const double coordinates[][3], double a
 
   Product of Shear and Relative Size
  */
-double hex_shear_and_size(int num_nodes, const double coordinates[][3], double average_hex_volume)
+VERDICT_HOST_DEVICE double hex_shear_and_size(int num_nodes, const double coordinates[][3], double average_hex_volume)
 {
   double size = hex_relative_size_squared(num_nodes, coordinates, average_hex_volume);
   double shear = hex_shear(num_nodes, coordinates);
@@ -2943,7 +2943,7 @@ double hex_shear_and_size(int num_nodes, const double coordinates[][3], double a
 /*!
   distortion of a hex
  */
-double hex_distortion(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double hex_distortion(int num_nodes, const double coordinates[][3])
 {
   // use 2x2 gauss points for linear hex and 3x3 for 2nd order hex
   int number_of_gauss_points = 0;
@@ -3059,7 +3059,7 @@ double hex_distortion(int num_nodes, const double coordinates[][3])
   return (double)distortion;
 }
 
-double hex_timestep(int num_nodes, const double coordinates[][3], double density,
+VERDICT_HOST_DEVICE double hex_timestep(int num_nodes, const double coordinates[][3], double density,
   double poissons_ratio, double youngs_modulus)
 {
   double char_length = hex_dimension(num_nodes, coordinates);

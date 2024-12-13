@@ -26,8 +26,8 @@
 
 namespace VERDICT_NAMESPACE
 {
-extern double tri_equiangle_skew(int num_nodes, const double coordinates[][3]);
-extern double quad_equiangle_skew(int num_nodes, const double coordinates[][3]);
+VERDICT_HOST_DEVICE extern double tri_equiangle_skew(int num_nodes, const double coordinates[][3]);
+VERDICT_HOST_DEVICE extern double quad_equiangle_skew(int num_nodes, const double coordinates[][3]);
 
 // local methods
 VERDICT_HOST_DEVICE void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tri2[][3],
@@ -156,7 +156,7 @@ VERDICT_HOST_DEVICE static void WEDGE21_gradients_of_the_shape_functions_for_RST
   dhdt[15] = -2.0 * 27.0 * rst[2] * RSM * RS;
 }
 
-double wedge_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   double tri1[3][3];
   double tri2[3][3];
@@ -188,7 +188,7 @@ double wedge_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   and summing the volume of each tet
 
  */
-double wedge_volume(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_volume(int /*num_nodes*/, const double coordinates[][3])
 {
   // We need to divide the wedge into 11 tets.
   // This is a better solution than 3 tets or 3 hexes because
@@ -392,7 +392,7 @@ double wedge_volume(int /*num_nodes*/, const double coordinates[][3])
    q for right, unit wedge : 1
    Reference : -
    */
-double wedge_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector a, b, c, d, e, f, g, h, i;
 
@@ -674,7 +674,7 @@ VERDICT_HOST_DEVICE static void aspects(int num_nodes, const double coordinates[
  Reference : Adapted from section 7.7
  Verdict Function : wedge_max_aspect_frobenius or wedge_condition
  */
-double wedge_max_aspect_frobenius(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_max_aspect_frobenius(int num_nodes, const double coordinates[][3])
 {
   double aspect1, aspect2, aspect3, aspect4, aspect5, aspect6;
   aspects(num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6);
@@ -705,7 +705,7 @@ double wedge_max_aspect_frobenius(int num_nodes, const double coordinates[][3])
    Reference : Adapted from section 7.8
    Verdict Function : wedge_mean_aspect_frobenius
    */
-double wedge_mean_aspect_frobenius(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_mean_aspect_frobenius(int num_nodes, const double coordinates[][3])
 {
   double aspect1, aspect2, aspect3, aspect4, aspect5, aspect6;
   aspects(num_nodes, coordinates, aspect1, aspect2, aspect3, aspect4, aspect5, aspect6);
@@ -736,7 +736,7 @@ double wedge_mean_aspect_frobenius(int num_nodes, const double coordinates[][3])
  Reference : Adapted from section 6.10
  Verdict Function : wedge_jacobian
  */
-double wedge_jacobian(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_jacobian(int num_nodes, const double coordinates[][3])
 {
   if (num_nodes == 21)
   {
@@ -881,7 +881,7 @@ double wedge_jacobian(int num_nodes, const double coordinates[][3])
  Reference : Adapted from section 7.3
  Verdict Function : wedge_distortion
  */
-double wedge_distortion(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_distortion(int num_nodes, const double coordinates[][3])
 {
   double jacobian = wedge_jacobian(num_nodes, coordinates);
   double master_volume = 0.433013;
@@ -918,7 +918,7 @@ double wedge_distortion(int num_nodes, const double coordinates[][3])
    Reference : Adapted from section 5.21
    Verdict Function : wedge_max_stretch
    */
-double wedge_max_stretch(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_max_stretch(int /*num_nodes*/, const double coordinates[][3])
 {
   // This function finds the stretch of the 3 quadrilateral faces and returns the maximum value
 
@@ -1008,7 +1008,7 @@ double wedge_max_stretch(int /*num_nodes*/, const double coordinates[][3])
    Reference : Adapted from section 6.14 and 7.11
    Verdict Function : wedge_scaled_jacobian
    */
-double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
 {
   double min_jacobian = 0, current_jacobian = 0, lengths = 42;
   VerdictVector vec1, vec2, vec3;
@@ -1127,7 +1127,7 @@ double wedge_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
    Reference : Adapted from section 7.12
    Verdict Function : wedge_shape
    */
-double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
 {
   double current_jacobian = 0, current_shape, norm_jacobi = 0;
   double min_shape = 1.0;
@@ -1295,12 +1295,12 @@ double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
  Reference : Adapted from section 7.7
  Verdict Function : wedge_max_aspect_frobenius or wedge_condition
  */
-double wedge_condition(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_condition(int /*num_nodes*/, const double coordinates[][3])
 {
   return wedge_max_aspect_frobenius(6, coordinates);
 }
 
-void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tri2[][3],
+VERDICT_HOST_DEVICE void make_wedge_faces(const double coordinates[][3], double tri1[][3], double tri2[][3],
   double quad1[][3], double quad2[][3], double quad3[][3])
 {
   // tri1

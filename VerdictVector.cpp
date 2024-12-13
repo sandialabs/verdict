@@ -27,7 +27,7 @@ namespace VERDICT_NAMESPACE
 {
 
 // scale the length of the vector to be the new_length
-VerdictVector& VerdictVector::length(const double new_length)
+VERDICT_HOST_DEVICE VerdictVector& VerdictVector::length(const double new_length)
 {
   double len = this->length();
   xVal *= new_length / len;
@@ -36,7 +36,7 @@ VerdictVector& VerdictVector::length(const double new_length)
   return *this;
 }
 
-double VerdictVector::interior_angle(const VerdictVector& otherVector)
+VERDICT_HOST_DEVICE double VerdictVector::interior_angle(const VerdictVector& otherVector)
 {
   double cosAngle = 0., angleRad = 0., len1, len2 = 0.;
 
@@ -46,8 +46,10 @@ double VerdictVector::interior_angle(const VerdictVector& otherVector)
   }
   else
   {
+#ifndef __HIP_DEVICE_COMPILE__
     assert(len1 > 0);
     assert(len2 > 0);
+#endif
   }
 
   if ((cosAngle > 1.0) && (cosAngle < 1.0001))
@@ -66,7 +68,9 @@ double VerdictVector::interior_angle(const VerdictVector& otherVector)
   }
   else
   {
+#ifndef __HIP_DEVICE_COMPILE__
     assert(cosAngle < 1.0001 && cosAngle > -1.0001);
+#endif
   }
 
   return ((angleRad * 180.) / VERDICT_PI);
