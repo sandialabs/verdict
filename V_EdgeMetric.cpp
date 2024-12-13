@@ -27,7 +27,7 @@ namespace VERDICT_NAMESPACE
 /*!\brief Length of and edge.
  * Length is calculated by taking the distance between the end nodes.
  */
-double edge_length(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double edge_length(int num_nodes, const double coordinates[][3])
 {
   double edge_length = 0.0;
 

@@ -362,7 +362,9 @@ constexpr VerdictVector& VerdictVector::operator*=(const double scalar)
 // Scales all values by 1/scalar
 constexpr VerdictVector& VerdictVector::operator/=(const double scalar)
 {
+#ifndef __HIP_DEVICE_COMPILE__
   assert(scalar != 0);
+#endif
   xVal /= scalar;
   yVal /= scalar;
   zVal /= scalar;
@@ -370,7 +372,7 @@ constexpr VerdictVector& VerdictVector::operator/=(const double scalar)
 }
 
 // Returns the normalized 'this'.
-inline VerdictVector operator~(const VerdictVector& vec)
+VERDICT_HOST_DEVICE inline VerdictVector operator~(const VerdictVector& vec)
 {
   double mag = sqrt(vec.xVal * vec.xVal + vec.yVal * vec.yVal + vec.zVal * vec.zVal);
 
@@ -446,12 +448,12 @@ constexpr double VerdictVector::length_squared() const
   return (xVal * xVal + yVal * yVal + zVal * zVal);
 }
 
-inline double VerdictVector::length() const
+VERDICT_HOST_DEVICE inline double VerdictVector::length() const
 {
   return (sqrt(xVal * xVal + yVal * yVal + zVal * zVal));
 }
 
-inline double VerdictVector::normalize()
+VERDICT_HOST_DEVICE inline double VerdictVector::normalize()
 {
   double mag = length();
   if (mag != 0)

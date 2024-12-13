@@ -62,7 +62,7 @@ VERDICT_HOST_DEVICE static double largest_pyramid_edge(const double coordinates[
     a quadrilateral base and a pointy peak like a pyramid
 */
 
-double pyramid_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double pyramid_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   double base[4][3];
   double tri1[3][3];
@@ -92,7 +92,7 @@ double pyramid_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
   the volume is calculated by dividing the pyramid into
   2 tets and summing the volumes of the 2 tets.
  */
-double pyramid_volume(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double pyramid_volume(int /*num_nodes*/, const double coordinates[][3])
 {
   double center_coords[3];
   // calculate the center of the quads
@@ -164,7 +164,7 @@ double pyramid_volume(int /*num_nodes*/, const double coordinates[][3])
   return (double)volume;
 }
 
-double pyramid_jacobian(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double pyramid_jacobian(int /*num_nodes*/, const double coordinates[][3])
 {
   // break the pyramid into four tets return the minimum jacobian of the two tets
   double tet1_coords[4][3];
@@ -185,7 +185,7 @@ double pyramid_jacobian(int /*num_nodes*/, const double coordinates[][3])
   return p1 < p2 ? p1 : p2;
 }
 
-double pyramid_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double pyramid_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
 {
   // break the pyramid into four tets return the minimum scaled jacobian of the tets
   double tet1_coords[4][3];
@@ -213,7 +213,7 @@ double pyramid_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
   return min_jac < 1.0 ? min_jac : 1.0 - (min_jac - 1.0);
 }
 
-double pyramid_shape(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double pyramid_shape(int num_nodes, const double coordinates[][3])
 {
   // ideally there will be four equilateral triangles and one square.
   // Test each face
@@ -255,7 +255,7 @@ double pyramid_shape(int num_nodes, const double coordinates[][3])
   return shape;
 }
 
-void make_pyramid_tets(const double coordinates[][3], double tet1_coords[][3],
+VERDICT_HOST_DEVICE void make_pyramid_tets(const double coordinates[][3], double tet1_coords[][3],
   double tet2_coords[][3], double tet3_coords[][3], double tet4_coords[][3])
 {
   // tet1
@@ -327,7 +327,7 @@ void make_pyramid_tets(const double coordinates[][3], double tet1_coords[][3],
   tet4_coords[3][2] = coordinates[4][2];
 }
 
-void make_pyramid_faces(const double coordinates[][3], double base[][3], double tri1[][3],
+VERDICT_HOST_DEVICE void make_pyramid_faces(const double coordinates[][3], double base[][3], double tri1[][3],
   double tri2[][3], double tri3[][3], double tri4[][3])
 {
   // base
@@ -400,7 +400,7 @@ void make_pyramid_faces(const double coordinates[][3], double base[][3], double 
   tri4[2][2] = coordinates[4][2];
 }
 
-void make_pyramid_edges(VerdictVector edges[8], const double coordinates[][3])
+VERDICT_HOST_DEVICE void make_pyramid_edges(VerdictVector edges[8], const double coordinates[][3])
 {
   edges[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
@@ -420,7 +420,7 @@ void make_pyramid_edges(VerdictVector edges[8], const double coordinates[][3])
     coordinates[4][2] - coordinates[3][2]);
 }
 
-double largest_pyramid_edge(const double coordinates[][3])
+VERDICT_HOST_DEVICE double largest_pyramid_edge(const double coordinates[][3])
 {
   VerdictVector edges[8];
   make_pyramid_edges(edges, coordinates);
@@ -444,7 +444,7 @@ double largest_pyramid_edge(const double coordinates[][3])
   return sqrt(max);
 }
 
-double distance_point_to_pyramid_base(
+VERDICT_HOST_DEVICE double distance_point_to_pyramid_base(
   int /*num_nodes*/, const double coordinates[][3], double& cos_angle)
 {
   VerdictVector a(coordinates[0]);

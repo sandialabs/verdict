@@ -57,7 +57,7 @@ VERDICT_HOST_DEVICE static double fix_range(double v)
   return v;
 }
 
-double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector ab, ac, bc, bd, ad, cd;
 
@@ -190,7 +190,7 @@ VERDICT_HOST_DEVICE static int tet_get_weight(
      Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
      minimum edge lengths
  */
-double tet_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector a, b, c, d, e, f;
 
@@ -328,12 +328,12 @@ VERDICT_HOST_DEVICE static double tet_scaled_jacobian_impl(int /*num_nodes*/, co
   return sqrt2 * jacobi / length_product;
 }
 
-double tet_scaled_jacobian(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_scaled_jacobian(int num_nodes, const double coordinates[][3])
 {
     return tet_scaled_jacobian_impl(num_nodes, coordinates);
 }
 
-double tet_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates)
+VERDICT_HOST_DEVICE double tet_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates)
 {
     return tet_scaled_jacobian_impl(num_nodes, coordinates);
 }
@@ -346,7 +346,7 @@ double tet_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * c
     Note that this function is similar to the aspect beta of a tet, except that
     it does not return VERDICT_DBL_MAX if the element has negative orientation.
  */
-double tet_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
 
   // Determine side vectors
@@ -448,11 +448,11 @@ VERDICT_HOST_DEVICE static double tet_aspect_ratio_impl(int /*num_nodes*/, const
   return fix_range(aspect_ratio);
 }
 
-double tet_aspect_ratio(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_aspect_ratio(int num_nodes, const double coordinates[][3])
 {
     return tet_aspect_ratio_impl(num_nodes, coordinates);
 }
-double tet_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+VERDICT_HOST_DEVICE double tet_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coordinates)
 {
     return tet_aspect_ratio_impl(num_nodes, coordinates);
 }
@@ -462,7 +462,7 @@ double tet_aspect_ratio_from_loc_ptrs(int num_nodes, const double * const *coord
 
   srms^3 / (8.48528137423857*V) where srms = sqrt(sum(Si^2)/6), where Si is the edge length
  */
-double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
 {
   // Determine side vectors
   VerdictVector side0, side1, side2, side3, side4, side5;
@@ -509,7 +509,7 @@ double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
   NB (P. Pebay 01/22/07):
     Frobenius condition number when the reference element is regular
  */
-double tet_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector ab, ac, ad;
 
@@ -558,7 +558,7 @@ double tet_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
   NB (P. Pebay 01/22/07):
     minimum nonoriented dihedral angle
  */
-double tet_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
 {
   // Determine side vectors
   VerdictVector ab, bc, ad, cd;
@@ -609,7 +609,7 @@ double tet_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
     conditioned. Previously, this would only happen when the volume was small
     and positive, but now ill-conditioned inverted tetrahedra are also included.
  */
-double tet_collapse_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_collapse_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   // Determine side vectors
   VerdictVector e01, e02, e03, e12, e13, e23;
@@ -691,7 +691,7 @@ double tet_collapse_ratio(int /*num_nodes*/, const double coordinates[][3])
   return fix_range(crMin);
 }
 
-double tet_equivolume_skew(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_equivolume_skew(int num_nodes, const double coordinates[][3])
 {
   //- Find the vectors from the origin to each of the nodes on the tet.
   VerdictVector vectA(coordinates[0][0], coordinates[0][1], coordinates[0][2]);
@@ -724,7 +724,7 @@ double tet_equivolume_skew(int num_nodes, const double coordinates[][3])
   return fix_range(eq_v_skew);
 }
 
-double tet_squish_index(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_squish_index(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector vectA(coordinates[0][0], coordinates[0][1], coordinates[0][2]);
   VerdictVector vectB(coordinates[1][0], coordinates[1][1], coordinates[1][2]);
@@ -1132,12 +1132,12 @@ VERDICT_HOST_DEVICE static double tet_volume_impl(int num_nodes, const CoordsCon
   return 0;
 }
 
-double tet_volume(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_volume(int num_nodes, const double coordinates[][3])
 {
     return tet_volume_impl(num_nodes, coordinates);
 }
 
-double tet_volume_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+VERDICT_HOST_DEVICE double tet_volume_from_loc_ptrs(int num_nodes, const double * const *coordinates)
 {
     return tet_volume_impl(num_nodes, coordinates);
 }
@@ -1177,12 +1177,12 @@ VERDICT_HOST_DEVICE static double tet_condition_impl(int /*num_nodes*/, const Co
   }
 }
 
-double tet_condition(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_condition(int num_nodes, const double coordinates[][3])
 {
     return tet_condition_impl(num_nodes, coordinates);
 }
 
-double tet_condition_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+VERDICT_HOST_DEVICE double tet_condition_from_loc_ptrs(int num_nodes, const double * const *coordinates)
 {
     return tet_condition_impl(num_nodes, coordinates);
 }
@@ -1191,7 +1191,7 @@ double tet_condition_from_loc_ptrs(int num_nodes, const double * const *coordina
 
   TODO
  */
-double tet_jacobian(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_jacobian(int num_nodes, const double coordinates[][3])
 {
   if (num_nodes == 15)
   {
@@ -1245,7 +1245,7 @@ double tet_jacobian(int num_nodes, const double coordinates[][3])
 
   3/ condition number of weighted jacobian matrix
  */
-double tet_shape(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_shape(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector edge0, edge2, edge3;
 
@@ -1285,7 +1285,7 @@ double tet_shape(int /*num_nodes*/, const double coordinates[][3])
 
   Min(J,1/J), where J is the determinant of the weighted Jacobian matrix
  */
-double tet_relative_size_squared(
+VERDICT_HOST_DEVICE double tet_relative_size_squared(
   int /*num_nodes*/, const double coordinates[][3], double average_tet_volume)
 {
   double size;
@@ -1319,7 +1319,7 @@ double tet_relative_size_squared(
 
   Product of the shape and relative size
  */
-double tet_shape_and_size(int num_nodes, const double coordinates[][3], double average_tet_volume)
+VERDICT_HOST_DEVICE double tet_shape_and_size(int num_nodes, const double coordinates[][3], double average_tet_volume)
 {
   double shape, size;
   shape = tet_shape(num_nodes, coordinates);
@@ -1331,7 +1331,7 @@ double tet_shape_and_size(int num_nodes, const double coordinates[][3], double a
 /*!
   the distortion of a tet
  */
-double tet_distortion(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_distortion(int num_nodes, const double coordinates[][3])
 {
   double distortion = VERDICT_DBL_MAX;
   int number_of_gauss_points = 0;
@@ -1438,7 +1438,7 @@ double tet_distortion(int num_nodes, const double coordinates[][3])
   return fix_range(distortion);
 }
 
-double tet_inradius(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_inradius(int num_nodes, const double coordinates[][3])
 {
   // avoid access beyond the end of the array
   if (num_nodes < 4)
@@ -1503,7 +1503,7 @@ double tet_inradius(int num_nodes, const double coordinates[][3])
   return inradius;
 }
 
-double tet_timestep(int num_nodes, const double coordinates[][3], double density,
+VERDICT_HOST_DEVICE double tet_timestep(int num_nodes, const double coordinates[][3], double density,
   double poissons_ratio, double youngs_modulus)
 {
   double char_length = 0;
@@ -1577,7 +1577,7 @@ VERDICT_HOST_DEVICE static double tet10_min_inradius(const CoordsContainerType c
   return min_tetinradius;
 }
 
-double tet10_characteristic_length(const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet10_characteristic_length(const double coordinates[][3])
 {
   // compute auxillary node coordinate
   double min_tetinradius = tet10_min_inradius(coordinates, 0, 11);
@@ -1664,12 +1664,12 @@ VERDICT_HOST_DEVICE static double tet_normalized_inradius_impl(int num_nodes, co
   return 0.0;
 }
 
-double tet_normalized_inradius(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_normalized_inradius(int num_nodes, const double coordinates[][3])
 {
     return tet_normalized_inradius_impl(num_nodes, coordinates);
 }
 
-double tet_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates)
+VERDICT_HOST_DEVICE double tet_normalized_inradius_from_loc_ptrs(int num_nodes, const double * const *coordinates)
 {
     return tet_normalized_inradius_impl(num_nodes, coordinates);
 }
@@ -1767,12 +1767,12 @@ VERDICT_HOST_DEVICE static double tet_mean_ratio_impl(int num_nodes, const Coord
   return 0.0;
 }
 
-double tet_mean_ratio(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double tet_mean_ratio(int num_nodes, const double coordinates[][3])
 {
    return tet_mean_ratio_impl(num_nodes, coordinates);
 }
 
-double tet_mean_ratio_from_loc_ptrs(int num_nodes, const double * const * coordinates)
+VERDICT_HOST_DEVICE double tet_mean_ratio_from_loc_ptrs(int num_nodes, const double * const * coordinates)
 {
    return tet_mean_ratio_impl(num_nodes, coordinates);
 }

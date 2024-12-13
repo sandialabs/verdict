@@ -350,7 +350,7 @@ VERDICT_HOST_DEVICE void quad_minimum_maximum_angle(double min_max_angles[2], co
      Hmax / Hmin where Hmax and Hmin are respectively the maximum and the
      minimum edge lengths
  */
-double quad_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
@@ -405,7 +405,7 @@ double quad_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 
   maximum edge length ratio at quad center
  */
-double quad_max_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_max_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector quad_nodes[4];
   quad_nodes[0].set(coordinates[0][0], coordinates[0][1], coordinates[0][2]);
@@ -441,7 +441,7 @@ double quad_max_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
      this is a generalization of the triangle aspect ratio
      using Heron's formula.
  */
-double quad_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
 
   VerdictVector edges[4];
@@ -476,7 +476,7 @@ double quad_aspect_ratio(int /*num_nodes*/, const double coordinates[][3])
      not exist in general with quads -- although a different name should probably
      be used in the future.
  */
-double quad_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
@@ -536,7 +536,7 @@ double quad_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
      this function is calculated by averaging the 4 Frobenius aspects at
      each corner of the quad, when the reference triangle is right isosceles.
  */
-double quad_med_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_med_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
 
   VerdictVector edges[4];
@@ -584,7 +584,7 @@ double quad_med_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3
      this function is calculated by taking the maximum of the 4 Frobenius aspects at
      each corner of the quad, when the reference triangle is right isosceles.
  */
-double quad_max_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_max_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
 
   VerdictVector edges[4];
@@ -636,7 +636,7 @@ double quad_max_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3
 
   maximum ||cos A|| where A is the angle between edges at quad center
  */
-double quad_skew(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector node_pos[4];
   for (int i = 0; i < 4; i++)
@@ -666,7 +666,7 @@ double quad_skew(int /*num_nodes*/, const double coordinates[][3])
 
   maximum ratio of lengths derived from opposite edges
  */
-double quad_taper(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_taper(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector node_pos[4];
   for (int i = 0; i < 4; i++)
@@ -701,7 +701,7 @@ double quad_taper(int /*num_nodes*/, const double coordinates[][3])
 
   deviation of element from planarity
  */
-double quad_warpage(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_warpage(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
@@ -735,7 +735,7 @@ double quad_warpage(int /*num_nodes*/, const double coordinates[][3])
 
   jacobian at quad center
  */
-double quad_area(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_area(int num_nodes, const double coordinates[][3])
 {
   if (4 == num_nodes)
   {
@@ -837,7 +837,7 @@ double quad_area(int num_nodes, const double coordinates[][3])
 
   sqrt(2) * minimum edge length / maximum diagonal length
  */
-double quad_stretch(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_stretch(int /*num_nodes*/, const double coordinates[][3])
 {
   VerdictVector edges[4], temp;
   make_quad_edges(edges, coordinates);
@@ -879,7 +879,7 @@ double quad_stretch(int /*num_nodes*/, const double coordinates[][3])
 
   largest included quad area (degrees)
  */
-double quad_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
 {
   // if this is a collapsed quad, just pass it on to
   // the tri_largest_angle routine
@@ -950,7 +950,7 @@ double quad_maximum_angle(int /*num_nodes*/, const double coordinates[][3])
 
   smallest included quad angle (degrees)
  */
-double quad_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
 {
   // if this quad is a collapsed quad, then just
   // send it to the tri_smallest_angle routine
@@ -1007,7 +1007,7 @@ double quad_minimum_angle(int /*num_nodes*/, const double coordinates[][3])
   return (double)fmax(min_angle, -VERDICT_DBL_MAX);
 }
 
-double quad_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 {
   double min_max_angle[2];
 
@@ -1028,7 +1028,7 @@ double quad_equiangle_skew(int /*num_nodes*/, const double coordinates[][3])
 
   general distortion measure based on left Cauchy-Green Tensor
  */
-double quad_oddy(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_oddy(int /*num_nodes*/, const double coordinates[][3])
 {
   double max_oddy = 0.;
 
@@ -1075,7 +1075,7 @@ double quad_oddy(int /*num_nodes*/, const double coordinates[][3])
 
   maximum condition number of the Jacobian matrix at 4 corners
  */
-double quad_condition(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_condition(int /*num_nodes*/, const double coordinates[][3])
 {
   if (is_collapsed_quad(coordinates) == VERDICT_TRUE)
   {
@@ -1128,7 +1128,7 @@ double quad_condition(int /*num_nodes*/, const double coordinates[][3])
 
   minimum pointwise volume of local map at 4 corners and center of quad
 */
-double quad_jacobian(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_jacobian(int /*num_nodes*/, const double coordinates[][3])
 {
 
   if (is_collapsed_quad(coordinates) == VERDICT_TRUE)
@@ -1152,7 +1152,7 @@ double quad_jacobian(int /*num_nodes*/, const double coordinates[][3])
 
   Minimum Jacobian divided by the lengths of the 2 edge vector
  */
-double quad_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
 {
   if (is_collapsed_quad(coordinates) == VERDICT_TRUE)
   {
@@ -1201,7 +1201,7 @@ double quad_scaled_jacobian(int /*num_nodes*/, const double coordinates[][3])
 
   2/Condition number of Jacobian Skew matrix
  */
-double quad_shear(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_shear(int /*num_nodes*/, const double coordinates[][3])
 {
   double scaled_jacobian = quad_scaled_jacobian(4, coordinates);
 
@@ -1220,7 +1220,7 @@ double quad_shear(int /*num_nodes*/, const double coordinates[][3])
 
    2/Condition number of weighted Jacobian matrix
  */
-double quad_shape(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_shape(int /*num_nodes*/, const double coordinates[][3])
 {
 
   double corner_areas[4], min_shape = VERDICT_DBL_MAX, shape;
@@ -1272,7 +1272,7 @@ double quad_shape(int /*num_nodes*/, const double coordinates[][3])
 
   Min( J, 1/J ), where J is determinant of weighted Jacobian matrix
 */
-double quad_relative_size_squared(
+VERDICT_HOST_DEVICE double quad_relative_size_squared(
   int /*num_nodes*/, const double coordinates[][3], double average_quad_area)
 {
   double the_quad_area = quad_area(4, coordinates);
@@ -1305,7 +1305,7 @@ double quad_relative_size_squared(
 
   Product of Shape and Relative Size
  */
-double quad_shape_and_size(int num_nodes, const double coordinates[][3], double average_quad_area)
+VERDICT_HOST_DEVICE double quad_shape_and_size(int num_nodes, const double coordinates[][3], double average_quad_area)
 {
   double shape, size;
   size = quad_relative_size_squared(num_nodes, coordinates, average_quad_area);
@@ -1325,7 +1325,7 @@ double quad_shape_and_size(int num_nodes, const double coordinates[][3], double 
 
   product of shear and relative size
  */
-double quad_shear_and_size(int num_nodes, const double coordinates[][3], double average_quad_area)
+VERDICT_HOST_DEVICE double quad_shear_and_size(int num_nodes, const double coordinates[][3], double average_quad_area)
 {
   double shear, size;
   shear = quad_shear(num_nodes, coordinates);
@@ -1343,7 +1343,7 @@ double quad_shear_and_size(int num_nodes, const double coordinates[][3], double 
 /*!
   the distortion of a quad
 */
-double quad_distortion(int num_nodes, const double coordinates[][3])
+VERDICT_HOST_DEVICE double quad_distortion(int num_nodes, const double coordinates[][3])
 {
   // To calculate distortion for linear and 2nd order quads
   // distortion = {min(|J|)/actual area}*{parent area}
