@@ -1120,35 +1120,14 @@ VERDICT_HOST_DEVICE double hex_volume(int num_nodes, const double coordinates[][
 {
   double volume = 0.0;
 
-  if (num_nodes > 9)
+  if (num_nodes == 27 || num_nodes == 20)
   {
-    int num_subtets = 0;
-    if (27 == num_nodes)
-    {
-      num_subtets = 48;
-    }
-    else if (20 == num_nodes)
-    {
-      num_subtets = 36;
-    }
-    else
-    {
-      return 0.0;
-    }
-
+    int num_subtets = num_nodes == 27 ? 48 : 36;
     VerdictVector aux_node = hex20_auxillary_node_coordinate(coordinates);
 
     for (int k = 0; k < num_subtets; k++)
     {
-      const int* subtet_conn;
-      if(27 == num_nodes)
-      {
-        subtet_conn = hex27_subtet_conn(k);
-      }
-      else if(20 == num_nodes)
-      {
-        subtet_conn = hex20_subtet_conn(k);
-      }
+      const int* subtet_conn = num_nodes == 27 ? hex27_subtet_conn(k) : hex20_subtet_conn(k);
 
       VerdictVector v1(
         coordinates[subtet_conn[1]][0] - coordinates[subtet_conn[0]][0],
@@ -1166,6 +1145,10 @@ VERDICT_HOST_DEVICE double hex_volume(int num_nodes, const double coordinates[][
 
       volume += compute_tet_volume(v1, v2, v3);
     }
+  }
+  else if(num_nodes != 8)
+  {
+    return 0.0;
   }
   else
   {
