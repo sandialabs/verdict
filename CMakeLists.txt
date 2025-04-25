@@ -24,6 +24,11 @@ if (VERDICT_ENABLE_HIP)
   enable_language(HIP)
 endif()
 
+# set sse2 math for 32 bit
+if("${CMAKE_CXX_SIZEOF_DATA_PTR}" STREQUAL "4" AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+  add_compile_options(-msse2)
+endif()
+
 # Includes
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
