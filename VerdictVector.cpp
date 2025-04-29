@@ -76,4 +76,21 @@ VERDICT_HOST_DEVICE double VerdictVector::interior_angle(const VerdictVector& ot
   return ((angleRad * 180.) / VERDICT_PI);
 }
 
+VERDICT_HOST_DEVICE double VerdictVector::normalize()
+{
+  double mag = length();
+  if (mag > std::numeric_limits<double>::epsilon())
+  {
+    xVal = xVal / mag;
+    yVal = yVal / mag;
+    zVal = zVal / mag;
+    return mag;
+  }
+  xVal = 0.0;
+  yVal = 0.0;
+  zVal = 0.0;
+  return 0;
+}
+
+
 } // namespace verdict

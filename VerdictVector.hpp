@@ -91,7 +91,7 @@ public:
 
   VERDICT_HOST_DEVICE constexpr void theta(const double yv); //- Set theta component of vector, if (r,theta) format
 
-  VERDICT_HOST_DEVICE inline double normalize();
+  VERDICT_HOST_DEVICE double normalize();
   //- Normalize (set magnitude equal to 1) vector - return the magnitude
 
   VERDICT_HOST_DEVICE VerdictVector& length(const double new_length);
@@ -374,13 +374,8 @@ constexpr VerdictVector& VerdictVector::operator/=(const double scalar)
 // Returns the normalized 'this'.
 VERDICT_HOST_DEVICE inline VerdictVector operator~(const VerdictVector& vec)
 {
-  double mag = sqrt(vec.xVal * vec.xVal + vec.yVal * vec.yVal + vec.zVal * vec.zVal);
-
   VerdictVector temp = vec;
-  if (mag != 0.0)
-  {
-    temp /= mag;
-  }
+  temp.normalize();
   return temp;
 }
 
@@ -451,22 +446,6 @@ constexpr double VerdictVector::length_squared() const
 VERDICT_HOST_DEVICE inline double VerdictVector::length() const
 {
   return (sqrt(xVal * xVal + yVal * yVal + zVal * zVal));
-}
-
-VERDICT_HOST_DEVICE inline double VerdictVector::normalize()
-{
-  double mag = length();
-  if (mag > std::numeric_limits<double>::epsilon())
-  {
-    xVal = xVal / mag;
-    yVal = yVal / mag;
-    zVal = zVal / mag;
-    return mag;
-  }
-  xVal = 0.0;
-  yVal = 0.0;
-  zVal = 0.0;
-  return 0;
 }
 
 // Dot Product.
