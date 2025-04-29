@@ -79,7 +79,7 @@ VERDICT_HOST_DEVICE double VerdictVector::interior_angle(const VerdictVector& ot
 VERDICT_HOST_DEVICE double VerdictVector::normalize()
 {
   double mag = length();
-  if (mag > std::numeric_limits<double>::epsilon())
+  if (mag > VERDICT_DBL_MIN)
   {
     xVal = xVal / mag;
     yVal = yVal / mag;
