@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-project(verdict LANGUAGES CXX VERSION 1.4.3)
+project(verdict LANGUAGES CXX VERSION 1.4.4)
 
 # Enable CUDA if requested
 option(VERDICT_ENABLE_CUDA "Build Verdict with CUDA support." OFF)
