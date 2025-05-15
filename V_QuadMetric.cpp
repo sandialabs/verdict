@@ -355,6 +355,8 @@ VERDICT_HOST_DEVICE double quad_edge_ratio(int /*num_nodes*/, const double coord
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
 
+  apply_elem_scaling_on_edges(4, coordinates, 4, edges);
+
   double a2 = edges[0].length_squared();
   double b2 = edges[1].length_squared();
   double c2 = edges[2].length_squared();
@@ -413,6 +415,8 @@ VERDICT_HOST_DEVICE double quad_max_edge_ratio(int /*num_nodes*/, const double c
   quad_nodes[2].set(coordinates[2][0], coordinates[2][1], coordinates[2][2]);
   quad_nodes[3].set(coordinates[3][0], coordinates[3][1], coordinates[3][2]);
 
+  apply_elem_scaling_on_points(4, coordinates, 4, quad_nodes);
+
   VerdictVector principal_axes[2];
   principal_axes[0] = quad_nodes[1] + quad_nodes[2] - quad_nodes[0] - quad_nodes[3];
   principal_axes[1] = quad_nodes[2] + quad_nodes[3] - quad_nodes[0] - quad_nodes[1];
@@ -447,6 +451,8 @@ VERDICT_HOST_DEVICE double quad_aspect_ratio(int /*num_nodes*/, const double coo
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
 
+  double char_size = apply_elem_scaling_on_edges(4, coordinates, 4, edges);
+
   double a1 = edges[0].length();
   double b1 = edges[1].length();
   double c1 = edges[2].length();
@@ -458,6 +464,10 @@ VERDICT_HOST_DEVICE double quad_aspect_ratio(int /*num_nodes*/, const double coo
 
   double corner_areas[4];
   signed_corner_areas(corner_areas, coordinates);
+  corner_areas[0] /= (char_size * char_size);
+  corner_areas[1] /= (char_size * char_size);
+  corner_areas[2] /= (char_size * char_size);
+  corner_areas[3] /= (char_size * char_size);
 
   double aspect_ratio = hm * (a1 + b1 + c1 + d1) / (corner_areas[0] + corner_areas[1] + corner_areas[2] + corner_areas[3]);
 
@@ -481,6 +491,8 @@ VERDICT_HOST_DEVICE double quad_radius_ratio(int /*num_nodes*/, const double coo
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
 
+  double char_size = apply_elem_scaling_on_edges(4, coordinates, 4, edges);
+
   double a2 = edges[0].length_squared();
   double b2 = edges[1].length_squared();
   double c2 = edges[2].length_squared();
@@ -489,10 +501,12 @@ VERDICT_HOST_DEVICE double quad_radius_ratio(int /*num_nodes*/, const double coo
   VerdictVector diag;
   diag.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
     coordinates[2][2] - coordinates[0][2]);
+  diag /= char_size;
   double m2 = diag.length_squared();
 
   diag.set(coordinates[3][0] - coordinates[1][0], coordinates[3][1] - coordinates[1][1],
     coordinates[3][2] - coordinates[1][2]);
+  diag /= char_size;
   double n2 = diag.length_squared();
 
   double t0 = a2 > b2 ? a2 : b2;
@@ -542,6 +556,8 @@ VERDICT_HOST_DEVICE double quad_med_aspect_frobenius(int /*num_nodes*/, const do
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
 
+  apply_elem_scaling_on_edges(4, coordinates, 4, edges);
+
   double a2 = edges[0].length_squared();
   double b2 = edges[1].length_squared();
   double c2 = edges[2].length_squared();
@@ -589,6 +605,8 @@ VERDICT_HOST_DEVICE double quad_max_aspect_frobenius(int /*num_nodes*/, const do
 
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
+
+  apply_elem_scaling_on_edges(4, coordinates, 4, edges);
 
   double a2 = edges[0].length_squared();
   double b2 = edges[1].length_squared();
@@ -644,6 +662,8 @@ VERDICT_HOST_DEVICE double quad_skew(int /*num_nodes*/, const double coordinates
     node_pos[i].set(coordinates[i][0], coordinates[i][1], coordinates[i][2]);
   }
 
+  apply_elem_scaling_on_points(4, coordinates, 4, node_pos);
+
   VerdictVector principle_axes[2];
   principle_axes[0] = node_pos[1] + node_pos[2] - node_pos[3] - node_pos[0];
   principle_axes[1] = node_pos[2] + node_pos[3] - node_pos[0] - node_pos[1];
@@ -673,6 +693,8 @@ VERDICT_HOST_DEVICE double quad_taper(int /*num_nodes*/, const double coordinate
   {
     node_pos[i].set(coordinates[i][0], coordinates[i][1], coordinates[i][2]);
   }
+
+  apply_elem_scaling_on_points(4, coordinates, 4, node_pos);
 
   VerdictVector principle_axes[2];
   principle_axes[0] = node_pos[1] + node_pos[2] - node_pos[3] - node_pos[0];
@@ -705,6 +727,8 @@ VERDICT_HOST_DEVICE double quad_warpage(int /*num_nodes*/, const double coordina
 {
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
+
+  apply_elem_scaling_on_edges(4, coordinates, 4, edges);
 
   VerdictVector corner_normals[4];
   corner_normals[0] = edges[3] * edges[0];
@@ -842,6 +866,8 @@ VERDICT_HOST_DEVICE double quad_stretch(int /*num_nodes*/, const double coordina
   VerdictVector edges[4], temp;
   make_quad_edges(edges, coordinates);
 
+  double char_size = apply_elem_scaling_on_edges(4, coordinates, 4, edges);
+
   double lengths_squared[4];
   lengths_squared[0] = edges[0].length_squared();
   lengths_squared[1] = edges[1].length_squared();
@@ -850,10 +876,12 @@ VERDICT_HOST_DEVICE double quad_stretch(int /*num_nodes*/, const double coordina
 
   temp.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
     coordinates[2][2] - coordinates[0][2]);
+  temp /= char_size;
   double diag02 = temp.length_squared();
 
   temp.set(coordinates[3][0] - coordinates[1][0], coordinates[3][1] - coordinates[1][1],
     coordinates[3][2] - coordinates[1][2]);
+  temp /= char_size;
   double diag13 = temp.length_squared();
 
   // 'diag02' is now the max diagonal of the quad
@@ -1042,6 +1070,8 @@ VERDICT_HOST_DEVICE double quad_oddy(int /*num_nodes*/, const double coordinates
     node_pos[i].set(coordinates[i][0], coordinates[i][1], coordinates[i][2]);
   }
 
+  apply_elem_scaling_on_points(4, coordinates, 4, node_pos);
+
   for (i = 0; i < 4; i++)
   {
     first = node_pos[i] - node_pos[(i + 1) % 4];
@@ -1082,8 +1112,14 @@ VERDICT_HOST_DEVICE double quad_condition(int /*num_nodes*/, const double coordi
     return tri_condition(3, coordinates);
   }
 
+  double char_size = elem_scaling(4, coordinates).second;
+
   double areas[4];
   signed_corner_areas(areas, coordinates);
+  areas[0] /= (char_size * char_size);
+  areas[1] /= (char_size * char_size);
+  areas[2] /= (char_size * char_size);
+  areas[3] /= (char_size * char_size);
 
   double max_condition = 0.;
 
@@ -1096,10 +1132,12 @@ VERDICT_HOST_DEVICE double quad_condition(int /*num_nodes*/, const double coordi
     xxi.set(coordinates[i][0] - coordinates[(i + 1) % 4][0],
       coordinates[i][1] - coordinates[(i + 1) % 4][1],
       coordinates[i][2] - coordinates[(i + 1) % 4][2]);
+    xxi /= char_size;
 
     xet.set(coordinates[i][0] - coordinates[(i + 3) % 4][0],
       coordinates[i][1] - coordinates[(i + 3) % 4][1],
       coordinates[i][2] - coordinates[(i + 3) % 4][2]);
+    xet /= char_size;
 
     if (areas[i] < VERDICT_DBL_MIN)
     {
@@ -1165,6 +1203,12 @@ VERDICT_HOST_DEVICE double quad_scaled_jacobian(int /*num_nodes*/, const double 
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
 
+  double char_size = apply_elem_scaling_on_edges(4, coordinates, 4, edges);
+  corner_areas[0] /= (char_size * char_size);
+  corner_areas[1] /= (char_size * char_size);
+  corner_areas[2] /= (char_size * char_size);
+  corner_areas[3] /= (char_size * char_size);
+
   double length[4];
   length[0] = edges[0].length();
   length[1] = edges[1].length();
@@ -1228,6 +1272,12 @@ VERDICT_HOST_DEVICE double quad_shape(int /*num_nodes*/, const double coordinate
 
   VerdictVector edges[4];
   make_quad_edges(edges, coordinates);
+
+  double char_size = apply_elem_scaling_on_edges(4, coordinates, 4, edges);
+  corner_areas[0] /= (char_size * char_size);
+  corner_areas[1] /= (char_size * char_size);
+  corner_areas[2] /= (char_size * char_size);
+  corner_areas[3] /= (char_size * char_size);
 
   double length_squared[4];
   length_squared[0] = edges[0].length_squared();

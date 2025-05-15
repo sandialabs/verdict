@@ -1127,11 +1127,13 @@ VERDICT_HOST_DEVICE double wedge_scaled_jacobian(int /*num_nodes*/, const double
    Reference : Adapted from section 7.12
    Verdict Function : wedge_shape
    */
-VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinates[][3])
+VERDICT_HOST_DEVICE double wedge_shape(int num_nodes, const double coordinates[][3])
 {
   double current_jacobian = 0, current_shape, norm_jacobi = 0;
   double min_shape = 1.0;
   VerdictVector vec1, vec2, vec3;
+
+  double char_size = elem_scaling(num_nodes, coordinates).second;
 
   // Node 0
   vec1.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
@@ -1142,6 +1144,10 @@ VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinat
 
   vec3.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
     coordinates[2][2] - coordinates[0][2]);
+
+  vec1 /= char_size;
+  vec2 /= char_size;
+  vec3 /= char_size;
 
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
@@ -1166,6 +1172,10 @@ VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinat
   vec3.set(coordinates[0][0] - coordinates[1][0], coordinates[0][1] - coordinates[1][1],
     coordinates[0][2] - coordinates[1][2]);
 
+  vec1 /= char_size;
+  vec2 /= char_size;
+  vec3 /= char_size;
+
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
@@ -1188,6 +1198,10 @@ VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinat
 
   vec3.set(coordinates[1][0] - coordinates[2][0], coordinates[1][1] - coordinates[2][1],
     coordinates[1][2] - coordinates[2][2]);
+
+  vec1 /= char_size;
+  vec2 /= char_size;
+  vec3 /= char_size;
 
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
@@ -1212,6 +1226,10 @@ VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinat
   vec3.set(coordinates[5][0] - coordinates[3][0], coordinates[5][1] - coordinates[3][1],
     coordinates[5][2] - coordinates[3][2]);
 
+  vec1 /= char_size;
+  vec2 /= char_size;
+  vec3 /= char_size;
+
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
@@ -1235,6 +1253,10 @@ VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinat
   vec3.set(coordinates[3][0] - coordinates[4][0], coordinates[3][1] - coordinates[4][1],
     coordinates[3][2] - coordinates[4][2]);
 
+  vec1 /= char_size;
+  vec2 /= char_size;
+  vec3 /= char_size;
+
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)
   {
@@ -1257,6 +1279,10 @@ VERDICT_HOST_DEVICE double wedge_shape(int /*num_nodes*/, const double coordinat
 
   vec3.set(coordinates[2][0] - coordinates[5][0], coordinates[2][1] - coordinates[5][1],
     coordinates[2][2] - coordinates[5][2]);
+
+  vec1 /= char_size;
+  vec2 /= char_size;
+  vec3 /= char_size;
 
   current_jacobian = vec2 % (vec1 * vec3);
   if (current_jacobian > VERDICT_DBL_MIN)

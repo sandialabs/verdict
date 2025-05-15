@@ -192,32 +192,34 @@ VERDICT_HOST_DEVICE static int tet_get_weight(
  */
 VERDICT_HOST_DEVICE double tet_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
-  VerdictVector a, b, c, d, e, f;
+  VerdictVector v[6];
 
-  a.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+  v[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
 
-  b.set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+  v[1].set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
     coordinates[2][2] - coordinates[1][2]);
 
-  c.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+  v[2].set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
     coordinates[0][2] - coordinates[2][2]);
 
-  d.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+  v[3].set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
     coordinates[3][2] - coordinates[0][2]);
 
-  e.set(coordinates[3][0] - coordinates[1][0], coordinates[3][1] - coordinates[1][1],
+  v[4].set(coordinates[3][0] - coordinates[1][0], coordinates[3][1] - coordinates[1][1],
     coordinates[3][2] - coordinates[1][2]);
 
-  f.set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
+  v[5].set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
     coordinates[3][2] - coordinates[2][2]);
 
-  double a2 = a.length_squared();
-  double b2 = b.length_squared();
-  double c2 = c.length_squared();
-  double d2 = d.length_squared();
-  double e2 = e.length_squared();
-  double f2 = f.length_squared();
+  apply_elem_scaling_on_edges(4, coordinates, 6, v);
+
+  double a2 = v[0].length_squared();
+  double b2 = v[1].length_squared();
+  double c2 = v[2].length_squared();
+  double d2 = v[3].length_squared();
+  double e2 = v[4].length_squared();
+  double f2 = v[5].length_squared();
 
   double m2, M2, mab, mcd, mef, Mab, Mcd, Mef;
 
@@ -278,12 +280,20 @@ VERDICT_HOST_DEVICE double tet_edge_ratio(int /*num_nodes*/, const double coordi
 template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE static double tet_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
-  const VerdictVector side0{coordinates[0], coordinates[1]};
-  const VerdictVector side1{coordinates[1], coordinates[2]};
-  const VerdictVector side2{coordinates[2], coordinates[0]};
-  const VerdictVector side3{coordinates[0], coordinates[3]};
-  const VerdictVector side4{coordinates[1], coordinates[3]};
-  const VerdictVector side5{coordinates[2], coordinates[3]};
+  VerdictVector side0{coordinates[0], coordinates[1]};
+  VerdictVector side1{coordinates[1], coordinates[2]};
+  VerdictVector side2{coordinates[2], coordinates[0]};
+  VerdictVector side3{coordinates[0], coordinates[3]};
+  VerdictVector side4{coordinates[1], coordinates[3]};
+  VerdictVector side5{coordinates[2], coordinates[3]};
+
+  double char_size = elem_scaling(4, coordinates).second;
+  side0 /= char_size;
+  side1 /= char_size;
+  side2 /= char_size;
+  side3 /= char_size;
+  side4 /= char_size;
+  side5 /= char_size;
 
   const double jacobi = side3 % (side2 * side0);
 
@@ -370,6 +380,8 @@ VERDICT_HOST_DEVICE double tet_radius_ratio(int /*num_nodes*/, const double coor
   side[5].set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
     coordinates[3][2] - coordinates[2][2]);
 
+  double char_size = apply_elem_scaling_on_edges(4, coordinates, 6, side);
+
   VerdictVector numerator = side[3].length_squared() * (side[2] * side[0]) +
     side[2].length_squared() * (side[3] * side[0]) + side[0].length_squared() * (side[3] * side[2]);
 
@@ -379,6 +391,7 @@ VERDICT_HOST_DEVICE double tet_radius_ratio(int /*num_nodes*/, const double coor
     0.5;
 
   double volume = tet_volume(4, coordinates);
+  volume /= (char_size*char_size*char_size);
 
   if (fabs(volume) < VERDICT_DBL_MIN)
   {
@@ -406,9 +419,14 @@ template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE static double tet_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
   // Determine side vectors
-  const VerdictVector ab{coordinates[0], coordinates[1]};
-  const VerdictVector ac{coordinates[0], coordinates[2]};
-  const VerdictVector ad{coordinates[0], coordinates[3]};
+  VerdictVector ab{coordinates[0], coordinates[1]};
+  VerdictVector ac{coordinates[0], coordinates[2]};
+  VerdictVector ad{coordinates[0], coordinates[3]};
+
+  double char_size = elem_scaling(4, coordinates).second;
+  ab /= char_size;
+  ac /= char_size;
+  ad /= char_size;
 
   double detTet = ab % (ac * ad);
 
@@ -420,6 +438,9 @@ VERDICT_HOST_DEVICE static double tet_aspect_ratio_impl(int /*num_nodes*/, const
   VerdictVector bc{coordinates[1], coordinates[2]};
   VerdictVector bd{coordinates[1], coordinates[3]};
   VerdictVector cd{coordinates[2], coordinates[3]};
+  bc /= char_size;
+  bd /= char_size;
+  cd /= char_size;
 
   const double ab2 = ab.length_squared();
   const double bc2 = bc.length_squared();
@@ -465,27 +486,30 @@ VERDICT_HOST_DEVICE double tet_aspect_ratio_from_loc_ptrs(int num_nodes, const d
 VERDICT_HOST_DEVICE double tet_aspect_gamma(int /*num_nodes*/, const double coordinates[][3])
 {
   // Determine side vectors
-  VerdictVector side0, side1, side2, side3, side4, side5;
+  VerdictVector side[6];
 
-  side0.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+  side[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
 
-  side1.set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+  side[1].set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
     coordinates[2][2] - coordinates[1][2]);
 
-  side2.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+  side[2].set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
     coordinates[0][2] - coordinates[2][2]);
 
-  side3.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+  side[3].set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
     coordinates[3][2] - coordinates[0][2]);
 
-  side4.set(coordinates[3][0] - coordinates[1][0], coordinates[3][1] - coordinates[1][1],
+  side[4].set(coordinates[3][0] - coordinates[1][0], coordinates[3][1] - coordinates[1][1],
     coordinates[3][2] - coordinates[1][2]);
 
-  side5.set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
+  side[5].set(coordinates[3][0] - coordinates[2][0], coordinates[3][1] - coordinates[2][1],
     coordinates[3][2] - coordinates[2][2]);
 
+  double char_size = apply_elem_scaling_on_edges(4, coordinates, 6, side);
+
   double volume = fabs(tet_volume(4, coordinates));
+  volume /= (char_size*char_size*char_size);
 
   if (volume < VERDICT_DBL_MIN)
   {
@@ -494,8 +518,8 @@ VERDICT_HOST_DEVICE double tet_aspect_gamma(int /*num_nodes*/, const double coor
   else
   {
     double srms =
-      sqrt((side0.length_squared() + side1.length_squared() + side2.length_squared() +
-                  side3.length_squared() + side4.length_squared() + side5.length_squared()) /
+      sqrt((side[0].length_squared() + side[1].length_squared() + side[2].length_squared() +
+                  side[3].length_squared() + side[4].length_squared() + side[5].length_squared()) /
         6.0);
 
     double aspect_ratio_gamma = (srms * srms * srms) / (8.48528137423857 * volume);
@@ -511,18 +535,23 @@ VERDICT_HOST_DEVICE double tet_aspect_gamma(int /*num_nodes*/, const double coor
  */
 VERDICT_HOST_DEVICE double tet_aspect_frobenius(int /*num_nodes*/, const double coordinates[][3])
 {
-  VerdictVector ab, ac, ad;
+  VerdictVector side[3];
 
-  ab.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+  side[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
 
-  ac.set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
+  side[1].set(coordinates[2][0] - coordinates[0][0], coordinates[2][1] - coordinates[0][1],
     coordinates[2][2] - coordinates[0][2]);
 
-  ad.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+  side[2].set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
     coordinates[3][2] - coordinates[0][2]);
 
-  double denominator = ab % (ac * ad);
+  double char_size = elem_scaling(4, coordinates, 3).second;
+  side[0] /= char_size;
+  side[1] /= char_size;
+  side[2] /= char_size;
+
+  double denominator = side[0] % (side[1] * side[2]);
   denominator *= denominator;
   denominator *= 2.;
   denominator = 3. * pow(denominator, one_third);
@@ -533,11 +562,11 @@ VERDICT_HOST_DEVICE double tet_aspect_frobenius(int /*num_nodes*/, const double 
   }
 
   double u[3];
-  ab.get_xyz(u);
+  side[0].get_xyz(u);
   double v[3];
-  ac.get_xyz(v);
+  side[1].get_xyz(v);
   double w[3];
-  ad.get_xyz(w);
+  side[2].get_xyz(w);
 
   double numerator = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
   numerator += v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
@@ -1155,9 +1184,14 @@ VERDICT_HOST_DEVICE double tet_volume_from_loc_ptrs(int num_nodes, const double 
 template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE static double tet_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates)
 {
-  const VerdictVector side0{coordinates[0], coordinates[1]};
-  const VerdictVector side2{coordinates[2], coordinates[0]};
-  const VerdictVector side3{coordinates[0], coordinates[3]};
+  VerdictVector side0{coordinates[0], coordinates[1]};
+  VerdictVector side2{coordinates[2], coordinates[0]};
+  VerdictVector side3{coordinates[0], coordinates[3]};
+
+  double char_size = elem_scaling(4, coordinates).second;
+  side0 /= char_size;
+  side2 /= char_size;
+  side3 /= char_size;
 
   const VerdictVector c_1 = side0;
   const VerdictVector c_2 = (-2. * side2 - side0) / sqrt3;
@@ -1247,25 +1281,27 @@ VERDICT_HOST_DEVICE double tet_jacobian(int num_nodes, const double coordinates[
  */
 VERDICT_HOST_DEVICE double tet_shape(int /*num_nodes*/, const double coordinates[][3])
 {
-  VerdictVector edge0, edge2, edge3;
+  VerdictVector edge[3];
 
-  edge0.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+  edge[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
 
-  edge2.set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+  edge[1].set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
     coordinates[0][2] - coordinates[2][2]);
 
-  edge3.set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
+  edge[2].set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
     coordinates[3][2] - coordinates[0][2]);
 
-  double jacobian = edge3 % (edge2 * edge0);
+  apply_elem_scaling_on_edges(4, coordinates, 3, edge);
+
+  double jacobian = edge[2] % (edge[1] * edge[0]);
   if (jacobian < VERDICT_DBL_MIN)
   {
     return (double)0.0;
   }
   double num = 3 * pow(sqrt2 * jacobian, two_thirds);
-  double den = 1.5 * (edge0 % edge0 + edge2 % edge2 + edge3 % edge3) -
-    (edge0 % -edge2 + -edge2 % edge3 + edge3 % edge0);
+  double den = 1.5 * (edge[0] % edge[0] + edge[1] % edge[1] + edge[2] % edge[2]) -
+    (edge[0] % -edge[1] + -edge[1] % edge[2] + edge[2] % edge[0]);
 
   if (den < VERDICT_DBL_MIN)
   {
@@ -1677,9 +1713,14 @@ VERDICT_HOST_DEVICE double tet_normalized_inradius_from_loc_ptrs(int num_nodes, 
 template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE static double tet4_mean_ratio(const CoordsContainerType coordinates)
 {
-  const VerdictVector side0{coordinates[0], coordinates[1]};
-  const VerdictVector side2{coordinates[2], coordinates[0]};
-  const VerdictVector side3{coordinates[0], coordinates[3]};
+  VerdictVector side0{coordinates[0], coordinates[1]};
+  VerdictVector side2{coordinates[2], coordinates[0]};
+  VerdictVector side3{coordinates[0], coordinates[3]};
+
+  double char_size = elem_scaling(4, coordinates).second;
+  side0 /= char_size;
+  side2 /= char_size;
+  side3 /= char_size;
 
   const double tetVolume = calculate_tet_volume_using_sides(side0, side2, side3);
   if (fabs( tetVolume ) < VERDICT_DBL_MIN)
@@ -1687,9 +1728,13 @@ VERDICT_HOST_DEVICE static double tet4_mean_ratio(const CoordsContainerType coor
     return 0.0;
   }
 
-  const VerdictVector side1{coordinates[1], coordinates[2]};
-  const VerdictVector side4{coordinates[1], coordinates[3]};
-  const VerdictVector side5{coordinates[2], coordinates[3]};
+  VerdictVector side1{coordinates[1], coordinates[2]};
+  VerdictVector side4{coordinates[1], coordinates[3]};
+  VerdictVector side5{coordinates[2], coordinates[3]};
+
+  side1 /= char_size;
+  side4 /= char_size;
+  side5 /= char_size;
 
   const double side0_length_squared = side0.length_squared();
   const double side1_length_squared = side1.length_squared();

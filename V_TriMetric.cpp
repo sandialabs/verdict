@@ -61,18 +61,22 @@ VERDICT_HOST_DEVICE static int tri_get_weight(
 VERDICT_HOST_DEVICE double tri_edge_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   // three vectors for each side
-  VerdictVector a(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+  VerdictVector v[3];
+
+  v[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
 
-  VerdictVector b(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+  v[1].set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
     coordinates[2][2] - coordinates[1][2]);
 
-  VerdictVector c(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+  v[2].set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
     coordinates[0][2] - coordinates[2][2]);
 
-  double a2 = a.length_squared();
-  double b2 = b.length_squared();
-  double c2 = c.length_squared();
+  apply_elem_scaling_on_edges(3, coordinates, 3, v);
+
+  double a2 = v[0].length_squared();
+  double b2 = v[1].length_squared();
+  double c2 = v[2].length_squared();
 
   double m2, M2;
   if (a2 < b2)
@@ -150,18 +154,21 @@ template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE static double tri_aspect_ratio_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
   // three vectors for each side
-  const VerdictVector a{coordinates[0], coordinates[1], dimension};
-  const VerdictVector b{coordinates[1], coordinates[2], dimension};
-  const VerdictVector c{coordinates[2], coordinates[0], dimension};
+  VerdictVector v[3] = {
+   {coordinates[0], coordinates[1], dimension},
+   {coordinates[1], coordinates[2], dimension},
+   {coordinates[2], coordinates[0], dimension} };
 
-  const double a1 = a.length();
-  const double b1 = b.length();
-  const double c1 = c.length();
+  apply_elem_scaling_on_edges(3, coordinates, 3, v, dimension);
+
+  const double a1 = v[0].length();
+  const double b1 = v[1].length();
+  const double c1 = v[2].length();
 
   double hm = a1 > b1 ? a1 : b1;
   hm = hm > c1 ? hm : c1;
 
-  const VerdictVector ab = a * b;
+  const VerdictVector ab = v[0] * v[1];
   const double denominator = ab.length();
 
   if (denominator < VERDICT_DBL_MIN)
@@ -200,20 +207,24 @@ VERDICT_HOST_DEVICE double tri_aspect_ratio_from_loc_ptrs(int num_nodes, const d
 VERDICT_HOST_DEVICE double tri_radius_ratio(int /*num_nodes*/, const double coordinates[][3])
 {
   // three vectors for each side
-  VerdictVector a(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+  VerdictVector v[3];
+
+  v[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
 
-  VerdictVector b(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+  v[1].set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
     coordinates[2][2] - coordinates[1][2]);
 
-  VerdictVector c(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+  v[2].set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
     coordinates[0][2] - coordinates[2][2]);
 
-  double a1 = a.length();
-  double b1 = b.length();
-  double c1 = c.length();
+  apply_elem_scaling_on_edges(3, coordinates, 3, v);
 
-  VerdictVector ab = a * b;
+  double a1 = v[0].length();
+  double b1 = v[1].length();
+  double c1 = v[2].length();
+
+  VerdictVector ab = v[0] * v[1];
   double denominator = ab.length_squared();
 
   if (denominator < VERDICT_DBL_MIN)
@@ -245,20 +256,24 @@ VERDICT_HOST_DEVICE double tri_aspect_frobenius(int /*num_nodes*/, const double 
 {
 
   // three vectors for each side
-  VerdictVector side1(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
+  VerdictVector side[3];
+
+  side[0].set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],
     coordinates[1][2] - coordinates[0][2]);
 
-  VerdictVector side2(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
+  side[1].set(coordinates[2][0] - coordinates[1][0], coordinates[2][1] - coordinates[1][1],
     coordinates[2][2] - coordinates[1][2]);
 
-  VerdictVector side3(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
+  side[2].set(coordinates[0][0] - coordinates[2][0], coordinates[0][1] - coordinates[2][1],
     coordinates[0][2] - coordinates[2][2]);
 
+  apply_elem_scaling_on_edges(3, coordinates, 3, side);
+
   // sum the lengths squared of each side
-  double srms = (side1.length_squared() + side2.length_squared() + side3.length_squared());
+  double srms = (side[0].length_squared() + side[1].length_squared() + side[2].length_squared());
 
   // find two times the area of the triangle by cross product
-  double areaX2 = ((side1 * (-side3)).length());
+  double areaX2 = ((side[0] * (-side[2])).length());
 
   if (areaX2 == 0.0)
   {
@@ -563,8 +578,13 @@ VERDICT_HOST_DEVICE double tri_equiangle_skew(int num_nodes, const double coordi
 template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE static double tri_condition_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
-  const VerdictVector v1{coordinates[0], coordinates[1], dimension};
-  const VerdictVector v2{coordinates[0], coordinates[2], dimension};
+  VerdictVector v1{coordinates[0], coordinates[1], dimension};
+  VerdictVector v2{coordinates[0], coordinates[2], dimension};
+
+  auto char_size = elem_scaling(3, coordinates, dimension);
+  v1 /= char_size.second;
+  v2 /= char_size.second;
+
   const VerdictVector tri_normal = v1 * v2;
   const double areax2 = tri_normal.length();
 
@@ -596,12 +616,14 @@ VERDICT_HOST_DEVICE double tri_condition_from_loc_ptrs(int num_nodes, const doub
 template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE static double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
 {
-  const VerdictVector edge[3] =
+  VerdictVector edge[3] =
   {
       {coordinates[0], coordinates[1], dimension},
       {coordinates[0], coordinates[2], dimension},
       {coordinates[1], coordinates[2], dimension},
   };
+
+  apply_elem_scaling_on_edges(3, coordinates, 3, edge, dimension);
 
   const VerdictVector first = edge[1] - edge[0];
   const VerdictVector second = edge[2] - edge[0];

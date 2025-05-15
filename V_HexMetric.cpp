@@ -646,80 +646,52 @@ VERDICT_HOST_DEVICE static VerdictVector calc_hex_efg(int efg_index, VerdictVect
   switch (efg_index)
   {
     case 1:
-      efg = coordinates[1];
-      efg += coordinates[2];
-      efg += coordinates[5];
-      efg += coordinates[6];
-      efg -= coordinates[0];
-      efg -= coordinates[3];
-      efg -= coordinates[4];
-      efg -= coordinates[7];
+      efg = (coordinates[1] - coordinates[0]);
+      efg += (coordinates[2] - coordinates[3]);
+      efg += (coordinates[5] - coordinates[4]);
+      efg += (coordinates[6] - coordinates[7]);
       break;
 
     case 2:
-      efg = coordinates[2];
-      efg += coordinates[3];
-      efg += coordinates[6];
-      efg += coordinates[7];
-      efg -= coordinates[0];
-      efg -= coordinates[1];
-      efg -= coordinates[4];
-      efg -= coordinates[5];
+      efg = (coordinates[2] - coordinates[0]);
+      efg += (coordinates[3] - coordinates[1]);
+      efg += (coordinates[6] - coordinates[4]);
+      efg += (coordinates[7] - coordinates[5]);
       break;
 
     case 3:
-      efg = coordinates[4];
-      efg += coordinates[5];
-      efg += coordinates[6];
-      efg += coordinates[7];
-      efg -= coordinates[0];
-      efg -= coordinates[1];
-      efg -= coordinates[2];
-      efg -= coordinates[3];
+      efg = (coordinates[4] - coordinates[0]);
+      efg += (coordinates[5] - coordinates[1]);
+      efg += (coordinates[6] - coordinates[2]);
+      efg += (coordinates[7] - coordinates[3]);
       break;
 
     case 12:
-      efg = coordinates[0];
-      efg += coordinates[2];
-      efg += coordinates[4];
-      efg += coordinates[6];
-      efg -= coordinates[1];
-      efg -= coordinates[3];
-      efg -= coordinates[5];
-      efg -= coordinates[7];
+      efg = (coordinates[0] - coordinates[1]);
+      efg += (coordinates[2] - coordinates[3]);
+      efg += (coordinates[4] - coordinates[5]);
+      efg += (coordinates[6] - coordinates[7]);
       break;
 
     case 13:
-      efg = coordinates[0];
-      efg += coordinates[3];
-      efg += coordinates[5];
-      efg += coordinates[6];
-      efg -= coordinates[1];
-      efg -= coordinates[2];
-      efg -= coordinates[4];
-      efg -= coordinates[7];
+      efg = (coordinates[0] - coordinates[1]);
+      efg += (coordinates[3] - coordinates[2]);
+      efg += (coordinates[5] - coordinates[4]);
+      efg += (coordinates[6] - coordinates[7]);
       break;
 
     case 23:
-      efg = coordinates[0];
-      efg += coordinates[1];
-      efg += coordinates[6];
-      efg += coordinates[7];
-      efg -= coordinates[2];
-      efg -= coordinates[3];
-      efg -= coordinates[4];
-      efg -= coordinates[5];
+      efg = (coordinates[0] - coordinates[2]);
+      efg += (coordinates[1] - coordinates[3]);
+      efg += (coordinates[6] - coordinates[4]);
+      efg += (coordinates[7] - coordinates[5]);
       break;
 
     case 123:
-      efg = coordinates[0];
-      efg += coordinates[2];
-      efg += coordinates[5];
-      efg += coordinates[7];
-      efg -= coordinates[1];
-      efg -= coordinates[5];
-      efg -= coordinates[6];
-      efg -= coordinates[2];
+      efg = (coordinates[0] - coordinates[1]);
+      efg += (coordinates[2] - coordinates[5]);
+      efg += (coordinates[5] - coordinates[6]);
+      efg += (coordinates[7] - coordinates[2]);
       break;
 
     default:
@@ -739,6 +711,7 @@ VERDICT_HOST_DEVICE double hex_edge_ratio(int /*num_nodes*/, const double coordi
 {
   VerdictVector edges[12];
   make_hex_edges(coordinates, edges);
+  apply_elem_scaling_on_edges(8, coordinates, 12, edges);
 
   double a2 = edges[0].length_squared();
   double b2 = edges[1].length_squared();
@@ -859,6 +832,8 @@ VERDICT_HOST_DEVICE double hex_max_edge_ratio(int /*num_nodes*/, const double co
   double aspect;
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
+
+  apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
 
   double aspect_12, aspect_13, aspect_23;
 
@@ -1048,6 +1023,8 @@ VERDICT_HOST_DEVICE double hex_skew(int /*num_nodes*/, const double coordinates[
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
 
+  apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
+
   double skew_1, skew_2, skew_3;
 
   VerdictVector efg1 = calc_hex_efg(1, node_pos);
@@ -1089,6 +1066,8 @@ VERDICT_HOST_DEVICE double hex_taper(int /*num_nodes*/, const double coordinates
 {
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
+
+  apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
 
   VerdictVector efg1 = calc_hex_efg(1, node_pos);
   VerdictVector efg2 = calc_hex_efg(2, node_pos);
@@ -1221,6 +1200,10 @@ VERDICT_HOST_DEVICE double hex_stretch(int /*num_nodes*/, const double coordinat
   double min_edge = hex_edge_length(0, coordinates);
   double max_diag = diag_length(1, coordinates);
 
+  double char_size = elem_scaling(8, coordinates).second;
+  min_edge /= char_size;
+  max_diag /= char_size;
+
   double stretch = sqrt3 * safe_ratio(min_edge, max_diag);
 
   if (stretch > 0)
@@ -1239,6 +1222,10 @@ VERDICT_HOST_DEVICE double hex_diagonal(int /*num_nodes*/, const double coordina
 {
   double min_diag = diag_length(0, coordinates);
   double max_diag = diag_length(1, coordinates);
+
+  double char_size = elem_scaling(8, coordinates).second;
+  min_diag /= char_size;
+  max_diag /= char_size;
 
   double diagonal = safe_ratio(min_diag, max_diag);
 
@@ -1636,6 +1623,8 @@ VERDICT_HOST_DEVICE double hex_med_aspect_frobenius(int /*num_nodes*/, const dou
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
 
+  apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
+
   VerdictVector xxi, xet, xze;
 
   // J(0,0,0):
@@ -1718,6 +1707,8 @@ VERDICT_HOST_DEVICE double hex_max_aspect_frobenius(int /*num_nodes*/, const dou
 {
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
+
+  apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
 
   VerdictVector xxi, xet, xze;
 
@@ -2036,6 +2027,8 @@ VERDICT_HOST_DEVICE double hex_scaled_jacobian(int num_nodes, const double coord
 
     VerdictVector node_pos[8];
     make_hex_nodes(coordinates, node_pos);
+
+    apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
 
     xxi = calc_hex_efg(1, node_pos);
     xet = calc_hex_efg(2, node_pos);
@@ -2379,6 +2372,8 @@ VERDICT_HOST_DEVICE double hex_shear(int /*num_nodes*/, const double coordinates
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
 
+  apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
+
   // J(0,0,0):
   xxi = node_pos[1] - node_pos[0];
   xet = node_pos[3] - node_pos[0];
@@ -2597,6 +2592,8 @@ VERDICT_HOST_DEVICE double hex_shape(int /*num_nodes*/, const double coordinates
 
   VerdictVector node_pos[8];
   make_hex_nodes(coordinates, node_pos);
+
+  apply_elem_scaling_on_points(8, coordinates, 8, node_pos);
 
   // J(0,0,0):
   xxi = node_pos[1] - node_pos[0];

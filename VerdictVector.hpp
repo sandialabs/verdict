@@ -28,6 +28,7 @@
 #include "verdict.h"
 
 #include <cassert>
+#include <utility>
 #include <math.h>
 
 namespace VERDICT_NAMESPACE
@@ -457,6 +458,65 @@ constexpr double VerdictVector::Dot(const VerdictVector& vector1, const VerdictV
 {
   return (vector1.xVal * vector2.xVal + vector1.yVal * vector2.yVal + vector1.zVal * vector2.zVal);
 }
+
+template <typename CoordsContainerType>
+VERDICT_HOST_DEVICE static std::pair<VerdictVector, double> elem_scaling(int num_coords, const CoordsContainerType coordinates, int dimension = 3)
+{
+  VerdictVector min(VERDICT_DBL_MAX, VERDICT_DBL_MAX, dimension == 3 ? VERDICT_DBL_MAX : 0);
+  VerdictVector max(-VERDICT_DBL_MAX, -VERDICT_DBL_MAX, dimension == 3 ? -VERDICT_DBL_MAX : 0);
+  VerdictVector center(0.0, 0.0, 0.0);
+
+  for (int i = 0; i < num_coords; i++)
+  {
+    if (coordinates[i][0] < min.x())
+      min.x(coordinates[i][0]);
+    if (coordinates[i][1] < min.y())
+      min.y(coordinates[i][1]);
+    if (coordinates[i][0] > max.x())
+      max.x(coordinates[i][0]);
+    if (coordinates[i][1] > max.y())
+      max.y(coordinates[i][1]);
+    if (dimension == 3)
+    {
+      if (coordinates[i][2] < min.z())
+        min.z(coordinates[i][2]);
+      if (coordinates[i][2] > max.z())
+        max.z(coordinates[i][2]);
+    }
+    center += VerdictVector(coordinates[i]);
+  }
+  center /= (double)num_coords;
+
+  double len = (max - min).length();
+  if (len < VERDICT_DBL_MIN)
+    return { {0.0,0.0,0.0}, 1.0 };
+  return { center, len };
+}
+
+template <typename CoordsContainerType>
+double apply_elem_scaling_on_points(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
+{
+  auto char_size = elem_scaling(num_coords, coordinates);
+  for (int i = 0; i < num_vec; i++)
+  {
+    v[i] -= char_size.first;
+    v[i] /= char_size.second;
+  }
+  return char_size.second;
+}
+
+template <typename CoordsContainerType>
+double apply_elem_scaling_on_edges(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
+{
+  auto char_size = elem_scaling(num_coords, coordinates);
+  for (int i = 0; i < num_vec; i++)
+  {
+    v[i] /= char_size.second;
+  }
+  return char_size.second;
+}
+
+
 } // namespace verdict
 
 #endif

@@ -124,7 +124,7 @@ using namespace VERDICT_NAMESPACE;
 
 namespace VERDICT_NAMESPACE
 {
-static constexpr double VERDICT_DBL_MIN = 2.2204460492503131e-016;  // DBL_EPSILON
+static constexpr double VERDICT_DBL_MIN = 2.2204460492503131e-015;  // DBL_EPSILON * 10
 static constexpr double VERDICT_DBL_MAX = 1.0E+30;
 static constexpr double VERDICT_PI = 3.1415926535897932384626;
 
