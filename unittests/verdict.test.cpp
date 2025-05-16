@@ -293,7 +293,11 @@ TEST(verdict, wedge_simple)
       { verdict::wedge_edge_ratio, std::sqrt(2.) },
       { verdict::wedge_max_aspect_frobenius, 1.1357042248 },
       { verdict::wedge_mean_aspect_frobenius, 1.0978474174 }, { verdict::wedge_distortion, 1 },
-      { verdict::wedge_max_stretch, 1 } },
+      { verdict::wedge_max_stretch, 1 },
+      { verdict::wedge_scaled_jacobian, 0.81649658 },
+      { verdict::wedge_shape, 0.8254818 },
+      { verdict::wedge_condition, 1.1357042248 },
+    },
     6, { { 0, 0, 0 }, { -1, 1, 0 }, { -1, 0, 0 }, { 0, 0, 1 }, { -1, 1, 1 }, { -1, 0, 1 } } };
 
   runtest(testcase);
@@ -323,7 +327,12 @@ TEST(verdict, tri_simple)
       /*  8 */ { verdict::tri_edge_ratio, 1 },
       /*  9 */ { verdict::tri_aspect_frobenius, 1 },
       /* 10 */ { verdict::tri_equiangle_skew, 1.8069363487e-09 },
-      /* 11 */ { verdict::tri_normalized_inradius, 1.0 } },
+      /* 11 */ { verdict::tri_normalized_inradius, 1.0 },
+      /* 12 */ { verdict::tri_radius_ratio, 1.0 },
+      /* 13 */ { verdict::tri_scaled_jacobian, 1.0 },
+      /* 14 */ { [](int n, double c[][3]) {return verdict::tri_relative_size_squared(n, c, 1.0);}, 0.008533 },
+      /* 15 */ { [](int n, double c[][3]) {return verdict::tri_shape_and_size(n, c, 1.0);}, 0.008533 },
+    },
     3, { { 0, 0, 0 }, { 5, 0, 0 }, { 2.5, 4.330127, 0 } } };
 
   runtest(testcase);
@@ -470,7 +479,12 @@ TEST(verdict, quad_simple2)
       /* 15 */ { verdict::quad_radius_ratio, 1.7320508076 },
       /* 16 */ { verdict::quad_med_aspect_frobenius, 1.2274682929 },
       /* 17 */ { verdict::quad_max_aspect_frobenius, 1.3416407865 },
-      /* 18 */ { verdict::quad_oddy, 1.6000000000 } },
+      /* 18 */ { verdict::quad_oddy, 1.6000000000 },
+      /* 19 */ { verdict::quad_edge_ratio, 2.449489742 },
+      /* 20 */ { [](int n, double c[][3]) {return verdict::quad_relative_size_squared(n, c, 1.0);}, 0.1379310344 },
+      /* 21 */ { [](int n, double c[][3]) {return verdict::quad_shape_and_size(n, c, 1.0);}, 0.05976401 },
+      /* 22 */ { [](int n, double c[][3]) {return verdict::quad_shear_and_size(n, c, 1.0);}, 0.0768394502 },
+      },
     4,
     {
       { 2, 0, 0 }, // 1
@@ -703,7 +717,14 @@ TEST(verdict, tet_test1)
       /* 10 */ { verdict::tet_minimum_angle, 54.735610317 },
       /* 11 */ { verdict::tet_collapse_ratio, 0.40824829046 },
       /* 12 */ { verdict::tet_equivolume_skew, 0.5 },
-      /* 13 */ { verdict::tet_normalized_inradius, 0.61401440738235424 } },
+      /* 13 */ { verdict::tet_normalized_inradius, 0.61401440738235424 },
+      /* 14 */ { verdict::tet_scaled_jacobian, 0.70710678 },
+      /* 15 */ { verdict::tet_aspect_gamma, 1.29903810 },
+      /* 16 */ { verdict::tet_squish_index, 0.095465966 },
+      /* 17 */ { [](int n, double c[][3]) {return verdict::tet_relative_size_squared(n,c,4.0);}, 0.000576 },
+      /* 18 */ { [](int n, double c[][3]) {return verdict::tet_shape_and_size(n,c,4.0);}, 0.0004838 },
+      /* 19 */ { [](int n, double c[][3]) { return verdict::tet_timestep(n, c, 1.0, 0.3, 1.0e9); }, 0.00011519 }
+    },
     4,
     {
       { -5, -5, -5 },
@@ -793,6 +814,10 @@ TEST(verdict, hex_test1)
       { verdict::hex_med_aspect_frobenius, 1.1435711972 }, { verdict::hex_jacobian, 0.477 },
       { verdict::hex_shear, 0.77784951012 }, { verdict::hex_shape, 0.78978528102 },
       { verdict::hex_distortion, 0.58479771148 },
+      { [](int n, double c[][3]) { return verdict::hex_relative_size_squared(n, c, 1.0); }, 0.6738357656},
+      { [](int n, double c[][3]) { return verdict::hex_shape_and_size(n, c, 1.0); }, 0.532185569},
+      { [](int n, double c[][3]) { return verdict::hex_shear_and_size(n, c, 1.0); }, 0.524142820},
+      { [](int n, double c[][3]) { return verdict::hex_timestep(n, c, 1.0, 0.3, 1.0e9); }, 1.4298027793530047e-05 },
       { verdict::hex_nodal_jacobian_ratio, 0.42513368984 }, { verdict::hex_oddy, 2.0988338297 },
       { verdict::hex_edge_ratio, 1.7944358445 }, { verdict::hex_equiangle_skew, 0.37159771083 } },
     8,
