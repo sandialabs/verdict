@@ -1133,7 +1133,7 @@ VERDICT_HOST_DEVICE double wedge_shape(int num_nodes, const double coordinates[]
   double min_shape = 1.0;
   VerdictVector vec1, vec2, vec3;
 
-  double char_size = elem_scaling(num_nodes, coordinates).second;
+  double char_size = elem_scaling(num_nodes, coordinates).scale;
 
   // Node 0
   vec1.set(coordinates[1][0] - coordinates[0][0], coordinates[1][1] - coordinates[0][1],

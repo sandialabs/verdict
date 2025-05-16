@@ -582,8 +582,8 @@ VERDICT_HOST_DEVICE static double tri_condition_impl(int /*num_nodes*/, const Co
   VerdictVector v2{coordinates[0], coordinates[2], dimension};
 
   auto char_size = elem_scaling(3, coordinates, dimension);
-  v1 /= char_size.second;
-  v2 /= char_size.second;
+  v1 /= char_size.scale;
+  v2 /= char_size.scale;
 
   const VerdictVector tri_normal = v1 * v2;
   const double areax2 = tri_normal.length();

@@ -459,8 +459,14 @@ constexpr double VerdictVector::Dot(const VerdictVector& vector1, const VerdictV
   return (vector1.xVal * vector2.xVal + vector1.yVal * vector2.yVal + vector1.zVal * vector2.zVal);
 }
 
+struct ElemScale
+{
+  VerdictVector center;
+  double scale;
+};
+
 template <typename CoordsContainerType>
-VERDICT_HOST_DEVICE static std::pair<VerdictVector, double> elem_scaling(int num_coords, const CoordsContainerType coordinates, int dimension = 3)
+VERDICT_HOST_DEVICE constexpr ElemScale elem_scaling(int num_coords, const CoordsContainerType coordinates, int dimension = 3)
 {
   VerdictVector min(VERDICT_DBL_MAX, VERDICT_DBL_MAX, dimension == 3 ? VERDICT_DBL_MAX : 0);
   VerdictVector max(-VERDICT_DBL_MAX, -VERDICT_DBL_MAX, dimension == 3 ? -VERDICT_DBL_MAX : 0);
@@ -489,31 +495,34 @@ VERDICT_HOST_DEVICE static std::pair<VerdictVector, double> elem_scaling(int num
 
   double len = (max - min).length();
   if (len < VERDICT_DBL_MIN)
-    return { {0.0,0.0,0.0}, 1.0 };
-  return { center, len };
+  {
+    center = VerdictVector(0.0,0.0,0.0);
+    len = 1.0;
+  }
+  return ElemScale{center, len};
 }
 
 template <typename CoordsContainerType>
-double apply_elem_scaling_on_points(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
+VERDICT_HOST_DEVICE constexpr double apply_elem_scaling_on_points(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
 {
   auto char_size = elem_scaling(num_coords, coordinates);
   for (int i = 0; i < num_vec; i++)
   {
-    v[i] -= char_size.first;
-    v[i] /= char_size.second;
+    v[i] -= char_size.center;
+    v[i] /= char_size.scale;
   }
-  return char_size.second;
+  return char_size.scale;
 }
 
 template <typename CoordsContainerType>
-double apply_elem_scaling_on_edges(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
+VERDICT_HOST_DEVICE constexpr double apply_elem_scaling_on_edges(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
 {
   auto char_size = elem_scaling(num_coords, coordinates);
   for (int i = 0; i < num_vec; i++)
   {
-    v[i] /= char_size.second;
+    v[i] /= char_size.scale;
   }
-  return char_size.second;
+  return char_size.scale;
 }
 
 

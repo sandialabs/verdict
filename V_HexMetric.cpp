@@ -1200,7 +1200,7 @@ VERDICT_HOST_DEVICE double hex_stretch(int /*num_nodes*/, const double coordinat
   double min_edge = hex_edge_length(0, coordinates);
   double max_diag = diag_length(1, coordinates);
 
-  double char_size = elem_scaling(8, coordinates).second;
+  double char_size = elem_scaling(8, coordinates).scale;
   min_edge /= char_size;
   max_diag /= char_size;
 
@@ -1223,7 +1223,7 @@ VERDICT_HOST_DEVICE double hex_diagonal(int /*num_nodes*/, const double coordina
   double min_diag = diag_length(0, coordinates);
   double max_diag = diag_length(1, coordinates);
 
-  double char_size = elem_scaling(8, coordinates).second;
+  double char_size = elem_scaling(8, coordinates).scale;
   min_diag /= char_size;
   max_diag /= char_size;
 

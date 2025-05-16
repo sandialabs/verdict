@@ -287,7 +287,7 @@ VERDICT_HOST_DEVICE static double tet_scaled_jacobian_impl(int /*num_nodes*/, co
   VerdictVector side4{coordinates[1], coordinates[3]};
   VerdictVector side5{coordinates[2], coordinates[3]};
 
-  double char_size = elem_scaling(4, coordinates).second;
+  double char_size = elem_scaling(4, coordinates).scale;
   side0 /= char_size;
   side1 /= char_size;
   side2 /= char_size;
@@ -423,7 +423,7 @@ VERDICT_HOST_DEVICE static double tet_aspect_ratio_impl(int /*num_nodes*/, const
   VerdictVector ac{coordinates[0], coordinates[2]};
   VerdictVector ad{coordinates[0], coordinates[3]};
 
-  double char_size = elem_scaling(4, coordinates).second;
+  double char_size = elem_scaling(4, coordinates).scale;
   ab /= char_size;
   ac /= char_size;
   ad /= char_size;
@@ -546,7 +546,7 @@ VERDICT_HOST_DEVICE double tet_aspect_frobenius(int /*num_nodes*/, const double 
   side[2].set(coordinates[3][0] - coordinates[0][0], coordinates[3][1] - coordinates[0][1],
     coordinates[3][2] - coordinates[0][2]);
 
-  double char_size = elem_scaling(4, coordinates, 3).second;
+  double char_size = elem_scaling(4, coordinates, 3).scale;
   side[0] /= char_size;
   side[1] /= char_size;
   side[2] /= char_size;
@@ -1188,7 +1188,7 @@ VERDICT_HOST_DEVICE static double tet_condition_impl(int /*num_nodes*/, const Co
   VerdictVector side2{coordinates[2], coordinates[0]};
   VerdictVector side3{coordinates[0], coordinates[3]};
 
-  double char_size = elem_scaling(4, coordinates).second;
+  double char_size = elem_scaling(4, coordinates).scale;
   side0 /= char_size;
   side2 /= char_size;
   side3 /= char_size;
@@ -1717,7 +1717,7 @@ VERDICT_HOST_DEVICE static double tet4_mean_ratio(const CoordsContainerType coor
   VerdictVector side2{coordinates[2], coordinates[0]};
   VerdictVector side3{coordinates[0], coordinates[3]};
 
-  double char_size = elem_scaling(4, coordinates).second;
+  double char_size = elem_scaling(4, coordinates).scale;
   side0 /= char_size;
   side2 /= char_size;
   side3 /= char_size;

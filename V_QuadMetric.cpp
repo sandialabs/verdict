@@ -1112,7 +1112,7 @@ VERDICT_HOST_DEVICE double quad_condition(int /*num_nodes*/, const double coordi
     return tri_condition(3, coordinates);
   }
 
-  double char_size = elem_scaling(4, coordinates).second;
+  double char_size = elem_scaling(4, coordinates).scale;
 
   double areas[4];
   signed_corner_areas(areas, coordinates);
