@@ -30,9 +30,9 @@ namespace VERDICT_NAMESPACE
 VERDICT_HOST_DEVICE VerdictVector& VerdictVector::length(const double new_length)
 {
   double len = this->length();
-  xVal *= new_length / len;
-  yVal *= new_length / len;
-  zVal *= new_length / len;
+  Val[0] *= new_length / len;
+  Val[1] *= new_length / len;
+  Val[2] *= new_length / len;
   return *this;
 }
 
@@ -81,14 +81,14 @@ VERDICT_HOST_DEVICE double VerdictVector::normalize()
   double mag = length();
   if (mag > VERDICT_DBL_MIN*2.0)
   {
-    xVal = xVal / mag;
-    yVal = yVal / mag;
-    zVal = zVal / mag;
+    Val[0] = Val[0] / mag;
+    Val[1] = Val[1] / mag;
+    Val[2] = Val[2] / mag;
     return mag;
   }
-  xVal = 0.0;
-  yVal = 0.0;
-  zVal = 0.0;
+  Val[0] = 0.0;
+  Val[1] = 0.0;
+  Val[2] = 0.0;
   return 0;
 }
 
