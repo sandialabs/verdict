@@ -614,7 +614,7 @@ VERDICT_HOST_DEVICE double tri_condition_from_loc_ptrs(int num_nodes, const doub
   minimum of the jacobian divided by the lengths of 2 edge vectors
  */
 template <typename CoordsContainerType>
-VERDICT_HOST_DEVICE static double tri_scaled_jacobian_impl(int /*num_nodes*/, const CoordsContainerType coordinates, const int dimension)
+VERDICT_HOST_DEVICE static double tri_scaled_jacobian_impl(const CoordsContainerType coordinates, const int dimension)
 {
   VerdictVector edge[3] =
   {
@@ -649,14 +649,142 @@ VERDICT_HOST_DEVICE static double tri_scaled_jacobian_impl(int /*num_nodes*/, co
   return (double)fmax(jacobian, -VERDICT_DBL_MAX);
 }
 
+
+VERDICT_HOST_DEVICE static const double* tri6_node_local_coord(int i)
+{
+  static const double node_local_coord[6][2] = {
+    { 0, 0 }, { 1.0, 0 }, { 0, 1.0 },
+    { 0.5, 0 }, { .5, .5 }, { 0, .5 }
+  };
+  return node_local_coord[i];
+};
+
+VERDICT_HOST_DEVICE static void tri6_gradients_of_the_shape_functions_for_R_S(
+  const double rs[2], double dhdr[6], double dhds[6])
+{
+  double r = rs[0];
+  double s = rs[1];
+
+  // dh/dr
+  dhdr[0] = 4.0 * r + 4.0 * s - 3.0;
+  dhdr[1] = 4.0 * r - 1.0;
+  dhdr[2] = 0.0;
+  dhdr[3] = 4.0 - 8.0 * r - 4.0 * s;
+  dhdr[4] = 4.0 * s;
+  dhdr[5] = -4.0 * s;
+
+  // dh/ds
+  dhds[0] = 4.0 * r + 4.0 * s - 3.0;
+  dhds[1] = 0.0;
+  dhds[2] = 4.0 * s - 1.0;
+  dhds[3] = -4.0 * r;
+  dhds[4] = 4.0 * r;
+  dhds[5] = 4.0 - 8.0 * s - 4.0 * r;
+}
+
+
+VERDICT_HOST_DEVICE static double tri6_jacobian_impl(VerdictVector node_pos[])
+{
+  double dhdr[6];
+  double dhds[6];
+  double min_determinant = VERDICT_DBL_MAX;
+
+  VerdictVector e1(node_pos[0], node_pos[1]);
+  VerdictVector e2(node_pos[0], node_pos[2]);
+  e1.normalize();
+  e2.normalize();
+  VerdictVector n = e1 * e2;
+  e2 = n * e1;
+  n.normalize();
+  e2.normalize();
+
+  for (int i = 1; i < 6; i++)
+  {
+    node_pos[i] -= node_pos[0];
+    double x = node_pos[i].x() * e1.x() + node_pos[i].y() * e1.y() + node_pos[i].z() * e1.z();
+    double y = node_pos[i].x() * e2.x() + node_pos[i].y() * e2.y() + node_pos[i].z() * e2.z();
+    node_pos[i].set(x, y, 0.0);
+  }
+  node_pos[0].set(0, 0, 0);
+
+  for (int i = 0; i < 6; i++)
+  {
+    tri6_gradients_of_the_shape_functions_for_R_S(tri6_node_local_coord(i), dhdr, dhds);
+    double jacobian[2][2] = { { 0, 0 }, { 0, 0 } };
+
+    for (int j = 0; j < 6; j++)
+    {
+      jacobian[0][0] += node_pos[j][0] * dhdr[j];
+      jacobian[0][1] += node_pos[j][0] * dhds[j];
+      jacobian[1][0] += node_pos[j][1] * dhdr[j];
+      jacobian[1][1] += node_pos[j][1] * dhds[j];
+    }
+    double det = jacobian[0][0] * jacobian[1][1] - jacobian[1][0] * jacobian[0][1];
+    min_determinant = fmin(det, min_determinant);
+  }
+  return min_determinant;
+}
+
+template <typename CoordsContainerType>
+VERDICT_HOST_DEVICE static double tri6_scaled_jacobian_impl(const CoordsContainerType coordinates, const int dimension)
+{
+  VerdictVector node_pos[6] =
+  {
+    VerdictVector( coordinates[0][0], coordinates[0][1], dimension == 3 ? coordinates[0][2] : 0.0 ),
+    VerdictVector( coordinates[1][0], coordinates[1][1], dimension == 3 ? coordinates[1][2] : 0.0 ),
+    VerdictVector( coordinates[2][0], coordinates[2][1], dimension == 3 ? coordinates[2][2] : 0.0 ),
+    VerdictVector( coordinates[3][0], coordinates[3][1], dimension == 3 ? coordinates[3][2] : 0.0 ),
+    VerdictVector( coordinates[4][0], coordinates[4][1], dimension == 3 ? coordinates[4][2] : 0.0 ),
+    VerdictVector( coordinates[5][0], coordinates[5][1], dimension == 3 ? coordinates[5][2] : 0.0 )
+  };
+
+  apply_elem_scaling_on_points(6, node_pos, 6, node_pos);
+
+  double jacobian = tri6_jacobian_impl(node_pos);
+
+  VerdictVector edge[6] =
+  {
+      {node_pos[0], node_pos[3]}, {node_pos[3], node_pos[1]},
+      {node_pos[1], node_pos[4]}, {node_pos[4], node_pos[2]},
+      {node_pos[2], node_pos[5]}, {node_pos[5], node_pos[0]}
+  };
+
+  double lengths[3] = {
+    edge[0].length() + edge[1].length(),
+    edge[2].length() + edge[3].length(),
+    edge[4].length() + edge[5].length()
+  };
+
+  const double max_edge_length_product = fmax(lengths[0] * lengths[1],
+    fmax(lengths[1] * lengths[2], lengths[0] * lengths[2]));
+
+  if (max_edge_length_product < VERDICT_DBL_MIN)
+  {
+    return (double)0.0;
+  }
+
+  jacobian *= two_over_sqrt3;
+  jacobian /= max_edge_length_product;
+
+  if (jacobian > 0)
+  {
+    return (double)fmin(jacobian, VERDICT_DBL_MAX);
+  }
+  return (double)fmax(jacobian, -VERDICT_DBL_MAX);
+}
+
 VERDICT_HOST_DEVICE double tri_scaled_jacobian(int num_nodes, const double coordinates[][3])
 {
-    return tri_scaled_jacobian_impl(num_nodes, coordinates, 3);
+  if (num_nodes == 6)
+    return tri6_scaled_jacobian_impl(coordinates, 3);
+  return tri_scaled_jacobian_impl(coordinates, 3);
 }
 
 VERDICT_HOST_DEVICE double tri_scaled_jacobian_from_loc_ptrs(int num_nodes, const double * const * coordinates, const int dimension)
 {
-    return tri_scaled_jacobian_impl(num_nodes, coordinates, dimension);
+  if (num_nodes == 6)
+    return tri6_scaled_jacobian_impl(coordinates, dimension);
+  return tri_scaled_jacobian_impl(coordinates, dimension);
 }
 
 /*!

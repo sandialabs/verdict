@@ -385,7 +385,7 @@ TEST(verdict, tri4_area_b)
 }
 
 
-// tri_distortion is not well covered, we need to test it with a six noded triangle */
+// tri mid-edge nodes are inverted intentionally
 TEST(verdict, tri_six_nodes)
 {
   test_case testcase = { "tri_six_nodes",
@@ -396,10 +396,27 @@ TEST(verdict, tri_six_nodes)
       /*  8 */ { verdict::tri_edge_ratio, 1.4005493428 },
       /*  9 */ { verdict::tri_aspect_frobenius, 1.1173381066 },
       /* 10 */ { verdict::tri_equiangle_skew, 0.24322035270 },
-      /* 11 */ { verdict::tri_normalized_inradius, 0.603527 } },
+      /* 11 */ { verdict::tri_normalized_inradius, 0.60352667 },
+      /* 12 */ { verdict::tri_scaled_jacobian, -1.3770186 },
+    },
     6,
     { { 0, 0, 0 }, { 1, 0, 0.2 }, { 0, 1, 0.4 }, { 0, 0.5, 0.1 }, { 0.5, 0.5, 0.3 },
-      { 0.5, 0, 0.2 } } };
+        { 0.5, 0, 0.2 } } };
+
+  runtest(testcase);
+}
+
+
+TEST(verdict, tri6)
+{
+  test_case testcase = { "tri6",
+    { 
+      { verdict::tri_scaled_jacobian, 0.8164965 }
+    },
+  6,
+  { { 0.4, 0.2, 0.7 }, { 1.339693, 0.2, 0.357980 }, { 0.516978, 1.139693, 1.021394 },
+    { 0.869846, 0.2, 0.528990 }, { 0.928335, 0.669846, 0.689687 }, { 0.458489, 0.669846, 0.860697 }
+  } };
 
   runtest(testcase);
 }
@@ -760,8 +777,10 @@ TEST(verdict, tet10_test1)
 {
   test_case testcase = { "tet10_test1",
     {
-      /* 0 */ { verdict::tet_distortion, 1 },
-      /* 1 */ { verdict::tet_normalized_inradius, 0.61401440738235424 },
+      /* 0 */ { verdict::tet_distortion, 0.95238095 },
+      /* 1 */ { verdict::tet_normalized_inradius, 0.613951756 },
+      /* 2 */ { verdict::tet_jacobian, 1000.0 },
+      /* 3 */ { verdict::tet_scaled_jacobian, 0.70710678 },
     },
     10,
     {
@@ -774,7 +793,7 @@ TEST(verdict, tet10_test1)
       { 0, 0, 5 },
       { -5, 0, 5 },
       { -5, -5, 0 },
-      { 0, -5, 5 },
+      { 0.5, -5.5, 5 },  // perturb node a bit
     } };
 
   runtest(testcase);
