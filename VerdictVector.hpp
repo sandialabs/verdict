@@ -456,7 +456,7 @@ VERDICT_HOST_DEVICE constexpr ElemScale elem_scaling(int num_coords, const Coord
       if (coordinates[i][2] > max.z())
         max.z(coordinates[i][2]);
     }
-    center += VerdictVector(coordinates[i]);
+    center += VerdictVector(coordinates[i][0], coordinates[i][1], dimension == 3 ? coordinates[i][2] : 0.0);
   }
   center /= (double)num_coords;
 
@@ -472,7 +472,7 @@ VERDICT_HOST_DEVICE constexpr ElemScale elem_scaling(int num_coords, const Coord
 template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE constexpr double apply_elem_scaling_on_points(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
 {
-  auto char_size = elem_scaling(num_coords, coordinates);
+  auto char_size = elem_scaling(num_coords, coordinates, dimension);
   for (int i = 0; i < num_vec; i++)
   {
     v[i] -= char_size.center;
@@ -484,7 +484,7 @@ VERDICT_HOST_DEVICE constexpr double apply_elem_scaling_on_points(int num_coords
 template <typename CoordsContainerType>
 VERDICT_HOST_DEVICE constexpr double apply_elem_scaling_on_edges(int num_coords, const CoordsContainerType coordinates, int num_vec, VerdictVector* v, int dimension = 3)
 {
-  auto char_size = elem_scaling(num_coords, coordinates);
+  auto char_size = elem_scaling(num_coords, coordinates, dimension);
   for (int i = 0; i < num_vec; i++)
   {
     v[i] /= char_size.scale;
