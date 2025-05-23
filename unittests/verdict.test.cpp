@@ -338,6 +338,22 @@ TEST(verdict, tri_simple)
   runtest(testcase);
 }
 
+TEST(verdict, tri_2d)
+{
+  double coordsarray[3][2] =
+  {
+    {0,0},
+    {1,0},
+    {0.5, 0.866}
+  };
+  double* coords[3] = {coordsarray[0], coordsarray[1], coordsarray[2]};
+
+  double expected_answer = 1.0;
+
+  EXPECT_NEAR(expected_answer, verdict::tri_scaled_jacobian_from_loc_ptrs(3, coords, 2),
+      std::abs(expected_answer) * VERDICT_RELATIVE_TOL + VERDICT_ABSOLUTE_TOL);
+}
+
 TEST(verdict, tri_singular)
 {
   test_case testcase = { "tri_singular",
