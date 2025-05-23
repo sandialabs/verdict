@@ -796,7 +796,7 @@ TEST(verdict, tet10_test1)
       /* 0 */ { verdict::tet_distortion, 0.95238095 },
       /* 1 */ { verdict::tet_normalized_inradius, 0.613951756 },
       /* 2 */ { verdict::tet_jacobian, 1000.0 },
-      /* 3 */ { verdict::tet_scaled_jacobian, 0.70710678 },
+      /* 3 */ { verdict::tet_scaled_jacobian, 0.7035627 },
     },
     10,
     {

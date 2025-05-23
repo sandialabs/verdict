@@ -632,43 +632,36 @@ VERDICT_HOST_DEVICE static double tet10_scaled_jacobian_impl(CoordsContainerType
 
   apply_elem_scaling_on_points(10, coordinates, 10, node_pos);
 
-  VerdictVector side0{ node_pos[0], node_pos[1] };
-  VerdictVector side1{ node_pos[1], node_pos[2] };
-  VerdictVector side2{ node_pos[2], node_pos[0] };
-  VerdictVector side3{ node_pos[0], node_pos[3] };
-  VerdictVector side4{ node_pos[1], node_pos[3] };
-  VerdictVector side5{ node_pos[2], node_pos[3] };
-
   double jacobi = tet_jacobian_impl(10, node_pos);
 
   // products of lengths squared of each edge attached to a node.
-  const double side0_length_squared = side0.length_squared();
-  const double side1_length_squared = side1.length_squared();
-  const double side2_length_squared = side2.length_squared();
-  const double side3_length_squared = side3.length_squared();
-  const double side4_length_squared = side4.length_squared();
-  const double side5_length_squared = side5.length_squared();
+  const double side0_length = VerdictVector(node_pos[0], node_pos[4]).length() + VerdictVector(node_pos[4], node_pos[1]).length();
+  const double side1_length = VerdictVector(node_pos[1], node_pos[5]).length() + VerdictVector(node_pos[5], node_pos[2]).length();
+  const double side2_length = VerdictVector(node_pos[2], node_pos[6]).length() + VerdictVector(node_pos[6], node_pos[0]).length();
+  const double side3_length = VerdictVector(node_pos[0], node_pos[7]).length() + VerdictVector(node_pos[7], node_pos[3]).length();
+  const double side4_length = VerdictVector(node_pos[1], node_pos[8]).length() + VerdictVector(node_pos[8], node_pos[3]).length();
+  const double side5_length = VerdictVector(node_pos[2], node_pos[9]).length() + VerdictVector(node_pos[9], node_pos[3]).length();
 
-  const double length_squared[4] = {
-    side0_length_squared * side2_length_squared * side3_length_squared,
-    side0_length_squared * side1_length_squared * side4_length_squared,
-    side1_length_squared * side2_length_squared * side5_length_squared,
-    side3_length_squared * side4_length_squared * side5_length_squared };
+  const double length[4] = {
+    side0_length * side2_length * side3_length,
+    side0_length * side1_length * side4_length,
+    side1_length * side2_length * side5_length,
+    side3_length * side4_length * side5_length };
   int which_node = 0;
-  if (length_squared[1] > length_squared[which_node])
+  if (length[1] > length[which_node])
   {
     which_node = 1;
   }
-  if (length_squared[2] > length_squared[which_node])
+  if (length[2] > length[which_node])
   {
     which_node = 2;
   }
-  if (length_squared[3] > length_squared[which_node])
+  if (length[3] > length[which_node])
   {
     which_node = 3;
   }
 
-  double length_product = sqrt(length_squared[which_node]);
+  double length_product = length[which_node];
   if (length_product < fabs(jacobi))
   {
     length_product = fabs(jacobi);
