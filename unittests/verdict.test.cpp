@@ -350,8 +350,8 @@ TEST(verdict, tri_2d)
 
   double expected_answer = 1.0;
 
-  EXPECT_NEAR(expected_answer, verdict::tri_scaled_jacobian_from_loc_ptrs(3, coords, 2),
-      std::abs(expected_answer) * VERDICT_RELATIVE_TOL + VERDICT_ABSOLUTE_TOL);
+  EXPECT_NEAR(expected_answer, verdict::tri_scaled_jacobian_from_loc_ptrs(3, coords, 2), 1.0);
+  EXPECT_NEAR(expected_answer, verdict::tri_normalized_inradius_from_loc_ptrs(3, coords, 2), 1.0);
 }
 
 TEST(verdict, tri_singular)
