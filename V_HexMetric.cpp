@@ -18,10 +18,10 @@
  *
  */
 
+#include "verdict.h"
 #include "V_HexMetric.hpp"
 #include "V_GaussIntegration.hpp"
 #include "VerdictVector.hpp"
-#include "verdict.h"
 #include "verdict_defines.hpp"
 
 #include <math.h>
