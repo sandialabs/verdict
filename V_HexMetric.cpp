@@ -24,7 +24,7 @@
 #include "verdict.h"
 #include "verdict_defines.hpp"
 
-#include <math.h>
+#include <cmath>
 
 namespace VERDICT_NAMESPACE
 {
@@ -3032,7 +3032,7 @@ VERDICT_HOST_DEVICE double hex_distortion(int num_nodes, const double coordinate
   {
     distortion = -VERDICT_DBL_MAX;
   }
-  else if (isnan(distortion))
+  else if (std::isnan(distortion))
   {
     distortion = VERDICT_DBL_MAX; // 0/0, or should we return some other value?
   }

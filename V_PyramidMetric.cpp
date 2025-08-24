@@ -22,7 +22,7 @@
 #include "verdict.h"
 #include "verdict_defines.hpp"
 
-#include <math.h>
+#include <cmath>
 
 namespace VERDICT_NAMESPACE
 {

@@ -29,7 +29,7 @@
 
 #include <cassert>
 #include <utility>
-#include <math.h>
+#include <cmath>
 
 namespace VERDICT_NAMESPACE
 {
