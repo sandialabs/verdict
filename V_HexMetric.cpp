@@ -251,16 +251,18 @@ VERDICT_HOST_DEVICE static void HEX27_gradients_of_the_shape_functions_for_RST(
 }
 
 #define make_hex_nodes(coord, pos)                                                                 \
-  for (int mhcii = 0; mhcii < 8; mhcii++)                                                          \
-  {                                                                                                \
-    pos[mhcii].set(coord[mhcii][0], coord[mhcii][1], coord[mhcii][2]);                             \
-  }
+  do {                                                                                             \
+    for (int mhcii = 0; mhcii < 8; mhcii++)                                                        \
+    {                                                                                              \
+      pos[mhcii].set(coord[mhcii][0], coord[mhcii][1], coord[mhcii][2]);                           \
+    }                                                                                              \
+  } while (0)
 
 #define make_edge_length_squares(edges, lengths)                                                   \
-  {                                                                                                \
+  do {                                                                                             \
     for (int melii = 0; melii < 12; melii++)                                                       \
       lengths[melii] = edges[melii].length_squared();                                              \
-  }
+  } while (0)
 
 //! make VerdictVectors from coordinates
 VERDICT_HOST_DEVICE static void make_hex_edges(const double coordinates[][3], VerdictVector edges[12])
