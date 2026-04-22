@@ -251,7 +251,7 @@ VERDICT_HOST_DEVICE static void HEX27_gradients_of_the_shape_functions_for_RST(
 }
 
 template <typename X, typename Y>
-static void make_hex_nodes(X& coord, Y& pos)
+VERDICT_HOST_DEVICE static void make_hex_nodes(X& coord, Y& pos)
 {
   for (int mhcii = 0; mhcii < 8; mhcii++)
   {
