@@ -22,7 +22,7 @@
 #include "VerdictVector.hpp"
 #include "verdict_defines.hpp"
 
-#include <math.h>
+#include <cmath>
 
 namespace VERDICT_NAMESPACE
 {
@@ -509,7 +509,7 @@ VERDICT_HOST_DEVICE double wedge_edge_ratio(int /*num_nodes*/, const double coor
 
   double edge_ratio = sqrt(max / min);
 
-  if (isnan(edge_ratio))
+  if (std::isnan(edge_ratio))
   {
     return VERDICT_DBL_MAX;
   }
@@ -890,7 +890,7 @@ VERDICT_HOST_DEVICE double wedge_distortion(int num_nodes, const double coordina
   if (fabs(current_volume) > 0.0)
     distortion = jacobian * master_volume / current_volume / 0.866025;
 
-  if (isnan(distortion))
+  if (std::isnan(distortion))
   {
     return VERDICT_DBL_MAX;
   }

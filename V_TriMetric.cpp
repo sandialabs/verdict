@@ -1161,7 +1161,7 @@ VERDICT_HOST_DEVICE static double calculate_tri3_outer_radius(const CoordsContai
 
 VERDICT_HOST_DEVICE static double fix_range(double v)
 {
-  if (isnan(v))
+  if (std::isnan(v))
   {
     return VERDICT_DBL_MAX;
   }

@@ -24,7 +24,7 @@
 #ifndef __verdict_h
 #define __verdict_h
 
-#include <math.h>
+#include <cmath>
 #include <limits>
 #include "verdict_config.h"
 

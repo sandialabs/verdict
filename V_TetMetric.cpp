@@ -23,7 +23,7 @@
 #include "verdict.h"
 #include "verdict_defines.hpp"
 
-#include <math.h>
+#include <cmath>
 
 namespace VERDICT_NAMESPACE
 {
@@ -42,7 +42,7 @@ VERDICT_HOST_DEVICE static const int* tet10_subtet_conn(int i)
 
 VERDICT_HOST_DEVICE static double fix_range(double v)
 {
-  if (isnan(v))
+  if (std::isnan(v))
   {
     return VERDICT_DBL_MAX;
   }

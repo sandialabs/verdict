@@ -24,7 +24,7 @@
 #include "verdict.h"
 
 #include <cassert>
-#include <math.h>
+#include <cmath>
 
 // TODO: remove this file
 
